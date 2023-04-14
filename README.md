@@ -18,26 +18,47 @@ Applications with databases such as mariadb, postgresql, etc.
 
 ### Success
 filebrowser
-All my custom-app Apps
-Komga
+
+All my custom-app Apps 
+
+Komga 
+
 emulatorjs
+
 homarr
+
 freshrss
+
 mysql-workbench
+
 bazarr
+
 flaresolverr
+
 phpldapadmin
+
 podgrab
+
 sabnzb
+
 uptime-kuma
+
 unpackerr
+
 autoscan
+
 tautulli
+
 overseerr
+
 code-server
+
 Jellyseerr
+
 adguard-home
 
 ### Failed
+
 photoprism
+
 Prometheus
