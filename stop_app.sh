@@ -70,7 +70,7 @@ stop_app() {
 
     local app_name timeout status
     app_name="$1"
-    timeout="50"
+    timeout="150"
 
     # Grab chart info
     chart_info=$(midclt call chart.release.get_instance "$app_name")
