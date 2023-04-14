@@ -118,7 +118,7 @@ num_lines=$(echo "${pvc_info}" | wc -l)
 if [ "${num_lines}" -gt 1 ]; then
     echo "Error: More than one volume found. This script only supports applications with a single volume."
     exit 1
-elif [ "${num_lines}" -eq 0 ]; then
+elif [[ -z "$pvc_info" ]]; then
     echo "Error: No volume found. Please ensure that the application has at least one PVC."
     exit 1
 fi
