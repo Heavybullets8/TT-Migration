@@ -1,7 +1,16 @@
 #!/bin/bash
 
+# colors
+reset='\033[0m'
+red='\033[0;31m'
+yellow='\033[1;33m'
+green='\033[0;32m'
+blue='\033[0;34m'
+bold='\033[1m'
+gray='\033[38;5;7m'
 
 source stop_app.sh
+source start_app.sh
 
 dry_run=0
 skip=false
@@ -190,4 +199,5 @@ done < <(paste <(echo "$migration_pvcs") <(echo "$new_volume_names"))
 echo
 
 # Start the app
-echo "Please start the app in the GUI manually."
+echo "Starting the app..."
+execute start_app "${appname}"
