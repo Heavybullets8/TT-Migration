@@ -40,9 +40,23 @@ function execute() {
 }
 
 before_skip() {
-    # Stop the old app
-    echo "Stopping the old app..."
-    execute stop_app "${appname}"
+    #Stop applicaiton if not stopped
+    status=$(cli -m csv -c 'app chart_release query name,status' | 
+                grep "^$appname," | 
+                awk -F ',' '{print $2}'| 
+                sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    if [[ "$status" != "STOPPED" ]]; then
+        echo -e "\nStopping ${blue}$appname${reset} prior to mount"
+        cmd=("stop_app" "$appname")
+        execute "${cmd[@]}"
+        result=$(handle_stop_code "$?")
+        if [[ $? -eq 1 ]]; then
+            echo -e "${red}${result}${reset}"
+            exit 1
+        else
+            echo -e "${green}${result}${reset}"
+        fi
+    fi
 
     echo
 
@@ -146,9 +160,25 @@ read -rp "Press Enter to continue..."
 
 echo
 
-# Stop the new app
-echo "Stopping the new app..."
-execute stop_app "${appname}"
+
+#Stop applicaiton if not stopped
+status=$(cli -m csv -c 'app chart_release query name,status' | 
+            grep "^$appname," | 
+            awk -F ',' '{print $2}'| 
+            sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+if [[ "$status" != "STOPPED" ]]; then
+    echo -e "\nStopping ${blue}$appname${reset} prior to mount"
+    cmd=("stop_app" "$appname")
+    execute "${cmd[@]}"
+    result=$(handle_stop_code "$?")
+    if [[ $? -eq 1 ]]; then
+        echo -e "${red}${result}${reset}"
+        exit 1
+    else
+        echo -e "${green}${result}${reset}"
+    fi
+fi
+
 
 echo
 
