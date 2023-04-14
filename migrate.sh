@@ -235,7 +235,17 @@ before_skip() {
     # Copy the app's config to a safe place
     echo "Please copy the app's config manually from the GUI (Edit app) and save it in a safe place."
     echo "Take Screenshots or whatever you want."
-    read -rp "Press Enter to continue..."
+    echo "I personally open two tabs, one tab with the old config open, and another tab with the new config open."
+    while true; do
+        read -n1 -s -rp "Press 'x' to continue..." key
+        if [[ $key == "x" ]]; then
+            echo -e "\nContinuing..."
+            break
+        else
+            echo -e "\nInvalid key. Please press 'x' to continue."
+        fi
+    done
+
 
     echo
 
@@ -274,7 +284,15 @@ main() {
     # Install the new version# of the app
     echo "Please install the new app from the catalog manually and configure it as the deleted app."
     echo "Ensure you use the same name as the old app."
-    read -rp "Press Enter to continue..."
+    while true; do
+        read -n1 -s -rp "Press 'x' to continue..." key
+        if [[ $key == "x" ]]; then
+            echo -e "\nContinuing..."
+            break
+        else
+            echo -e "\nInvalid key. Please press 'x' to continue."
+        fi
+    done
 
     echo
 
