@@ -78,19 +78,27 @@ before_skip() {
     echo
 }
 
+
 echo "Finding apps pool..."
 ix_apps_pool=$(cli -c 'app kubernetes config' | 
                    grep -E "pool\s\|" | 
                    awk -F '|' '{print $3}' | 
                    sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-echo "Found: ${ix_apps_pool}"
 
-# Check if the migration directory exists, and create it if it doesn't
-if [ ! -d "/mnt/${ix_apps_pool}/migration" ]; then
-    echo "Creating migration directory..."
-    cmd=("mkdir" "-p" "/mnt/${ix_apps_pool}/migration")
+# Check if the apps pool exists
+if [ -z "${ix_apps_pool}" ]; then
+    echo "Error: Apps pool not found."
+    exit 1
+else
+    echo "Found: ${ix_apps_pool}"
+fi
+
+# Check if the migration dataset exists, and create it if it doesn't
+if ! zfs list "${ix_apps_pool}/migration" >/dev/null 2>&1; then
+    echo "Creating migration dataset..."
+    cmd=("zfs" "create" "${ix_apps_pool}/migration")
     execute "${cmd[@]}"
-    echo "Migration directory created."
+    echo "Migration dataset created."
     echo
 fi
 
@@ -106,11 +114,15 @@ pvc_info=$(k3s kubectl get pvc -n "${ix_appname}" -o custom-columns="NAME:.metad
 # Count the number of lines in the pvc_info variable
 num_lines=$(echo "${pvc_info}" | wc -l)
 
-# Check if there's more than one line, print an error message, and exit the script
+# Check if there's more than one line or no lines, print an error message, and exit the script
 if [ "${num_lines}" -gt 1 ]; then
     echo "Error: More than one volume found. This script only supports applications with a single volume."
     exit 1
+elif [ "${num_lines}" -eq 0 ]; then
+    echo "Error: No volume found. Please ensure that the application has at least one PVC."
+    exit 1
 fi
+
 
 echo
 
