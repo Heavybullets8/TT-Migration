@@ -55,5 +55,4 @@ Applications with databases such as mariadb, postgresql, etc.
 | photoprism         | Failed  |
 | Prometheus         | Failed  |
 | Readarr            | Failed  |
-| Sonarr             | Failed  |
 | Radarr             | Failed  |
