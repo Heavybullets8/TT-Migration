@@ -59,4 +59,4 @@ Applications with databases such as mariadb, postgresql, etc.
 | Homepage           | Success |
 | Plex               | Success |
 | Jellyfin           | Success |
-| Fileflows          | Sucess  |
+| Fileflows          | Sucesss |
