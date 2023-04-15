@@ -57,5 +57,3 @@ Applications with databases such as mariadb, postgresql, etc.
 | Readarr            | Failed  |
 | Sonarr             | Failed  |
 | Radarr             | Failed  |
-
-

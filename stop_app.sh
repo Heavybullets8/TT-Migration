@@ -1,21 +1,6 @@
 #!/bin/bash
 
 
-wait_for_pods_to_stop() {
-    local app_name timeout
-    app_name="$1"
-    timeout="$2"
-
-    SECONDS=0
-    while k3s kubectl get pods -n ix-"$app_name" -o=name | grep -qv -- '-cnpg-'; do
-        if [[ "$SECONDS" -gt $timeout ]]; then
-            return 1
-        fi
-        sleep 1
-    done
-}
-
-
 get_app_status() {
     local app_name
     app_name="$1"
@@ -24,19 +9,6 @@ get_app_status() {
             grep -- "^$app_name," | \
             awk -F ',' '{print $2}'
 }
-
-
-scale_down_resources() {
-    local app_name timeout
-    app_name="$1"
-    timeout="$2"
-
-    if ! k3s kubectl get deployments,statefulsets -n ix-"$app_name" | grep -vE -- "(NAME|^$|-cnpg-)" | awk '{print $1}' | xargs -I{} k3s kubectl scale --replicas=0 -n ix-"$app_name" {} &>/dev/null; then
-        return 1
-    fi
-    wait_for_pods_to_stop "$app_name" "$timeout" && return 0 || return 1
-}
-
 
 handle_stop_code() {
     local stop_code
@@ -59,14 +31,27 @@ handle_stop_code() {
             echo "HeavyScript doesn't have the ability to stop Prometheus"
             return 1
             ;;
+        4)
+            echo "The new application contains a cnpg pod, there is no way to restore to this new application"
+            echo "Please restore to a previous snapshot"
+            echo "Alternatively, you can try to follow these steps:"
+            echo "   1. Delete the new app you just created"
+            echo "   2. Install the new app with ${blue}custom-app${reset}, that is available in the catalog"
+            echo "   3. Give it the same name as the original app"
+            echo "   4. Fill out all of the information for the new app, with the information from the old app"
+            echo "   5. Once that application has started, you can run ${blue}bash migrate -s${reset}, this will migrate the data from the old app to the new ${blue}custom-app${reset}"
+            echo "   NOTE: If you need an example on how to fill out the information for the new app, you can look here:${blue}https://heavysetup.info/applications/sonarr/installation/${reset}"
+            return 1
+            ;;
     esac
 }
 
-
 stop_app() {
+    # Return 0 if app is stopped
     # Return 1 if cli command outright fails
     # Return 2 if timeout is reached
     # Return 3 if app is a prometheus instance
+    # Return 4 if the new app contains a cnpg pod
 
     local app_name timeout status
     app_name="$1"
@@ -77,7 +62,7 @@ stop_app() {
 
     # Check if app has a cnpg pods
     if printf "%s" "$chart_info" | grep -sq -- \"cnpg\":;then
-        scale_down_resources "$app_name" "$timeout" && return 0 || return 1
+        return 4
     # Check if app is a prometheus instance
     elif printf "%s" "$chart_info" | grep -sq -- \"prometheus\":;then
         return 3
