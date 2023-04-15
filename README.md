@@ -4,6 +4,10 @@ This script is designed to assist with the migration of Persistent Volume Claims
 
 It follows the steps outlined in this guide: https://docs.dasnipe.com/docs/truenas/Fast-Reinstall
 
+## Guide
+https://docs.dasnipe.com/docs/truenas/HeavyBullet-Migration
+
+
 ## Usage
 
 ```bash
