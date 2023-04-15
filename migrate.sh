@@ -44,10 +44,14 @@ check_for_db_pods() {
     local namespace=$1
     local db_regex='-(postgresql|mariadb|mysql|mongodb|redis|mssql|cnpg)'
     if k3s kubectl get pods,statefulsets -n "$namespace" -o=name | grep -E -- "$db_regex" | grep -v "pod/svclb"; then
-        echo "The applicaiton contains a database pod. Exiting."
+        echo "The application contains a database pod or statefulset."
+        echo "This migration script does not support migrating databases."
+        echo "You may be able to restore the application following this guide instead:"
+        echo "https://truecharts.org/manual/SCALE/guides/migration-pvc"
         exit 1
     fi   
 }
+
 
 find_most_similar_pvc() {
     local source_pvc=$1
