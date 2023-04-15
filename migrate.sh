@@ -39,6 +39,16 @@ function execute() {
     fi
 }
 
+# Check if namespace has any database pods
+check_for_db_pods() {
+    local namespace=$1
+    local db_regex='-(postgresql|mariadb|mysql|mongodb|redis|mssql|cnpg)'
+    if k3s kubectl get pods,statefulsets -n "$namespace" -o=name | grep -E -- "$db_regex" | grep -v "pod/svclb"; then
+        echo "The applicaiton contains a database pod. Exiting."
+        exit 1
+    fi   
+}
+
 find_most_similar_pvc() {
     local source_pvc=$1
     local max_similarity=0
@@ -272,6 +282,7 @@ main() {
     echo
 
     prompt_app_name
+    check_for_db_pods "${ix_appname}"
     get_pvc_info
     check_pvc_count
 
