@@ -56,3 +56,4 @@ Applications with databases such as mariadb, postgresql, etc.
 | Prometheus         | Failed  |
 | Readarr            | Failed  |
 | Radarr             | Failed  |
+| Homepage           | Success |
