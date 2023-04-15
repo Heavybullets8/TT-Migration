@@ -26,49 +26,27 @@ Applications with databases such as mariadb, postgresql, etc.
 
 ## Tested on
 
-### Success
-filebrowser
-
-All my custom-app Apps 
-
-Komga 
-
-emulatorjs
-
-homarr
-
-freshrss
-
-mysql-workbench
-
-bazarr
-
-flaresolverr
-
-phpldapadmin
-
-podgrab
-
-sabnzb
-
-uptime-kuma
-
-unpackerr
-
-autoscan
-
-tautulli
-
-overseerr
-
-code-server
-
-Jellyseerr
-
-adguard-home
-
-### Failed
-
-photoprism
-
-Prometheus
+| Application        | Status  |
+|--------------------|---------|
+| filebrowser        | Success |
+| Custom-app Apps    | Success |
+| Komga              | Success |
+| emulatorjs         | Success |
+| homarr             | Success |
+| freshrss           | Success |
+| mysql-workbench    | Success |
+| bazarr             | Success |
+| flaresolverr       | Success |
+| phpldapadmin       | Success |
+| podgrab            | Success |
+| sabnzb             | Success |
+| uptime-kuma        | Success |
+| unpackerr          | Success |
+| autoscan           | Success |
+| tautulli           | Success |
+| overseerr          | Success |
+| code-server        | Success |
+| Jellyseerr         | Success |
+| adguard-home       | Success |
+| photoprism         | Failed  |
+| Prometheus         | Failed  |
