@@ -160,7 +160,7 @@ destroy_new_apps_pvcs() {
         else
             echo "Error: Failed to destroy ${to_delete}"
             echo "If the error reports \"dataset is busy\" run the following command:"
-            echo "${blue}systemctl middlewared restart${reset}"
+            echo "${blue}systemctl restart middlewared${reset}"
             echo "Then run this script again. with the ${blue}-s${reset} flag."
             echo "Example: ${blue}bash migration.sh -s${reset}"
             exit 1
@@ -168,7 +168,7 @@ destroy_new_apps_pvcs() {
     done
     echo
 }
-
+ 
 rename_migration_pvcs() {
     echo "Renaming the migration PVCs to the new app's PVC names..."
 
