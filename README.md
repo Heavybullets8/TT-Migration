@@ -58,3 +58,5 @@ Applications with databases such as mariadb, postgresql, etc.
 | Radarr             | Failed  |
 | Homepage           | Success |
 | Plex               | Success |
+| Jellyfin           | Success |
+| Fileflows          | Sucess  |
