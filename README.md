@@ -54,3 +54,4 @@ Applications with databases such as mariadb, postgresql, etc.
 | adguard-home       | Success |
 | photoprism         | Failed  |
 | Prometheus         | Failed  |
+| Readarr            |         |
