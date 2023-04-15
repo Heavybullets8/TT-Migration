@@ -60,8 +60,10 @@ stop_app() {
     # Grab chart info
     chart_info=$(midclt call chart.release.get_instance "$app_name")
 
-    # Check if app has a cnpg pods
-    if printf "%s" "$chart_info" | grep -sq -- \"cnpg\":;then
+    output=$(check_filterd_apps)
+
+    # Check if output contains the desired namespace and "cnpg"
+    if echo "$output" | grep -q "ix-${app_name},cnpg"; then
         return 4
     # Check if app is a prometheus instance
     elif printf "%s" "$chart_info" | grep -sq -- \"prometheus\":;then

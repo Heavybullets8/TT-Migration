@@ -11,6 +11,7 @@ gray='\033[38;5;7m'
 
 source stop_app.sh
 source start_app.sh
+source allowed.sh
 
 dry_run=0
 skip=false
@@ -155,20 +156,34 @@ destroy_new_apps_pvcs() {
         volume_name="${pvc_and_volume_arr[1]}"
         to_delete="${ix_apps_pool}/ix-applications/releases/${appname}/volumes/${volume_name}"
         cmd=("zfs" "destroy" "${to_delete}")
-        if execute "${cmd[@]}"; then
-            echo "Destroyed ${to_delete}"
-        else
-            echo "Error: Failed to destroy ${to_delete}"
-            echo "If the error reports \"dataset is busy\" run the following command:"
-            echo "${blue}systemctl restart middlewared${reset}"
-            echo "Then run this script again. with the ${blue}-s${reset} flag."
-            echo "Example: ${blue}bash migration.sh -s${reset}"
-            exit 1
-        fi
+
+        success=false
+        attempt_count=0
+        max_attempts=2
+
+        while ! $success && [ $attempt_count -lt $max_attempts ]; do
+            if output=$(execute "${cmd[@]}"); then
+                echo "Destroyed ${to_delete}"
+                success=true
+            else
+                if echo "$output" | grep -q "dataset is busy" && [ $attempt_count -eq 0 ]; then
+                    echo "Dataset is busy, restarting middlewared and retrying..."
+                    systemctl restart middlewared
+                    sleep 5
+                    stop_app_if_needed "$appname"
+                    sleep 5
+                else
+                    echo "Error: Failed to destroy ${to_delete}"
+                    echo "Error message: $output"
+                    exit 1
+                fi
+            fi
+            attempt_count=$((attempt_count + 1))
+        done
     done
     echo
 }
- 
+
 rename_migration_pvcs() {
     echo "Renaming the migration PVCs to the new app's PVC names..."
 
