@@ -32,31 +32,33 @@ Applications with databases such as mariadb, postgresql, etc.
 
 | Application        | Status  |
 |--------------------|---------|
-| filebrowser        | Success |
-| Custom-app Apps    | Success |
-| Komga              | Success |
-| emulatorjs         | Success |
-| homarr             | Success |
-| freshrss           | Success |
-| mysql-workbench    | Success |
-| bazarr             | Success |
-| flaresolverr       | Success |
-| phpldapadmin       | Success |
-| podgrab            | Success |
-| sabnzb             | Success |
-| uptime-kuma        | Success |
-| unpackerr          | Success |
-| autoscan           | Success |
-| tautulli           | Success |
-| overseerr          | Success |
-| code-server        | Success |
-| Jellyseerr         | Success |
 | adguard-home       | Success |
-| photoprism         | Failed  |
-| Prometheus         | Failed  |
-| Readarr            | Failed  |
-| Radarr             | Failed  |
-| Homepage           | Success |
-| Plex               | Success |
-| Jellyfin           | Success |
+| autoscan           | Success |
+| bazarr             | Success |
+| code-server        | Success |
+| Custom-app Apps    | Success |
+| emulatorjs         | Success |
 | Fileflows          | Sucesss |
+| filebrowser        | Success |
+| flaresolverr       | Success |
+| freshrss           | Success |
+| homarr             | Success |
+| Homepage           | Success |
+| Jellyfin           | Success |
+| Jellyseerr         | Success |
+| Komga              | Success |
+| mysql-workbench    | Success |
+| overseerr          | Success |
+| phpldapadmin       | Success |
+| photoprism         | Failed  |
+| Plex               | Success |
+| podgrab            | Success |
+| Prometheus         | Failed  |
+| Radarr             | Failed  |
+| Readarr            | Failed  |
+| sabnzb             | Success |
+| tautulli           | Success |
+| Transmission       | Sucesss |
+| unpackerr          | Success |
+| uptime-kuma        | Success |
+
