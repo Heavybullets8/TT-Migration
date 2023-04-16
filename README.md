@@ -38,7 +38,7 @@ Applications with databases such as mariadb, postgresql, etc.
 | code-server        | Success |
 | Custom-app Apps    | Success |
 | emulatorjs         | Success |
-| Fileflows          | Sucesss |
+| Fileflows          | Success |
 | filebrowser        | Success |
 | flaresolverr       | Success |
 | freshrss           | Success |
@@ -61,7 +61,7 @@ Applications with databases such as mariadb, postgresql, etc.
 | Readarr            | Failed  |
 | sabnzb             | Success |
 | tautulli           | Success |
-| Transmission       | Sucesss |
+| Transmission       | Success |
 | unpackerr          | Success |
 | uptime-kuma        | Success |
 
