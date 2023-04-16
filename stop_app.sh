@@ -61,10 +61,10 @@ stop_app() {
     output=$(check_filtered_apps "$app_name")
 
     # Check if output contains the desired namespace and "cnpg"
-    if echo "$output" | grep -q "ix-${app_name},cnpg"; then
+    if echo "$output" | grep -q "${app_name},cnpg"; then
         return 4
     # Check if app is an operator instance
-    elif echo "$output" | grep -q "ix-${app_name},operator"; then
+    elif echo "$output" | grep -q "${app_name},operator"; then
         return 3
     fi
 
