@@ -32,6 +32,9 @@ It also will not work on some of the arrs at the moment, since some of them are 
 
 Trucharts may change the way they handle databases in the future, so this script may end up working on those at some point.
 
+> A workaround for the arr apps moving to the new db is to use the `Custom-app` template from trucharts, and migrate to that instead. Which obviously will not end up using the new db. I did this for prowlarr, and it worked fine, just make sure the name is the same as the old app.
+
+
 ## Tested on
 
 | Application        | Status  |
