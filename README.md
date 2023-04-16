@@ -28,6 +28,10 @@ which will skip to the step immediately after deleting the old application.
 
 Applications with databases such as mariadb, postgresql, etc.
 
+It also will not work on some of the arrs at the moment, since some of them are migrating to a new database. 
+
+Trucharts may change the way they handle databases in the future, so this script may end up working on those at some point.
+
 ## Tested on
 
 | Application        | Status  |
@@ -36,32 +40,34 @@ Applications with databases such as mariadb, postgresql, etc.
 | autoscan           | Success |
 | bazarr             | Success |
 | code-server        | Success |
-| Custom-app Apps    | Success |
+| `Custom-app` Apps  | Success |
 | emulatorjs         | Success |
-| Fileflows          | Success |
+| fileflows          | Success |
 | filebrowser        | Success |
 | flaresolverr       | Success |
 | freshrss           | Success |
 | heimdall           | Success |
 | homarr             | Success |
-| Homepage           | Success |
-| Jellyfin           | Success |
-| Jellyseerr         | Success |
+| homepage           | Success |
+| jellyfin           | Success |
+| jellyseerr         | Success |
 | Komga              | Success |
 | mymediaforalexa    | Success |
 | mysql-workbench    | Success |
 | overseerr          | Success |
 | phpldapadmin       | Success |
 | photoprism         | Failed  |
-| Plex               | Success |
+| plex               | Success |
 | podgrab            | Success |
 | Prometheus         | Failed  |
+| prowlarr           | Failed  |
 | qBittorrent        | Success |
-| Radarr             | Failed  |
-| Readarr            | Failed  |
+| radarr             | Failed  |
+| readarr            | Failed  |
 | sabnzb             | Success |
+| sonarr             | Success |
 | tautulli           | Success |
-| Transmission       | Success |
+| transmission       | Success |
 | unpackerr          | Success |
 | uptime-kuma        | Success |
 
