@@ -57,14 +57,13 @@ stop_app() {
     app_name="$1"
     timeout="150"
 
-    # Check if app is a cnpg instance, or an operator instance
+    # Check if the app is a cnpg instance, or an operator instance
     output=$(check_filtered_apps "$app_name")
 
-    # Check if output contains the desired namespace and "cnpg"
-    if echo "$output" | grep -q "${app_name},cnpg"; then
+    # Check if the output contains the desired namespace and "cnpg" or "operator"
+    if [[ $output == "${app_name},cnpg" ]]; then
         return 4
-    # Check if app is an operator instance
-    elif echo "$output" | grep -q "${app_name},operator"; then
+    elif [[ $output == "${app_name},operator" ]]; then
         return 3
     fi
 
