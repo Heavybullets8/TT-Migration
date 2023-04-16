@@ -54,6 +54,7 @@ Applications with databases such as mariadb, postgresql, etc.
 | Plex               | Success |
 | podgrab            | Success |
 | Prometheus         | Failed  |
+| qBittorrent        | Success |
 | Radarr             | Failed  |
 | Readarr            | Failed  |
 | sabnzb             | Success |
