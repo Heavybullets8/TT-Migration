@@ -42,11 +42,13 @@ Applications with databases such as mariadb, postgresql, etc.
 | filebrowser        | Success |
 | flaresolverr       | Success |
 | freshrss           | Success |
+| heimdall           | Success |
 | homarr             | Success |
 | Homepage           | Success |
 | Jellyfin           | Success |
 | Jellyseerr         | Success |
 | Komga              | Success |
+| mymediaforalexa    | Success |
 | mysql-workbench    | Success |
 | overseerr          | Success |
 | phpldapadmin       | Success |
