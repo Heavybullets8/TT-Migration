@@ -352,7 +352,7 @@ stop_app_if_needed() {
                 awk -F ',' '{print $2}'| 
                 sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     if [[ "$status" != "STOPPED" ]]; then
-        echo -e "\nStopping ${blue}$appname${reset} prior to mount"
+        echo -e "\nStopping ${blue}$appname${reset}"
         cmd=("stop_app" "$appname")
         execute "${cmd[@]}"
         result=$(handle_stop_code "$?")
