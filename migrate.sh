@@ -126,10 +126,18 @@ get_pvc_info() {
 }
 
 check_pvc_count() {
+    check_type=$1
     # Check if there's more than one line or no lines, print an error message, and exit the script
     
-    if [[ -z "$pvc_info" ]]; then
+    if [[ -z "$pvc_info" && $check_type == "original" ]]; then
         echo "Error: No volume found. Please ensure that the application has at least one PVC."
+        exit 1
+    elif [[ -z "$pvc_info" && $check_type == "new" ]]; then
+        echo "Error: The new app does not appear to have any PVCs."
+        echo "If you previously ran this script for the same app, you may need to do the following:"
+        echo "    1. Delete the new app"
+        echo "    2. Download the new app's chart again with the same settings as the original"
+        echo "    3. Run this script again with ${blue}bash migrate.sh --skip${reset}"
         exit 1
     fi
 }
@@ -307,7 +315,7 @@ main() {
     prompt_app_name
     check_for_db_pods "${ix_appname}"
     get_pvc_info
-    check_pvc_count
+    check_pvc_count "original"
 
     echo
 
@@ -334,6 +342,7 @@ main() {
 
     echo
     get_pvc_info
+    check_pvc_count "new"
     destroy_new_apps_pvcs
 
     echo
