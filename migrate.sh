@@ -53,6 +53,13 @@ check_for_db_pods() {
     fi   
 }
 
+# Function to check if the app exists
+app_exists() {
+    local app_name=$1
+    echo
+    echo "Checking if app exists..."
+    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -E "^${app_name}$"
+}
 
 find_most_similar_pvc() {
     local source_pvc=$1
@@ -103,21 +110,30 @@ create_migration_dataset() {
         echo "Creating migration dataset..."
         cmd=("zfs" "create" "${ix_apps_pool}/migration")
         if execute "${cmd[@]}"; then
-            echo "Migration dataset created."
+            echo "Dataset created: ${ix_apps_pool}/migration"
             echo
         else
             echo "Error: Failed to create migration dataset."
             exit 1
         fi
-        echo "Migration dataset created."
-        echo
     fi
 }
 
 prompt_app_name() {
-    # Prompt the user for the app name
-    read -r -p "Enter the application name: " appname
-    ix_appname="ix-${appname}"
+    while true
+    do
+        # Prompt the user for the app name
+        read -r -p "Enter the application name: " appname
+        ix_appname="ix-${appname}"
+
+        # Check if the app exists
+        if app_exists "${appname}"; then
+            echo "Found: ${appname}"
+            break
+        else
+            echo "Error: App not found."
+        fi
+    done
 }
 
 get_pvc_info() {
@@ -226,6 +242,33 @@ rename_migration_pvcs() {
     echo
 }
 
+check_for_new_app() {
+    # Keep asking to continue until app is found
+    while true; do
+        echo "Please install the new version of the app from the catalog manually."
+        echo "Ensure you use the same name as the old app."
+        while true; do
+            read -n1 -s -rp "Press 'x' to continue..." key
+            if [[ $key == "x" ]]; then
+                echo -e "\nContinuing..."
+                break
+            else
+                echo -e "\nInvalid key. Please press 'x' to continue."
+            fi
+        done
+
+        echo
+
+        # Check if the app exists
+        if app_exists "${appname}"; then
+            echo "Found: ${appname}"
+            break
+        else
+            echo "App not found. Please install the new version of the app from the catalog manually."
+            echo "Ensure you use the same name as the old app."
+        fi
+    done
+}
 
 rename_apps_pvcs() {
     # Rename the app's PVCs
@@ -323,18 +366,7 @@ main() {
         before_skip
     fi
 
-    # Install the new version# of the app
-    echo "Please install the new app from the catalog manually and configure it as the deleted app."
-    echo "Ensure you use the same name as the old app."
-    while true; do
-        read -n1 -s -rp "Press 'x' to continue..." key
-        if [[ $key == "x" ]]; then
-            echo -e "\nContinuing..."
-            break
-        else
-            echo -e "\nInvalid key. Please press 'x' to continue."
-        fi
-    done
+    check_for_new_app
 
     echo
 
