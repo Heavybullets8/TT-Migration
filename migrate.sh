@@ -124,7 +124,7 @@ prompt_app_name() {
     do
         # Prompt the user for the app name
         read -r -p "Enter the application name: " appname
-        ix_appname="ix-${appname}"
+        namespace="ix-${appname}"
 
         # Check if the app exists
         if app_exists "${appname}"; then
@@ -138,7 +138,18 @@ prompt_app_name() {
 
 get_pvc_info() {
     # Grab the app's PVC names and volume names
-    pvc_info=$(k3s kubectl get pvc -n "${ix_appname}" -o custom-columns="NAME:.metadata.name,VOLUME:.spec.volumeName" --no-headers)
+    pvc_info=$(k3s kubectl get pvc -n "${namespace}" -o custom-columns="NAME:.metadata.name,VOLUME:.spec.volumeName" --no-headers)
+}
+
+get_pvc_parent_path() {
+    pvc_path=$(zfs list -r "${ix_apps_pool}" -o name -H | grep "${volume_name}")
+
+    if [ -z "${pvc_path}" ]; then
+        echo "PVC not found"
+        return 1
+    fi
+
+    pvc_parent_path=$(dirname "${pvc_path}")
 }
 
 check_pvc_count() {
@@ -178,7 +189,7 @@ destroy_new_apps_pvcs() {
     for new_pvc in "${new_pvcs[@]}"; do
         IFS=',' read -ra pvc_and_volume_arr <<< "$new_pvc"
         volume_name="${pvc_and_volume_arr[1]}"
-        to_delete="${ix_apps_pool}/ix-applications/releases/${appname}/volumes/${volume_name}"
+        to_delete="$pvc_parent_path/${volume_name}"
         cmd=("zfs" "destroy" "${to_delete}")
 
         success=false
@@ -230,11 +241,11 @@ rename_migration_pvcs() {
 
     for old_pvc in "${migration_pvcs[@]}"; do
         most_similar_pvc=$(find_most_similar_pvc "$old_pvc")
-        cmd=("zfs" "rename" "${ix_apps_pool}/migration/${old_pvc}" "${ix_apps_pool}/ix-applications/releases/${appname}/volumes/${most_similar_pvc}")
+        cmd=("zfs" "rename" "${ix_apps_pool}/migration/${old_pvc}" "$pvc_parent_path/${most_similar_pvc}")
         if execute "${cmd[@]}"; then
-            echo "Renamed ${ix_apps_pool}/migration/${old_pvc} to ${ix_apps_pool}/ix-applications/releases/${appname}/volumes/${most_similar_pvc}"
+            echo "Renamed ${ix_apps_pool}/migration/${old_pvc} to $pvc_parent_path/${most_similar_pvc}"
         else
-            echo "Error: Failed to rename ${ix_apps_pool}/migration/${old_pvc} to ${ix_apps_pool}/ix-applications/releases/${appname}/volumes/${most_similar_pvc}"
+            echo "Error: Failed to rename ${ix_apps_pool}/migration/${old_pvc} to $pvc_parent_path/${most_similar_pvc}"
             exit 1
         fi
     done
@@ -276,7 +287,7 @@ rename_apps_pvcs() {
     echo "${pvc_info}" | while read -r line; do
         pvc_name=$(echo "${line}" | awk '{print $1}')
         volume_name=$(echo "${line}" | awk '{print $2}')
-        old_pvc_name="${ix_apps_pool}/ix-applications/releases/${appname}/volumes/${volume_name}"
+        old_pvc_name="$pvc_parent_path/${volume_name}"
         new_pvc_name="${ix_apps_pool}/migration/${pvc_name}"
         cmd=("zfs" "rename" "${old_pvc_name}" "${new_pvc_name}")
         if execute "${cmd[@]}"; then 
@@ -356,10 +367,10 @@ main() {
     echo
 
     prompt_app_name
-    check_for_db_pods "${ix_appname}"
+    check_for_db_pods "${namespace}"
     get_pvc_info
     check_pvc_count "original"
-
+    get_pvc_parent_path
     echo
 
     if [ "${skip}" = false ]; then
