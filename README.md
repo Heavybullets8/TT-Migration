@@ -58,6 +58,7 @@ Trucharts may change the way they handle databases for the arr apps in the futur
 | Komga              | Success |
 | mymediaforalexa    | Success |
 | mysql-workbench    | Success |
+| organizr           | Success |
 | overseerr          | Success |
 | phpldapadmin       | Success |
 | photoprism         | Failed  |
