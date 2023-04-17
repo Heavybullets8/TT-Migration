@@ -44,6 +44,7 @@ Trucharts may change the way they handle databases in the future, so this script
 | bazarr             | Success |
 | code-server        | Success |
 | `Custom-app` Apps  | Success |
+| deluge             | Success |
 | emulatorjs         | Success |
 | fileflows          | Success |
 | filebrowser        | Success |
