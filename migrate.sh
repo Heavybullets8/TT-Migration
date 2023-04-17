@@ -153,6 +153,11 @@ get_pvc_parent_path() {
     fi
 
     pvc_parent_path=$(dirname "${pvc_path}")
+
+    if [ -z "${pvc_parent_path}" ]; then
+        echo "PVC parent path not found"
+        exit 1
+    fi
 }
 
 check_pvc_count() {
