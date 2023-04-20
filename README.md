@@ -73,6 +73,7 @@ Trucharts may change the way they handle databases for the arr apps in the futur
 | sonarr             | Success |
 | tautulli           | Success |
 | transmission       | Success |
+| unifi              | Success |
 | unpackerr          | Success |
 | uptime-kuma        | Success |
 
