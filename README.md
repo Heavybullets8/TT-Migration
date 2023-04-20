@@ -57,6 +57,7 @@ Trucharts may change the way they handle databases for the arr apps in the futur
 | jellyfin           | Success |
 | jellyseerr         | Success |
 | Komga              | Success |
+| mkvcleaver         | Success |
 | mymediaforalexa    | Success |
 | mysql-workbench    | Success |
 | organizr           | Success |
@@ -70,8 +71,11 @@ Trucharts may change the way they handle databases for the arr apps in the futur
 | qBittorrent        | Success |
 | radarr             | Failed  |
 | readarr            | Failed  |
+| recyclarr          | Success |
 | sabnzb             | Success |
+| scrutiny           | Success |
 | sonarr             | Success |
+| syncthing          | Success |
 | tautulli           | Success |
 | transmission       | Success |
 | unifi              | Success |
