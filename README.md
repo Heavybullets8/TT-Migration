@@ -40,6 +40,7 @@ Trucharts may change the way they handle databases for the arr apps in the futur
 | Application        | Status  |
 |--------------------|---------|
 | adguard-home       | Success |
+| audiobookshelf     | Success |
 | autoscan           | Success |
 | bazarr             | Success |
 | code-server        | Success |
