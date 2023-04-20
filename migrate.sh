@@ -15,6 +15,10 @@ source allowed.sh
 
 dry_run=0
 skip=false
+script=$(readlink -f "$0")
+script_path=$(dirname "$script")
+script_name="migrate.sh"
+args=("$@")
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -48,9 +52,18 @@ if [[ $(id -u) != 0 ]]; then
     echo -e "${red}sudo bash migrate.sh${reset}" >&2
     echo -e "${red}or run the script as the \"root\" user${reset}" >&2
     echo -e "${red}su root${reset}" >&2
-    exit 1
+
+    # Prompt the user to retry with sudo
+    echo -e "${yellow}Would you like to run the script with sudo? (y/n)${reset}"
+    read -r answer
+    if [[ $answer =~ ^[Yy]$ ]]; then
+        exec sudo bash "$script_path"/$script_name "${args[@]}"
+    else
+        exit 1
+    fi
 fi
 }
+
 
 # Check if namespace has any database pods
 check_for_db_pods() {
