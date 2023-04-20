@@ -40,6 +40,18 @@ function execute() {
     fi
 }
 
+check_privileges() {
+# Check user's permissions
+if [[ $(id -u) != 0 ]]; then
+    echo -e "${red}This script must be run as root.${reset}" >&2
+    echo -e "${red}Please run the following command:${reset}" >&2
+    echo -e "${red}sudo bash migrate.sh${reset}" >&2
+    echo -e "${red}or run the script as the \"root\" user${reset}" >&2
+    echo -e "${red}su root${reset}" >&2
+    exit 1
+fi
+}
+
 # Check if namespace has any database pods
 check_for_db_pods() {
     local namespace=$1
@@ -350,6 +362,7 @@ before_skip() {
 }
 
 main() {
+    check_privileges
     find_apps_pool
     create_migration_dataset
 
