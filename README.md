@@ -52,6 +52,7 @@ The script will check to see if these databases exist prior to accepting them fo
 | jellyfin           | Success |
 | jellyseerr         | Success |
 | Komga              | Success |
+| mkvcleaver         | Success |
 | mymediaforalexa    | Success |
 | mysql-workbench    | Success |
 | organizr           | Success |
@@ -64,8 +65,11 @@ The script will check to see if these databases exist prior to accepting them fo
 | qBittorrent        | Success |
 | radarr             | Success |
 | readarr            | Success |
+| recyclarr          | Success |
 | sabnzb             | Success |
+| scrutiny           | Success |
 | sonarr             | Success |
+| syncthing          | Success |
 | tautulli           | Success |
 | transmission       | Success |
 | unifi              | Success |
