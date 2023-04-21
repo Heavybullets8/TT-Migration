@@ -38,6 +38,7 @@ The script will check to see if these databases exist prior to accepting them fo
 | audiobookshelf     | Success |
 | autoscan           | Success |
 | bazarr             | Success |
+| calibre            | Success |
 | code-server        | Success |
 | `Custom-app` Apps  | Success |
 | deluge             | Success |
@@ -75,4 +76,5 @@ The script will check to see if these databases exist prior to accepting them fo
 | unifi              | Success |
 | unpackerr          | Success |
 | uptime-kuma        | Success |
+
 
