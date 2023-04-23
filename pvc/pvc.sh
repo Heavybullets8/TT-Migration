@@ -123,7 +123,7 @@ get_pvc_parent_path() {
 
     if [ -z "${pvc_path}" ]; then
         echo "PVC not found"
-        return 1
+        exit 1
     fi
 
     pvc_parent_path=$(dirname "${pvc_path}")
