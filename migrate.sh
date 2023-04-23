@@ -42,8 +42,10 @@ done
 
 
 main() {
-    if [[ "${skip}" == true && $(prompt_if_renamed) ]]; then
-        different_migration=true
+    if [[ "${skip}" == true ]]; then
+        if prompt_if_renamed; then
+            different_migration=true
+        fi
     fi
 
     prompt_app_name
