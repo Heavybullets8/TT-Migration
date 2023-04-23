@@ -51,7 +51,7 @@ main() {
     get_pvc_parent_path
     echo
 
-    if [ "${skip}" = false ]; then
+    if [[ "${skip}" == false ]]; then
         stop_app_if_needed
         echo
         rename_original_pvcs
@@ -60,8 +60,8 @@ main() {
         echo
         delete_original_app
     fi
-
     prompt_rename
+    
     check_for_new_app
     
     echo
