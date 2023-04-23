@@ -19,14 +19,15 @@ prompt_app_name() {
 }
 
 prompt_create_backup() {
-    echo
-    echo "Please copy the app's config manually from the GUI (Edit app) and save it in a safe place."
-    echo "Take Screenshots or whatever you want."
+    echo "Please copy the app's config manually from the GUI:"
+    echo "    Apps > Installed Applications > ${appname} > 3 dots on top right of app card > Edit"
     echo "I personally open two tabs, one tab with the old config open, and another tab with the new config open."
+    echo "The next steps involve deleting the app, so please ensure you have screenshots or a tab open with the old config."
     while true; do
         read -n1 -s -rp "Press 'x' to continue..." key
         if [[ $key == "x" ]]; then
             echo -e "\nContinuing..."
+            echo
             break
         else
             echo -e "${yellow}\nInvalid key. Please press 'x' to continue.${reset}"

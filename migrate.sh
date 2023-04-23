@@ -68,6 +68,7 @@ main() {
 
     if [[ "${skip}" == false ]]; then
         stop_app_if_needed
+        prompt_create_backup
         rename_original_pvcs
         delete_original_app
         prompt_rename
