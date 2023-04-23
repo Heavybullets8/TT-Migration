@@ -17,6 +17,7 @@ skip=false
 
 # source functions
 source check/check.sh
+source create/create.sh
 source find/find.sh
 source lifecycle/lifecycle.sh
 source lifecycle/start_app.sh
@@ -43,7 +44,7 @@ main() {
     prompt_app_name
     check_for_db_pods "${namespace}"
     find_apps_pool
-    check_migration_dataset
+    create_migration_dataset
     create_app_dataset
 
     get_pvc_info

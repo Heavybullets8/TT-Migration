@@ -8,7 +8,7 @@ get_pvc_info() {
 rename_original_pvcs() {
     # Rename the app's PVCs
     echo "Renaming the app's PVCs..."
-    echo "${pvc_info}" | while read -r line; do
+    while read -r line; do
         pvc_name=$(echo "${line}" | awk '{print $1}')
         volume_name=$(echo "${line}" | awk '{print $2}')
         old_pvc_name="$pvc_parent_path/${volume_name}"
@@ -19,8 +19,9 @@ rename_original_pvcs() {
             echo "Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}"
             exit 1
         fi
-    done
+    done < <(echo "${pvc_info}")
 }
+
 
 rename_migration_pvcs() {
     echo "Renaming the migration PVCs to the new app's PVC names..."
@@ -29,7 +30,7 @@ rename_migration_pvcs() {
     migration_pvcs=()
 
     # Get the list of migration PVCs
-    migration_pvcs_info=$(zfs list -r "${ix_apps_pool}/migration" | grep "${appname}" | awk '{print $1}')
+    migration_pvcs_info=$(zfs list -r "$migration_path" | awk '{print $1}')
 
     # Read the migration_pvcs_info line by line and store the migration PVCs in the migration_pvcs array
     while read -r line; do
