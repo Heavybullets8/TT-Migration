@@ -45,7 +45,7 @@ rename_migration_pvcs() {
 
     for original_pvc in "${migration_pvcs[@]}"; do
         most_similar_pvc=$(find_most_similar_pvc "$original_pvc")
-        if zfs rename "$migration_path${original_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
+        if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
             echo "Renamed $migration_path/${original_pvc} to $pvc_parent_path/${most_similar_pvc}"
         else
             echo "Error: Failed to rename $migration_path/${original_pvc} to $pvc_parent_path/${most_similar_pvc}"
