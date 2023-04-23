@@ -70,7 +70,7 @@ check_for_new_app() {
         echo
 
         # Check if the app exists
-        if app_exists "${appname}"; then
+        if check_if_app_exists "${appname}"; then
             echo "Found: ${appname}"
             break
         else
