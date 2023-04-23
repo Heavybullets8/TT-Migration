@@ -59,8 +59,9 @@ main() {
         verify_rename
         echo
         delete_original_app
+        prompt_rename
     fi
-    prompt_rename
+    
     
     check_for_new_app
     
