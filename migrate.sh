@@ -60,10 +60,8 @@ main() {
         echo
         delete_original_app
         prompt_rename
+        check_for_new_app
     fi
-    
-    
-    check_for_new_app
     
     echo
 
