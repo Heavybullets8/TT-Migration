@@ -49,6 +49,7 @@ prompt_rename() {
             echo -e "${yellow}\nInvalid key. Please press 'y' to rename the app or 'n' to skip.${reset}"
         fi
     done
+    echo
 }
 
 rename_app() {

@@ -72,6 +72,8 @@ check_for_new_app() {
             fi
         done
 
+        echo
+
         # Check if the app exists
         if check_if_app_exists "${appname}"; then
             echo -e "${green}Found: ${blue}${appname}${reset}"
