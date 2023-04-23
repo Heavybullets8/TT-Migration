@@ -13,6 +13,10 @@ export appname
 export ix_apps_pool
 export migration_path
 export rename=false
+export script=$(readlink -f "$0")
+export script_path=$(dirname "$script")
+export script_name="migrate.sh"
+export args=("$@")
 skip=false
 
 # source functions
@@ -41,6 +45,7 @@ done
 
 
 main() {
+    check_privileges
     prompt_app_name
     check_for_db_pods "${namespace}"
     find_apps_pool

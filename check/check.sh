@@ -1,5 +1,24 @@
 #!/bin/bash
 
+check_privileges() {
+# Check user's permissions
+if [[ $(id -u) != 0 ]]; then
+    echo -e "${red}This script must be run as root.${reset}" >&2
+    echo -e "${red}Please run the following command:${reset}" >&2
+    echo -e "${red}sudo bash migrate.sh${reset}" >&2
+    echo -e "${red}or run the script as the \"root\" user${reset}" >&2
+    echo -e "${red}su root${reset}" >&2
+
+    # Prompt the user to retry with sudo
+    echo -e "${yellow}Would you like to run the script with sudo? (y/n)${reset}"
+    read -r answer
+    if [[ $answer =~ ^[Yy]$ ]]; then
+        exec sudo bash "$script_path"/$script_name "${args[@]}"
+    else
+        exit 1
+    fi
+fi
+}
 
 # Check if namespace has any database pods
 check_for_db_pods() {
