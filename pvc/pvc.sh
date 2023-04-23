@@ -144,7 +144,7 @@ find_most_similar_pvc() {
         local len2=${#target_pvc_name}
         local maxlen=$(( len1 > len2 ? len1 : len2 ))
         local dist
-        dist=$(python levenshtein.py "$source_pvc" "$target_pvc_name")
+        dist=$(python pvc/levenshtein.py "$source_pvc" "$target_pvc_name")
         local similarity=$(( 100 * ( maxlen - dist ) / maxlen ))
 
         if [ "$similarity" -gt "$max_similarity" ]; then
