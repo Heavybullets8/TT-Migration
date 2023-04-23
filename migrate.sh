@@ -56,8 +56,6 @@ main() {
         echo
         rename_original_pvcs
         echo
-        verify_rename
-        echo
         delete_original_app
         prompt_rename
         check_for_new_app

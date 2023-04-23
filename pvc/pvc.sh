@@ -22,17 +22,6 @@ rename_original_pvcs() {
     done
 }
 
-verify_rename() {
-    # Verify the rename was successful
-    echo "Verifying the rename was successful..."
-    if zfs list -r "${ix_apps_pool}/migration" | grep "${appname}" > /dev/null; then
-        echo "Rename successful."
-    else
-        echo "Rename failed."
-        exit 1
-    fi
-}
-
 rename_migration_pvcs() {
     echo "Renaming the migration PVCs to the new app's PVC names..."
 
@@ -40,7 +29,7 @@ rename_migration_pvcs() {
     migration_pvcs=()
 
     # Get the list of migration PVCs
-    migration_pvcs_info=$(zfs list -r "${ix_apps_pool}/migration" | grep "${appname}" | awk '{print $1}')
+    migration_pvcs_info=$(zfs list -r "${ix_apps_pool}/migration" | awk '{print $1}')
 
     # Read the migration_pvcs_info line by line and store the migration PVCs in the migration_pvcs array
     while read -r line; do
