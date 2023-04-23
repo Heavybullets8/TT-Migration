@@ -28,20 +28,17 @@ which will skip to the step immediately after deleting the old application.
 
 Applications with databases such as mariadb, postgresql, etc.
 
-It also will not work on some of the arrs at the moment, since some of them are migrating to a new database. 
-
-Trucharts may change the way they handle databases for the arr apps in the future, so this script may end up working on those at some point.
-
-> A workaround for the arr apps moving to the new db is to use the `Custom-app` template from trucharts, and migrate to that instead. Which obviously will not end up using the new db. I did this for prowlarr, and it worked fine, just make sure the name is the same as the old app.
-
+The script will check to see if these databases exist prior to accepting them for migration, but I include a list down below anyway, for verification.
 
 ## Tested on
 
 | Application        | Status  |
 |--------------------|---------|
 | adguard-home       | Success |
+| audiobookshelf     | Success |
 | autoscan           | Success |
 | bazarr             | Success |
+| calibre            | Success |
 | code-server        | Success |
 | `Custom-app` Apps  | Success |
 | deluge             | Success |
@@ -56,23 +53,28 @@ Trucharts may change the way they handle databases for the arr apps in the futur
 | jellyfin           | Success |
 | jellyseerr         | Success |
 | Komga              | Success |
+| mkvcleaver         | Success |
 | mymediaforalexa    | Success |
 | mysql-workbench    | Success |
 | organizr           | Success |
 | overseerr          | Success |
 | phpldapadmin       | Success |
-| photoprism         | Failed  |
 | plex               | Success |
 | podgrab            | Success |
 | Prometheus         | Failed  |
-| prowlarr           | Failed  |
+| prowlarr           | Success |
 | qBittorrent        | Success |
-| radarr             | Failed  |
-| readarr            | Failed  |
+| radarr             | Success |
+| readarr            | Success |
+| recyclarr          | Success |
 | sabnzb             | Success |
+| scrutiny           | Success |
 | sonarr             | Success |
+| syncthing          | Success |
 | tautulli           | Success |
 | transmission       | Success |
+| unifi              | Success |
 | unpackerr          | Success |
 | uptime-kuma        | Success |
+
 

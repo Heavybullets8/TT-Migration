@@ -18,6 +18,10 @@ export script_path=$(dirname "$script")
 export script_name="migrate.sh"
 export args=("$@")
 skip=false
+script=$(readlink -f "$0")
+script_path=$(dirname "$script")
+script_name="migrate.sh"
+args=("$@")
 
 # source functions
 source check/check.sh
@@ -44,10 +48,12 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 
+
 main() {
     check_privileges
     prompt_app_name
     check_for_db_pods "${namespace}"
+
     find_apps_pool
     create_migration_dataset
 
