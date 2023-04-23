@@ -71,7 +71,7 @@ main() {
     echo
     get_pvc_info
     
-    if [[ "${rename}" = true ]]; then
+    if [[ "${rename}" = true || $skip == true ]]; then
         get_pvc_parent_path
     fi
     
