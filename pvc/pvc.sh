@@ -7,16 +7,17 @@ get_pvc_info() {
 
 rename_original_pvcs() {
     # Rename the app's PVCs
-    echo "Renaming the app's PVCs..."
+    echo -e "${bold}Renaming the app's PVCs...${reset}"
     while read -r line; do
         pvc_name=$(echo "${line}" | awk '{print $1}')
         volume_name=$(echo "${line}" | awk '{print $2}')
         old_pvc_name="$pvc_parent_path/${volume_name}"
         new_pvc_name="$migration_path/${pvc_name}"
         if zfs rename "${old_pvc_name}" "${new_pvc_name}"; then 
-            echo "Renamed ${old_pvc_name} to ${new_pvc_name}"
+            echo -e "Renamed ${blue}${old_pvc_name}${reset} to ${blue}${new_pvc_name}${reset}"
+            echo
         else
-            echo "Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}"
+            echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"
             exit 1
         fi
     done < <(echo "${pvc_info}")

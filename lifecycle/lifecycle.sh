@@ -21,11 +21,12 @@ stop_app_if_needed() {
 }
 
 delete_original_app() {
-    echo "Deleting the original app..."
+    echo -e "${bold}Deleting the original app...${reset}"
     if cli -c "app chart_release delete release_name=\"${appname}\""; then
-        echo "Success"
+        echo -e "${green}Success${reset}"
+        echo
     else
-        echo "Error: Failed to delete the old version of the app."
+        echo -e "${red}Error: Failed to delete the old version of the app.${reset}"
         exit 1
     fi
 }

@@ -53,7 +53,6 @@ main() {
     check_privileges
     prompt_app_name
     check_for_db_pods "${namespace}"
-
     find_apps_pool
     create_migration_dataset
 
@@ -66,23 +65,16 @@ main() {
     get_pvc_info
     check_pvc_count "original"
     get_pvc_parent_path
-    echo
 
     if [[ "${skip}" == false ]]; then
         stop_app_if_needed
-        echo
         rename_original_pvcs
-        echo
         delete_original_app
         prompt_rename
         check_for_new_app
     fi
     
-    echo
-
     stop_app_if_needed
-
-    echo
     get_pvc_info
     
     if [[ "${rename}" = true ]]; then
@@ -91,17 +83,8 @@ main() {
     
     check_pvc_count "new"
     destroy_new_apps_pvcs
-
-    echo
-
     rename_migration_pvcs
-
-    echo
-
     remove_migration_app_dataset
-
-    echo
-
     start_app "${appname}"
 }
 

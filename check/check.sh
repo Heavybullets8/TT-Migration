@@ -6,7 +6,7 @@ if [[ $(id -u) != 0 ]]; then
     echo -e "${red}This script must be run as root.${reset}" >&2
     echo -e "${red}Please run the following command:${reset}" >&2
     echo -e "${red}sudo bash migrate.sh${reset}" >&2
-    echo -e "${red}or run the script as the \"root\" user${reset}" >&2
+    echo -e "${red}or run the script as the ${blue}root${reset} user${reset}" >&2
     echo -e "${red}su root${reset}" >&2
 
     # Prompt the user to retry with sudo
@@ -37,8 +37,8 @@ check_for_db_pods() {
 check_if_app_exists() {
     local app_name=$1
     echo
-    echo "Checking if app exists..."
-    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -E "^${app_name}$"
+    echo -e "${bold}Checking if app exists...${reset}"
+    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
 }
 
 check_pvc_count() {
@@ -46,22 +46,22 @@ check_pvc_count() {
     # Check if there's more than one line or no lines, print an error message, and exit the script
     
     if [[ -z "$pvc_info" && $check_type == "original" ]]; then
-        echo "Error: No volume found. Please ensure that the application has at least one PVC."
+        echo -e "${red}Error: No volume found. Please ensure that the application has at least one PVC.${reset}"
         exit 1
     elif [[ -z "$pvc_info" && $check_type == "new" ]]; then
-        echo "Error: The new app does not appear to have any PVCs."
-        echo "If you previously ran this script for the same app, you may need to do the following:"
-        echo "    1. Delete the new app"
-        echo "    2. Download the new app's chart again with the same settings as the original"
-        echo "    3. Run this script again with ${blue}bash migrate.sh --skip${reset}"
+        echo -e "${red}Error: The new app does not appear to have any PVCs.${reset}"
+        echo -e "If you previously ran this script for the same app, you may need to do the following:"
+        echo -e "    1. Delete the new app"
+        echo -e "    2. Download the new app's chart again with the same settings as the original"
+        echo -e "    3. Run this script again with ${blue}bash migrate.sh --skip${reset}"
         exit 1
     fi
 }
 
 check_for_new_app() {
     # Keep asking to continue until app is found
-    echo "Please install the new version of the app from the catalog manually."
-    echo "Ensure you use ${blue}${appname}${reset} as the name."
+    echo -e "Please install the new version of the app from the catalog manually."
+    echo -e "Ensure you use ${blue}${appname}${reset} as the name."
     while true; do
         while true; do
             read -n1 -s -rp "Press 'x' to continue..." key
@@ -77,11 +77,11 @@ check_for_new_app() {
 
         # Check if the app exists
         if check_if_app_exists "${appname}"; then
-            echo "Found: ${appname}"
+            echo -e "${green}Found: ${blue}${appname}${reset}"
             break
         else
-            echo "App not found. Please install the new version of the app from the catalog manually."
-            echo "Ensure you use ${blue}${appname}${reset} as the name."
+            echo -e "App not found. Please install the new version of the app from the catalog manually."
+            echo -e "Ensure you use ${blue}${appname}${reset} as the name."
         fi
     done
 }

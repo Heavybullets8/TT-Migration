@@ -9,10 +9,11 @@ prompt_app_name() {
 
         # Check if the app exists
         if check_if_app_exists "${appname}"; then
-            echo "Found: ${appname}"
+            echo -e "${green}Found: ${blue}${appname}${reset}"
+            echo
             break
         else
-            echo "Error: App not found."
+            echo -e "${yellow}Error: App not found.${reset}"
         fi
     done
 }
@@ -28,24 +29,24 @@ prompt_create_backup() {
             echo -e "\nContinuing..."
             break
         else
-            echo -e "\nInvalid key. Please press 'x' to continue."
+            echo -e "${yellow}\nInvalid key. Please press 'x' to continue.${reset}"
         fi
     done
 }
 
 prompt_rename() {
     while true; do
-        read -n1 -s -rp "Do you want to rename the app? [y/N] " key
+        read -n1 -s -rp "Do you want to rename the app? [y/n] " key
         if [[ $key == "y" ]]; then
-            echo -e "\nRenaming..."
             rename_app
             rename=true
+            echo
             break
-        elif [[ $key == "N" || $key == "" ]]; then
-            echo -e "\nSkipping..."
+        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
+            echo
             break
         else
-            echo -e "\nInvalid key. Please press 'y' to rename the app or 'N' to skip."
+            echo -e "${yellow}\nInvalid key. Please press 'y' to rename the app or 'n' to skip.${reset}"
         fi
     done
 }
