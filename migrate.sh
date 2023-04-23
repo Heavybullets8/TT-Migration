@@ -11,6 +11,7 @@ export gray='\033[38;5;7m'
 export namespace
 export appname
 export ix_apps_pool
+export rename=false
 skip=false
 
 # source functions
@@ -62,13 +63,18 @@ main() {
 
     prompt_rename
     check_for_new_app
-
+    
     echo
 
     stop_app_if_needed
 
     echo
     get_pvc_info
+    
+    if [[ "${rename}" = true ]]; then
+        get_pvc_parent_path
+    fi
+    
     check_pvc_count "new"
     destroy_new_apps_pvcs
 

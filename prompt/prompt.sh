@@ -39,6 +39,7 @@ prompt_rename() {
         if [[ $key == "y" ]]; then
             echo -e "\nRenaming..."
             rename_app
+            rename=true
             break
         elif [[ $key == "N" || $key == "" ]]; then
             echo -e "\nSkipping..."
