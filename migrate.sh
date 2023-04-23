@@ -13,7 +13,6 @@ export appname
 export ix_apps_pool
 export migration_path
 export rename=false
-export different_migration=false
 skip=false
 
 # source functions
@@ -42,18 +41,12 @@ done
 
 
 main() {
-    if [[ "${skip}" == true ]]; then
-        if prompt_if_renamed; then
-            different_migration=true
-        fi
-    fi
-
     prompt_app_name
     check_for_db_pods "${namespace}"
     find_apps_pool
     create_migration_dataset
 
-    if [[ "${different_migration}" == true ]]; then
+    if [[ "${skip}" == true ]]; then
         prompt_migration_path
     else
         create_app_dataset

@@ -58,19 +58,6 @@ rename_app() {
     namespace="ix-${appname}"
 }
 
-prompt_if_renamed(){
-    # ask the user if the app was renamed
-    read -r -p "Was the app renamed? [y/N] " response
-    case "$response" in
-        [yY][eE][sS]|[yY])
-            return 0
-            ;;
-        *)
-            return 1
-            ;;
-    esac
-}
-
 prompt_migration_path() {
     # Create a list of datasets within migration
     app_list=$(zfs list -H -o name -r speed/migration | grep -E "speed/migration/.*" | awk -F/ '{print $3}' | sort | uniq)
