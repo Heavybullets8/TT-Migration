@@ -57,3 +57,49 @@ rename_app() {
     appname="${new_appname}"
     namespace="ix-${appname}"
 }
+
+prompt_if_renamed(){
+    # ask the user if the app was renamed
+    read -r -p "Was the app renamed? [y/N] " response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+prompt_migration_path() {
+    # Create a list of datasets within migration
+    app_list=$(zfs list -H -o name -r speed/migration | grep -E "speed/migration/.*" | awk -F/ '{print $3}' | sort | uniq)
+
+    # Check if there are any datasets and exit if there are none
+    if [ -z "${app_list}" ]; then
+        echo "No datasets found within migration."
+        exit 1
+    fi
+
+    # Present the list of datasets to the user with number options
+    echo "Select your original app name:"
+    apps_array=()
+    i=1
+    for app in $app_list; do
+        echo "${i}) ${app}"
+        apps_array+=("${app}")
+        i=$((i+1))
+    done
+
+    # Loop until the user makes a valid choice
+    while true; do
+        read -r -p "Enter the number associated with the app: " choice
+        if [[ "${choice}" =~ ^[0-9]+$ ]] && [ "${choice}" -ge 1 ] && [ "${choice}" -le "${#apps_array[@]}" ]; then
+            migration_path="$ix_apps_pool/migration/${apps_array[$((choice-1))]}"
+            echo "You have chosen ${migration_path}"
+            break
+        else
+            echo "Invalid choice. Please enter a valid number."
+        fi
+    done
+}
