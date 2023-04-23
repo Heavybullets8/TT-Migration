@@ -82,6 +82,10 @@ main() {
 
     echo
 
+    remove_migration_app_dataset
+
+    echo
+
     start_app "${appname}"
 }
 

@@ -145,3 +145,13 @@ find_most_similar_pvc() {
     done
     echo "$most_similar_volume"
 }
+
+remove_migration_app_dataset() {
+    echo "Removing the migration app dataset..."
+    if zfs destroy -r "$migration_path"; then
+        echo "Removed $migration_path"
+    else
+        echo "Error: Failed to remove $migration_path"
+        exit 1
+    fi
+}
