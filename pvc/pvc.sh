@@ -30,7 +30,7 @@ rename_migration_pvcs() {
     migration_pvcs=()
 
     # Get the list of migration PVCs
-    migration_pvcs_info=$(zfs list -r "$migration_path" | awk '{print $1}')
+    migration_pvcs_info=$(zfs list -r "$migration_path" | grep -v "${migration_path}$" | awk 'NR>1 {print $1}')
 
     # Read the migration_pvcs_info line by line and store the migration PVCs in the migration_pvcs array
     while read -r line; do
