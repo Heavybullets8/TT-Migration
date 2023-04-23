@@ -1,13 +1,13 @@
 #!/bin/bash
 
 stop_app_if_needed() {
+    echo -e "${bold}Stopping the app...${reset}"
     # Stop application if not stopped
     status=$(cli -m csv -c 'app chart_release query name,status' | 
                 grep "^$appname," | 
                 awk -F ',' '{print $2}'| 
                 sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     if [[ "$status" != "STOPPED" ]]; then
-        echo -e "Stopping ${blue}$appname${reset}"
         stop_app "$appname"
         result=$(handle_stop_code "$?")
         if [[ $? -eq 1 ]]; then

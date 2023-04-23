@@ -23,8 +23,7 @@ start_app(){
         exit
     fi
 
-    echo -e "Starting ${blue}$app_name${reset}..."
-
+    echo -e "${bold}Starting app...${reset}"
 
     # Check for cnpg pods and scale the application
     cnpg=$(k3s kubectl get pods -n ix-"$app_name" -o=name | grep -q -- '-cnpg-' && echo "true" || echo "false")
@@ -36,8 +35,7 @@ start_app(){
         echo -e "${yellow}However, HeavyScript cannot monitor the new applications${reset}"
         echo -e "${yellow}with the new postgres backend to ensure it worked..${reset}"
     elif cli -c 'app chart_release scale release_name='\""$app_name"\"\ 'scale_options={"replica_count": '"$replica_count}" &> /dev/null; then
-        echo -e "${blue}$app_name ${green}Started${reset}"
-        echo -e "${green}Replica count set to ${blue}$replica_count${reset}"
+        echo -e "${green}Started with replica count ${blue}$replica_count${reset}"
     else
         echo -e "${red}Failed to start ${blue}$app_name${reset}"
     fi
