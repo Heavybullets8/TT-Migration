@@ -25,7 +25,6 @@ create_app_dataset() {
     if ! zfs list "$path" >/dev/null 2>&1; then
         echo -e "${bold}Creating app dataset...${reset}"
         if zfs create "$path"; then
-            migration_path=$path
             echo -e "${green}Dataset created: ${blue}$path${reset}"
             echo
         else
@@ -33,4 +32,5 @@ create_app_dataset() {
             exit 1
         fi
     fi
+    migration_path=$path
 }
