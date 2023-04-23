@@ -38,9 +38,9 @@ prompt_rename() {
     while true; do
         read -n1 -s -rp "Do you want to rename the app? [y/n] " key
         if [[ $key == "y" ]]; then
+            echo
             rename_app
             rename=true
-            echo
             break
         elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
             echo
