@@ -36,7 +36,6 @@ check_for_db_pods() {
 # Function to check if the app exists
 check_if_app_exists() {
     local app_name=$1
-    echo
     echo -e "${bold}Checking if app exists...${reset}"
     cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
 }
@@ -73,11 +72,10 @@ check_for_new_app() {
             fi
         done
 
-        echo
-
         # Check if the app exists
         if check_if_app_exists "${appname}"; then
             echo -e "${green}Found: ${blue}${appname}${reset}"
+            echo
             break
         else
             echo -e "App not found. Please install the new version of the app from the catalog manually."

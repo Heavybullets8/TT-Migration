@@ -14,7 +14,7 @@ rename_original_pvcs() {
         old_pvc_name="$pvc_parent_path/${volume_name}"
         new_pvc_name="$migration_path/${pvc_name}"
         if zfs rename "${old_pvc_name}" "${new_pvc_name}"; then 
-            echo -e "Renamed ${blue}${old_pvc_name}${reset} to ${blue}${new_pvc_name}${reset}"
+            echo -e "${green}Renamed ${blue}${old_pvc_name}${reset} to ${blue}${new_pvc_name}${reset}"
         else
             echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"
             exit 1
@@ -47,7 +47,7 @@ rename_migration_pvcs() {
     for original_pvc in "${migration_pvcs[@]}"; do
         most_similar_pvc=$(find_most_similar_pvc "$original_pvc")
         if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
-            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${green}$pvc_parent_path/${most_similar_pvc}${reset}"
+            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset}"
         else
             echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset}"
             exit 1
