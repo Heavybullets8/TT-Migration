@@ -15,12 +15,12 @@ rename_original_pvcs() {
         new_pvc_name="$migration_path/${pvc_name}"
         if zfs rename "${old_pvc_name}" "${new_pvc_name}"; then 
             echo -e "Renamed ${blue}${old_pvc_name}${reset} to ${blue}${new_pvc_name}${reset}"
-            echo
         else
             echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"
             exit 1
         fi
     done < <(echo "${pvc_info}")
+    echo
 }
 
 
