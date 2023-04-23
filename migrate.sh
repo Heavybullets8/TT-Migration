@@ -48,7 +48,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 
-
+# TODO: 1. create the datasets only if PV's were found for the app
+#       2. Remove check_pvc_count and instead check if PV's exist with get_pvc_info
+#       3. Create a function to cleanup empty datasets on successful migration
+#       4. Also remove the migration dataset if no child datasets exist within it
 main() {
     check_privileges
     prompt_app_name
