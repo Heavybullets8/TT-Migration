@@ -12,7 +12,7 @@ rename_original_pvcs() {
         pvc_name=$(echo "${line}" | awk '{print $1}')
         volume_name=$(echo "${line}" | awk '{print $2}')
         old_pvc_name="$pvc_parent_path/${volume_name}"
-        new_pvc_name="${ix_apps_pool}/migration/${pvc_name}"
+        new_pvc_name="$migration_path/${pvc_name}"
         if zfs rename "${old_pvc_name}" "${new_pvc_name}"; then 
             echo "Renamed ${old_pvc_name} to ${new_pvc_name}"
         else
@@ -29,7 +29,7 @@ rename_migration_pvcs() {
     migration_pvcs=()
 
     # Get the list of migration PVCs
-    migration_pvcs_info=$(zfs list -r "${ix_apps_pool}/migration" | awk '{print $1}')
+    migration_pvcs_info=$(zfs list -r "${ix_apps_pool}/migration" | grep "${appname}" | awk '{print $1}')
 
     # Read the migration_pvcs_info line by line and store the migration PVCs in the migration_pvcs array
     while read -r line; do
@@ -42,12 +42,12 @@ rename_migration_pvcs() {
         exit 1
     fi
 
-    for old_pvc in "${migration_pvcs[@]}"; do
-        most_similar_pvc=$(find_most_similar_pvc "$old_pvc")
-        if zfs rename "${ix_apps_pool}/migration/${old_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
-            echo "Renamed ${ix_apps_pool}/migration/${old_pvc} to $pvc_parent_path/${most_similar_pvc}"
+    for original_pvc in "${migration_pvcs[@]}"; do
+        most_similar_pvc=$(find_most_similar_pvc "$original_pvc")
+        if zfs rename "$migration_path${original_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
+            echo "Renamed $migration_path/${original_pvc} to $pvc_parent_path/${most_similar_pvc}"
         else
-            echo "Error: Failed to rename ${ix_apps_pool}/migration/${old_pvc} to $pvc_parent_path/${most_similar_pvc}"
+            echo "Error: Failed to rename $migration_path/${original_pvc} to $pvc_parent_path/${most_similar_pvc}"
             exit 1
         fi
     done

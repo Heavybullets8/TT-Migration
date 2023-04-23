@@ -11,6 +11,7 @@ export gray='\033[38;5;7m'
 export namespace
 export appname
 export ix_apps_pool
+export migration_path
 export rename=false
 skip=false
 
@@ -39,13 +40,12 @@ done
 
 
 main() {
-    find_apps_pool
-    check_migration_dataset
-
-    echo
-
     prompt_app_name
     check_for_db_pods "${namespace}"
+    find_apps_pool
+    check_migration_dataset
+    create_app_dataset
+
     get_pvc_info
     check_pvc_count "original"
     get_pvc_parent_path

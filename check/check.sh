@@ -1,18 +1,5 @@
 #!/bin/bash
 
-check_migration_dataset() {
-    # Check if the migration dataset exists, and create it if it doesn't
-    if ! zfs list "${ix_apps_pool}/migration" >/dev/null 2>&1; then
-        echo "Creating migration dataset..."
-        if zfs create "${ix_apps_pool}/migration"; then
-            echo "Dataset created: ${ix_apps_pool}/migration"
-            echo
-        else
-            echo "Error: Failed to create migration dataset."
-            exit 1
-        fi
-    fi
-}
 
 # Check if namespace has any database pods
 check_for_db_pods() {
