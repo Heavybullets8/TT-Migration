@@ -9,9 +9,9 @@ blue='\033[0;34m'
 bold='\033[1m'
 gray='\033[38;5;7m'
 
-source stop_app.sh
-source start_app.sh
-source allowed.sh
+source functions/stop_app.sh
+source functions/start_app.sh
+source functions/allowed.sh
 
 dry_run=0
 skip=false
