@@ -25,7 +25,7 @@ rename_original_pvcs() {
 
 
 rename_migration_pvcs() {
-    echo "Renaming the migration PVCs to the new app's PVC names..."
+    echo -e "${bold}Renaming the migration PVCs to the new app's PVC names...${reset}"
 
     # Create an array to store the migration PVCs
     migration_pvcs=()
@@ -47,9 +47,9 @@ rename_migration_pvcs() {
     for original_pvc in "${migration_pvcs[@]}"; do
         most_similar_pvc=$(find_most_similar_pvc "$original_pvc")
         if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
-            echo "Renamed $migration_path/${original_pvc} to $pvc_parent_path/${most_similar_pvc}"
+            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${green}$pvc_parent_path/${most_similar_pvc}${reset}"
         else
-            echo "Error: Failed to rename $migration_path/${original_pvc} to $pvc_parent_path/${most_similar_pvc}"
+            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset}"
             exit 1
         fi
     done
@@ -58,7 +58,7 @@ rename_migration_pvcs() {
 }
 
 destroy_new_apps_pvcs() {
-    echo "Destroying the new app's PVCs..."
+    echo -e "${bold}Destroying the new app's PVCs...${reset}"
 
     # Create an array to store the new PVCs
     new_pvcs=()
@@ -70,7 +70,7 @@ destroy_new_apps_pvcs() {
     done < <(echo "${pvc_info}")
 
     if [ ${#new_pvcs[@]} -eq 0 ]; then
-        echo "Error: No new PVCs found."
+        echo -e "${red}Error: No new PVCs found.${reset}"
         exit 1
     fi
 
@@ -85,18 +85,18 @@ destroy_new_apps_pvcs() {
 
         while ! $success && [ $attempt_count -lt $max_attempts ]; do
             if output=$(zfs destroy "${to_delete}"); then
-                echo "Destroyed ${to_delete}"
+                echo -e "${green}Destroyed ${blue}${to_delete}${reset}"
                 success=true
             else
                 if echo "$output" | grep -q "dataset is busy" && [ $attempt_count -eq 0 ]; then
-                    echo "Dataset is busy, restarting middlewared and retrying..."
+                    echo -e "${yellow}Dataset is busy, restarting middlewared and retrying...${green}"
                     systemctl restart middlewared
                     sleep 5
                     stop_app_if_needed "$appname"
                     sleep 5
                 else
-                    echo "Error: Failed to destroy ${to_delete}"
-                    echo "Error message: $output"
+                    echo "${red}Error: Failed to destroy ${blue}${to_delete}${reset}"
+                    echo "${red}Error message: ${reset}$output"
                     exit 1
                 fi
             fi
@@ -113,7 +113,7 @@ get_pvc_parent_path() {
     pvc_path=$(zfs list -r "${ix_apps_pool}/ix-applications" -o name -H | grep "${volume_name}")
 
     if [ -z "${pvc_path}" ]; then
-        echo "PVC not found"
+        echo -e "${red}PVC not found${reset}"
         exit 1
     fi
 
@@ -148,11 +148,12 @@ find_most_similar_pvc() {
 }
 
 remove_migration_app_dataset() {
-    echo "Removing the migration app dataset..."
+    echo -e "${bold}Removing the migration app dataset...${reset}"
     if zfs destroy -r "$migration_path"; then
-        echo "Removed $migration_path"
+        echo -e "${green}Removed ${blue}$migration_path${reset}"
+        echo
     else
-        echo "Error: Failed to remove $migration_path"
+        echo "${red}Error: Failed to remove ${blue}$migration_path${reset}"
         exit 1
     fi
 }
