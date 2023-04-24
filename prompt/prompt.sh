@@ -63,7 +63,7 @@ rename_app() {
 
 prompt_migration_path() {
     # Create a list of datasets within migration
-    app_list=$(zfs list -H -o name -r speed/migration | grep -E "speed/migration/.*" | awk -F/ '{print $3}' | sort | uniq)
+    app_list=$(zfs list -H -o name -r "$ix_apps_pool/migration" | grep -E "$ix_apps_pool/migration/.*" | awk -F/ '{print $3}' | sort | uniq)
 
     # Check if there are any datasets and exit if there are none
     if [ -z "${app_list}" ]; then
