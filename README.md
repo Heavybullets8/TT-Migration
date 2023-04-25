@@ -57,6 +57,7 @@ The script will check to see if these databases exist prior to accepting them fo
 | mymediaforalexa    | Success |
 | mysql-workbench    | Success |
 | organizr           | Success |
+| omada-controller   | Success |
 | overseerr          | Success |
 | phpldapadmin       | Success |
 | plex               | Success |
