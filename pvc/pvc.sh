@@ -248,13 +248,50 @@ find_most_similar_pvc() {
     echo "$most_similar_volume"
 }
 
-remove_migration_app_dataset() {
-    echo -e "${bold}Removing the migration app dataset...${reset}"
-    if zfs destroy -r "$migration_path"; then
-        echo -e "${green}Removed ${blue}$migration_path${reset}"
+cleanup_datasets() {
+    local child_datasets datasets_to_remove should_display_message is_empty
+    local datasets_to_remove=()
+
+    while IFS= read -r child_dataset; do
+        is_empty=true
+        while IFS= read -r grandchild_dataset; do
+            is_empty=false
+            break
+        done < <(zfs list -H -d 1 -o name -t filesystem "$child_dataset" 2>/dev/null)
+
+        if [ "$is_empty" = true ]; then
+            datasets_to_remove+=("$child_dataset")
+        fi
+    done < <(zfs list -H -d 1 -o name -t filesystem "$migration_path" 2>/dev/null)
+
+    should_display_message=false
+    if [ ${#datasets_to_remove[@]} -gt 0 ]; then
+        echo -e "${bold}Cleaning up...${reset}"
+        should_display_message=true
+    fi
+
+    # Remove empty datasets
+    if [ ${#datasets_to_remove[@]} -gt 0 ]; then
+        for dataset in "${datasets_to_remove[@]}"; do
+            if zfs destroy "$dataset"; then
+                echo -e "${green}Removed empty dataset: ${blue}$dataset${reset}"
+            else
+                echo -e "${red}Error: Failed to remove empty dataset: ${blue}$dataset${reset}"
+            fi
+        done
+    fi
+
+    # Remove migration dataset if it has no child datasets
+    if [ -z "$(zfs list -r -H -o name -t filesystem "$migration_path" 2>/dev/null)" ]; then
+        echo -e "Removing migration dataset as it has no child datasets..."
+        if zfs destroy "$migration_path"; then
+            echo -e "${green}Removed migration dataset: ${blue}$migration_path${reset}"
+        else
+            echo -e "${red}Error: Failed to remove migration dataset: ${blue}$migration_path${reset}"
+        fi
+    fi
+
+    if [ "$should_display_message" = true ]; then
         echo
-    else
-        echo "${red}Error: Failed to remove ${blue}$migration_path${reset}"
-        exit 1
     fi
 }
