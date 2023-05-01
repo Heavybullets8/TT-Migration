@@ -86,9 +86,7 @@ main() {
     
     destroy_new_apps_pvcs
     rename_migration_pvcs
-    cleanup_empty_datasets
-    remove_migration_dataset_if_empty
-    remove_migration_app_dataset
+    cleanup_datasets
     start_app "${appname}"
 }
 
