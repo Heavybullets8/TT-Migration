@@ -22,8 +22,8 @@ get_pvc_info() {
 rename_original_pvcs() {
     # Rename the app's PVCs
     echo -e "${bold}Renaming the app's PVCs...${reset}"
-    mount_path_file="$migration_path/mount_paths.txt"
-    true > "/mnt/$mount_path_file"
+    mount_path_file="/mnt/$migration_path/mount_paths.txt"
+    true > "$mount_path_file"
     for line in "${pvc_info[@]}"; do
         pvc_name=$(echo "${line}" | awk '{print $1}')
         volume_name=$(echo "${line}" | awk '{print $2}')
