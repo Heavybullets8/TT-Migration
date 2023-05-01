@@ -44,20 +44,16 @@ rename_original_pvcs() {
 rename_migration_pvcs() {
     echo -e "${bold}Renaming the migration PVCs to the new app's PVC names...${reset}"
 
-    # Create an array to store the migration PVCs
-    migration_pvcs=()
+    # Create an array to store the original PVC info
+    original_pvc_info=()
 
-    # Get the list of migration PVCs
-    migration_pvcs_info=$(zfs list -r "$migration_path" | grep -v "${migration_path}$" | awk 'NR>1 {print $1}')
+    # Read the mount_paths.txt file and store the original PVC info in the original_pvc_info array
+    while IFS= read -r line; do
+        original_pvc_info+=("${line}")
+    done < "/mnt/$migration_path/mount_paths.txt"
 
-    # Read the migration_pvcs_info line by line and store the migration PVCs in the migration_pvcs array
-    while read -r line; do
-        pvc_name=$(basename "${line}")
-        migration_pvcs+=("${pvc_name}")
-    done < <(echo "${migration_pvcs_info}")
-
-    if [ ${#migration_pvcs[@]} -eq 0 ]; then
-        echo "Error: No migration PVCs found."
+    if [ ${#original_pvc_info[@]} -eq 0 ]; then
+        echo "Error: No original PVCs found."
         exit 1
     fi
 
@@ -70,7 +66,7 @@ rename_migration_pvcs() {
     fi
 
     # Match the remaining single PVC pair
-    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#pvc_info[@]} -eq 1 ]; then
+    if [ ${#original_pvc_info[@]} -eq 1 ] && [ ${#pvc_info[@]} -eq 1 ]; then
         match_remaining_single_pvc_pair
         return
     fi
@@ -82,10 +78,9 @@ rename_migration_pvcs() {
 }
 
 match_pvcs_with_mountpoints() {
-    mount_path_file="/mnt/$migration_path/mount_paths.txt"
-    while IFS= read -r line; do
-        original_pvc=$(echo "${line}" | awk '{print $1}')
-        original_mount_path=$(echo "${line}" | awk '{print $3}')
+    for original_pvc_line in "${original_pvc_info[@]}"; do
+        original_pvc=$(echo "${original_pvc_line}" | awk '{print $1}')
+        original_mount_path=$(echo "${original_pvc_line}" | awk '{print $3}')
 
         for index in "${!pvc_info[@]}"; do
             new_pvc_info="${pvc_info[index]}"
@@ -101,21 +96,21 @@ match_pvcs_with_mountpoints() {
                     exit 1
                 fi
                 # Remove the matched PVCs from the arrays
-                unset "migration_pvcs[index]"
+                unset "original_pvc_info[index]"
                 unset "pvc_info[index]"
                 break
             fi
         done
-    done < "$mount_path_file"
+    done
 
     # Rebuild the arrays
-    migration_pvcs=("${migration_pvcs[@]}")
+    original_pvc_info=("${original_pvc_info[@]}")
     pvc_info=("${pvc_info[@]}")
 }
 
 match_remaining_single_pvc_pair() {
-    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#pvc_info[@]} -eq 1 ]; then
-        original_pvc="${migration_pvcs[0]}"
+    if [ ${#original_pvc_info[@]} -eq 1 ] && [ ${#pvc_info[@]} -eq 1 ]; then
+        original_pvc=$(echo "${original_pvc_info[0]}" | awk '{print $1}')
         new_pvc_info="${pvc_info[0]}"
         new_pvc=$(echo "${new_pvc_info}" | awk '{print $1}')
         new_volume=$(echo "${new_pvc_info}" | awk '{print $2}')
@@ -129,7 +124,8 @@ match_remaining_single_pvc_pair() {
 }
 
 match_remaining_pvcs_by_name() {
-    for original_pvc in "${migration_pvcs[@]}"; do
+    for original_pvc_info in "${original_pvc_info[@]}"; do
+        original_pvc=$(echo "${original_pvc_info}" | awk '{print $1}')
         most_similar_volume=$(find_most_similar_pvc "$original_pvc")
         if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${most_similar_volume}"; then
             echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_volume}${reset} (matched by name similarity)"
