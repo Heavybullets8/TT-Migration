@@ -249,9 +249,10 @@ find_most_similar_pvc() {
 }
 
 cleanup_datasets() {
+    local base_path="${ix_apps_pool}/migration"
     local child_dataset datasets_to_remove base_name
 
-    base_name="$migration_path"
+    base_name="$base_path"
 
     # List child datasets
     while IFS= read -r child_dataset; do
@@ -259,7 +260,7 @@ cleanup_datasets() {
         if ! zfs list -H -d 1 -o name -t filesystem -r "$child_dataset" 2>/dev/null | grep -q -v "^${child_dataset}$"; then
             datasets_to_remove+=("$child_dataset")
         fi
-    done < <(zfs list -H -d 1 -o name -t filesystem -r "$migration_path" 2>/dev/null | grep -v "^${base_name}$")
+    done < <(zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -v "^${base_name}$")
 
     # Remove child datasets without grandchild datasets
     if [ ${#datasets_to_remove[@]} -gt 0 ]; then
@@ -274,13 +275,14 @@ cleanup_datasets() {
         echo
     fi
 
-    # Remove migration dataset if it has no child datasets
-    if ! zfs list -H -d 1 -o name -t filesystem -r "$migration_path" 2>/dev/null | grep -q -v "^${base_name}$" ; then
-        echo -e "Removing migration dataset as it has no child datasets..."
-        if zfs destroy "$migration_path"; then
-            echo -e "${green}Removed migration dataset: ${blue}$migration_path${reset}"
+    # Remove base_path dataset if it has no child datasets
+    if ! zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -q -v "^${base_name}$"; then
+        echo -e "Removing base path dataset as it has no child datasets..."
+        if zfs destroy "$base_path"; then
+            echo -e "${green}Removed base path dataset: ${blue}$base_path${reset}"
         else
-            echo -e "${red}Error: Failed to remove migration dataset: ${blue}$migration_path${reset}"
+            echo -e "${red}Error: Failed to remove base path dataset: ${blue}$base_path${reset}"
         fi
+        echo
     fi
 }
