@@ -3,7 +3,6 @@
 get_pvc_info() {
     local pods
     pods=$(k3s kubectl get pods -n "$namespace" -o jsonpath='{.items[*].metadata.name}')
-    local pvc_info=()
 
     # Loop over all pods
     for pod in $pods; do
