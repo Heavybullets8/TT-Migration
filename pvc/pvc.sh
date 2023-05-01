@@ -166,8 +166,8 @@ destroy_new_apps_pvcs() {
                     stop_app_if_needed "$appname"
                     sleep 5
                 else
-                    echo "${red}Error: Failed to destroy ${blue}${to_delete}${reset}"
-                    echo "${red}Error message: ${reset}$output"
+                    echo -e "${red}Error: Failed to destroy ${blue}${to_delete}${reset}"
+                    echo -e "${red}Error message: ${reset}$output"
                     exit 1
                 fi
             fi

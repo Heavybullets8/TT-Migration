@@ -80,6 +80,7 @@ main() {
     fi
     
     stop_app_if_needed
+    unset pvc_info
     get_pvc_info
     
     if [[ "${rename}" = true ]]; then
