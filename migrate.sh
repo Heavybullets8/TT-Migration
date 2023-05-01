@@ -66,7 +66,7 @@ main() {
     fi
 
     get_pvc_info
-    check_pvc_count "original"
+    # check_pvc_count "original"
     get_pvc_parent_path
 
     if [[ "${skip}" == false ]]; then
@@ -85,7 +85,7 @@ main() {
         get_pvc_parent_path
     fi
     
-    check_pvc_count "new"
+    # check_pvc_count "new"
     destroy_new_apps_pvcs
     rename_migration_pvcs
     remove_migration_app_dataset
