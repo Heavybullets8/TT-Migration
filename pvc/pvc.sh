@@ -61,24 +61,16 @@ rename_migration_pvcs() {
         exit 1
     fi
 
-    # Create an associative array to store the new PVCs and their mount paths
-    declare -A new_pvcs_mount_paths
-    for line in "${pvc_info[@]}"; do
-        pvc_name=$(echo "${line}" | awk '{print $1}')
-        mount_path=$(echo "${line}" | awk '{print $3}')
-        new_pvcs_mount_paths["$pvc_name"]="$mount_path"
-    done
-
     # Match PVCs with the same mount points
     match_pvcs_with_mountpoints
 
-    if [ ${#new_pvcs_mount_paths[@]} -eq 0 ]; then
+    if [ ${#pvc_info[@]} -eq 0 ]; then
         echo
         return
     fi
 
     # Match the remaining single PVC pair
-    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#new_pvcs_mount_paths[@]} -eq 1 ]; then
+    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#pvc_info[@]} -eq 1 ]; then
         match_remaining_single_pvc_pair
         return
     fi
@@ -95,9 +87,12 @@ match_pvcs_with_mountpoints() {
         original_pvc=$(echo "${line}" | awk '{print $1}')
         original_mount_path=$(echo "${line}" | awk '{print $3}')
 
-        for new_pvc in "${!new_pvcs_mount_paths[@]}"; do
-            if [ "${new_pvcs_mount_paths[$new_pvc]}" == "$original_mount_path" ]; then
-                new_volume=$(echo "$pvc_data" | jq -r --arg pvc_name "$new_pvc" '.items[] | select(.metadata.name == $pvc_name) | .spec.volumeName')
+        for new_pvc_info in "${pvc_info[@]}"; do
+            new_pvc=$(echo "${new_pvc_info}" | awk '{print $1}')
+            new_mount_path=$(echo "${new_pvc_info}" | awk '{print $3}')
+
+            if [ "$new_mount_path" == "$original_mount_path" ]; then
+                new_volume=$(echo "${new_pvc_info}" | awk '{print $2}')
                 if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${new_volume}"; then
                     echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_volume}${reset} (matched by mount point)"
                 else
@@ -106,7 +101,7 @@ match_pvcs_with_mountpoints() {
                 fi
                 # Remove the matched PVCs from the arrays
                 migration_pvcs=("${migration_pvcs[@]/$original_pvc}")
-                unset "new_pvcs_mount_paths[$new_pvc]"
+                pvc_info=("${pvc_info[@]/$new_pvc_info}")
                 break
             fi
         done
@@ -114,13 +109,15 @@ match_pvcs_with_mountpoints() {
 }
 
 match_remaining_single_pvc_pair() {
-    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#new_pvcs_mount_paths[@]} -eq 1 ]; then
+    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#pvc_info[@]} -eq 1 ]; then
         original_pvc="${migration_pvcs[0]}"
-        new_pvc="${!new_pvcs_mount_paths[@]}"
-        if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${new_pvc}"; then
-            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_pvc}${reset} (single pair left)"
+        new_pvc_info="${pvc_info[0]}"
+        new_pvc=$(echo "${new_pvc_info}" | awk '{print $1}')
+        new_volume=$(echo "${new_pvc_info}" | awk '{print $2}')
+        if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${new_volume}"; then
+            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_volume}${reset} (single pair left)"
         else
-            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_pvc}${reset}"
+            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_volume}${reset}"
             exit 1
         fi
     fi
@@ -128,11 +125,11 @@ match_remaining_single_pvc_pair() {
 
 match_remaining_pvcs_by_name() {
     for original_pvc in "${migration_pvcs[@]}"; do
-        most_similar_pvc=$(find_most_similar_pvc "$original_pvc")
-        if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
-            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset} (matched by name similarity)"
+        most_similar_volume=$(find_most_similar_pvc "$original_pvc")
+        if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${most_similar_volume}"; then
+            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_volume}${reset} (matched by name similarity)"
         else
-            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset}"
+            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_volume}${reset}"
             exit 1
         fi
     done
