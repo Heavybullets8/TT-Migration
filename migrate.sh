@@ -54,19 +54,16 @@ main() {
     check_privileges
     prompt_app_name
     check_for_db_pods "${namespace}"
+    get_pvc_info
+    check_pvc_info_empty
     find_apps_pool
+    create_migration_dataset
+    get_pvc_parent_path
+
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
     else
         create_app_dataset
-    fi
-
-    get_pvc_info
-    check_pvc_info_empty
-    get_pvc_parent_path
-    create_migration_dataset
-
-    if [[ "${skip}" == false ]]; then
         stop_app_if_needed
         prompt_create_backup
         rename_original_pvcs
