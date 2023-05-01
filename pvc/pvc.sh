@@ -249,8 +249,9 @@ find_most_similar_pvc() {
 }
 
 cleanup_datasets() {
-    local child_datasets datasets_to_remove should_display_message is_empty
-    local datasets_to_remove=()
+    local child_datasets datasets_to_remove should_display_message is_empty base_name
+
+    base_name="$migration_path"
 
     while IFS= read -r child_dataset; do
         is_empty=true
@@ -262,7 +263,7 @@ cleanup_datasets() {
         if [ "$is_empty" = true ]; then
             datasets_to_remove+=("$child_dataset")
         fi
-    done < <(zfs list -H -d 1 -o name -t filesystem "$migration_path" 2>/dev/null)
+    done < <(zfs list -H -d 1 -o name -t filesystem "$migration_path" 2>/dev/null | grep -v "^${base_name}$")
 
     should_display_message=false
     if [ ${#datasets_to_remove[@]} -gt 0 ]; then
