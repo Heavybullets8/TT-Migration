@@ -22,6 +22,8 @@ script=$(readlink -f "$0")
 script_path=$(dirname "$script")
 script_name="migrate.sh"
 args=("$@")
+export pvc_info=()
+
 
 # source functions
 source check/check.sh
@@ -48,17 +50,11 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 
-# TODO: 1. create the datasets only if PV's were found for the app
-#       2. Remove check_pvc_count and instead check if PV's exist with get_pvc_info
-#       3. Create a function to cleanup empty datasets on successful migration
-#       4. Also remove the migration dataset if no child datasets exist within it
 main() {
     check_privileges
     prompt_app_name
     check_for_db_pods "${namespace}"
     find_apps_pool
-    create_migration_dataset
-
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
     else
@@ -66,8 +62,9 @@ main() {
     fi
 
     get_pvc_info
-    check_pvc_count "original"
+    check_pvc_info_empty
     get_pvc_parent_path
+    create_migration_dataset
 
     if [[ "${skip}" == false ]]; then
         stop_app_if_needed
@@ -79,16 +76,17 @@ main() {
     fi
     
     stop_app_if_needed
+    unset pvc_info
     get_pvc_info
+    check_pvc_info_empty
     
     if [[ "${rename}" = true ]]; then
         get_pvc_parent_path
     fi
     
-    check_pvc_count "new"
     destroy_new_apps_pvcs
     rename_migration_pvcs
-    remove_migration_app_dataset
+    cleanup_datasets
     start_app "${appname}"
 }
 
