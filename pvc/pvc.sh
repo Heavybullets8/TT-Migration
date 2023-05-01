@@ -93,10 +93,10 @@ match_pvcs_with_mountpoints() {
     mount_path_file="/mnt/$migration_path/mount_paths.txt"
     while IFS= read -r line; do
         original_pvc=$(echo "${line}" | awk '{print $1}')
-        mount_path=$(echo "${line}" | awk '{print $3}')
+        original_mount_path=$(echo "${line}" | awk '{print $3}')
 
         for new_pvc in "${!new_pvcs_mount_paths[@]}"; do
-            if [ "${new_pvcs_mount_paths[$new_pvc]}" == "$mount_path" ]; then
+            if [ "${new_pvcs_mount_paths[$new_pvc]}" == "$original_mount_path" ]; then
                 new_volume=$(echo "$pvc_data" | jq -r --arg pvc_name "$new_pvc" '.items[] | select(.metadata.name == $pvc_name) | .spec.volumeName')
                 if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${new_volume}"; then
                     echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_volume}${reset} (matched by mount point)"
