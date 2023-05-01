@@ -85,9 +85,13 @@ rename_migration_pvcs() {
 }
 
 match_pvcs_with_mountpoints() {
-    for original_pvc in "${migration_pvcs[@]}"; do
+    mount_path_file="/mnt/$migration_path/mount_paths.txt"
+    while IFS= read -r line; do
+        original_pvc=$(echo "${line}" | awk '{print $1}')
+        mount_path=$(echo "${line}" | awk '{print $2}')
+
         for new_pvc in "${!new_pvcs_mount_paths[@]}"; do
-            if [ "${new_pvcs_mount_paths[$new_pvc]}" == "$migration_path/$original_pvc" ]; then
+            if [ "${new_pvcs_mount_paths[$new_pvc]}" == "$mount_path" ]; then
                 if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${new_pvc}"; then
                     echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_pvc}${reset} (matched by mount point)"
                 else
@@ -100,7 +104,7 @@ match_pvcs_with_mountpoints() {
                 break
             fi
         done
-    done
+    done < "$mount_path_file"
 }
 
 match_remaining_single_pvc_pair() {
