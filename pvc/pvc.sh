@@ -19,6 +19,13 @@ get_pvc_info() {
     done < <(echo "$pvc_data" | jq -c '.items[]')
 }
 
+check_pvc_info_empty() {
+    if [ ${#pvc_info[@]} -eq 0 ]; then
+        echo -e "${red}Error: pvc_info is empty. No PVCs found in the namespace.${reset}"
+        exit 1
+    fi
+}
+
 rename_original_pvcs() {
     # Rename the app's PVCs
     echo -e "${bold}Renaming the app's PVCs...${reset}"

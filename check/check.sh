@@ -40,23 +40,6 @@ check_if_app_exists() {
     cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
 }
 
-check_pvc_count() {
-    check_type=$1
-    # Check if there's more than one line or no lines, print an error message, and exit the script
-    
-    if [[ -z "$pvc_info" && $check_type == "original" ]]; then
-        echo -e "${red}Error: No volume found. Please ensure that the application has at least one PVC.${reset}"
-        exit 1
-    elif [[ -z "$pvc_info" && $check_type == "new" ]]; then
-        echo -e "${red}Error: The new app does not appear to have any PVCs.${reset}"
-        echo -e "If you previously ran this script for the same app, you may need to do the following:"
-        echo -e "    1. Delete the new app"
-        echo -e "    2. Download the new app's chart again with the same settings as the original"
-        echo -e "    3. Run this script again with ${blue}bash migrate.sh --skip${reset}"
-        exit 1
-    fi
-}
-
 check_for_new_app() {
     # Keep asking to continue until app is found
     echo -e "Please install the new version of the app from the catalog manually."

@@ -59,7 +59,6 @@ main() {
     prompt_app_name
     check_for_db_pods "${namespace}"
     find_apps_pool
-    create_migration_dataset
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
     else
@@ -67,8 +66,9 @@ main() {
     fi
 
     get_pvc_info
-    # check_pvc_count "original"
+    check_pvc_info_empty
     get_pvc_parent_path
+    create_migration_dataset
 
     if [[ "${skip}" == false ]]; then
         stop_app_if_needed
@@ -82,12 +82,12 @@ main() {
     stop_app_if_needed
     unset pvc_info
     get_pvc_info
+    check_pvc_info_empty
     
     if [[ "${rename}" = true ]]; then
         get_pvc_parent_path
     fi
     
-    # check_pvc_count "new"
     destroy_new_apps_pvcs
     rename_migration_pvcs
     remove_migration_app_dataset
