@@ -1,28 +1,48 @@
 #!/bin/bash
 
 get_pvc_info() {
-    # Grab the app's PVC names and volume names
-    pvc_info=$(k3s kubectl get pvc -n "${namespace}" -o custom-columns="NAME:.metadata.name,VOLUME:.spec.volumeName" --no-headers)
+    local pods
+    pods=$(k3s kubectl get pods -n "$namespace" -o jsonpath='{.items[*].metadata.name}')
+    local pvc_info=()
+
+    # Loop over all pods
+    for pod in $pods; do
+        # Get PVC mount information for the current pod
+        pvc_mounts=$(k3s kubectl get pod -n "$namespace" "$pod" -o jsonpath='{.spec.volumes[?(@.persistentVolumeClaim)].name}')
+
+        # Loop over all PVC mounts in the current pod
+        for pvc_mount in $pvc_mounts; do
+            # Get the mount path of the PVC within the container
+            mount_path=$(k3s kubectl get pod -n "$namespace" "$pod" -o jsonpath="{.spec.containers[*].volumeMounts[?(@.name=='$pvc_mount')].mountPath}")
+            pvc_volume=$(k3s kubectl get pvc -n "$namespace" "$pvc_mount" -o jsonpath='{.spec.volumeName}' 2>/dev/null)
+
+            pvc_info+=("$pvc_mount $pvc_volume $mount_path")
+        done
+    done
+    echo "${pvc_info[@]}"
 }
 
 rename_original_pvcs() {
     # Rename the app's PVCs
     echo -e "${bold}Renaming the app's PVCs...${reset}"
-    while read -r line; do
+    mount_path_file="$migration_path/mount_paths.txt"
+    true > "$mount_path_file"
+    for line in "${pvc_info[@]}"; do
         pvc_name=$(echo "${line}" | awk '{print $1}')
         volume_name=$(echo "${line}" | awk '{print $2}')
+        mount_path=$(echo "${line}" | awk '{print $3}')
         old_pvc_name="$pvc_parent_path/${volume_name}"
         new_pvc_name="$migration_path/${pvc_name}"
         if zfs rename "${old_pvc_name}" "${new_pvc_name}"; then 
             echo -e "${green}Renamed ${blue}${old_pvc_name}${reset} to ${blue}${new_pvc_name}${reset}"
+            echo "$pvc_name $mount_path" >> "$mount_path_file"
         else
             echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"
             exit 1
         fi
-    done < <(echo "${pvc_info}")
+    done
     echo
 }
-
 
 rename_migration_pvcs() {
     echo -e "${bold}Renaming the migration PVCs to the new app's PVC names...${reset}"
@@ -44,17 +64,71 @@ rename_migration_pvcs() {
         exit 1
     fi
 
+    # Create an associative array to store the new PVCs and their mount paths
+    declare -A new_pvcs_mount_paths
+    for line in "${pvc_info[@]}"; do
+        pvc_name=$(echo "${line}" | awk '{print $1}')
+        mount_path=$(echo "${line}" | awk '{print $3}')
+        new_pvcs_mount_paths["$pvc_name"]="$mount_path"
+    done
+
+    # Match PVCs with the same mount points
+    match_pvcs_with_mountpoints
+
+    # Match the remaining single PVC pair
+    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#new_pvcs_mount_paths[@]} -eq 1 ]; then
+        match_remaining_single_pvc_pair
+        return
+    fi
+
+    # Match the remaining PVCs based on their names
+    match_remaining_pvcs_by_name
+
+    echo
+}
+
+match_pvcs_with_mountpoints() {
+    for original_pvc in "${migration_pvcs[@]}"; do
+        for new_pvc in "${!new_pvcs_mount_paths[@]}"; do
+            if [ "${new_pvcs_mount_paths[$new_pvc]}" == "$migration_path/$original_pvc" ]; then
+                if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${new_pvc}"; then
+                    echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_pvc}${reset} (matched by mount point)"
+                else
+                    echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_pvc}${reset}"
+                    exit 1
+                fi
+                # Remove the matched PVCs from the arrays
+                migration_pvcs=("${migration_pvcs[@]/$original_pvc}")
+                unset "new_pvcs_mount_paths[$new_pvc]"
+                break
+            fi
+        done
+    done
+}
+
+match_remaining_single_pvc_pair() {
+    if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#new_pvcs_mount_paths[@]} -eq 1 ]; then
+        original_pvc="${migration_pvcs[0]}"
+        new_pvc="${!new_pvcs_mount_paths[@]}"
+        if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${new_pvc}"; then
+            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_pvc}${reset} (single pair left)"
+        else
+            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${new_pvc}${reset}"
+            exit 1
+        fi
+    fi
+}
+
+match_remaining_pvcs_by_name() {
     for original_pvc in "${migration_pvcs[@]}"; do
         most_similar_pvc=$(find_most_similar_pvc "$original_pvc")
         if zfs rename "$migration_path/${original_pvc}" "$pvc_parent_path/${most_similar_pvc}"; then
-            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset}"
+            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset} (matched by name similarity)"
         else
             echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc}${reset} to ${blue}$pvc_parent_path/${most_similar_pvc}${reset}"
             exit 1
         fi
     done
-
-    echo
 }
 
 destroy_new_apps_pvcs() {
@@ -63,11 +137,11 @@ destroy_new_apps_pvcs() {
     # Create an array to store the new PVCs
     new_pvcs=()
     
-    # Read the PVC info line by line and store the new PVCs in the new_pvcs array
-    while read -r line; do
+    # Read the PVC info from the pvc_info array and store the new PVCs in the new_pvcs array
+    for line in "${pvc_info[@]}"; do
         pvc_and_volume=$(echo "${line}" | awk '{print $1 "," $2}')
         new_pvcs+=("${pvc_and_volume}")
-    done < <(echo "${pvc_info}")
+    done
 
     if [ ${#new_pvcs[@]} -eq 0 ]; then
         echo -e "${red}Error: No new PVCs found.${reset}"
