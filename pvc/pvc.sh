@@ -72,6 +72,11 @@ rename_migration_pvcs() {
     # Match PVCs with the same mount points
     match_pvcs_with_mountpoints
 
+    if [ ${#new_pvcs_mount_paths[@]} -eq 0 ]; then
+        echo
+        return
+    fi
+
     # Match the remaining single PVC pair
     if [ ${#migration_pvcs[@]} -eq 1 ] && [ ${#new_pvcs_mount_paths[@]} -eq 1 ]; then
         match_remaining_single_pvc_pair
