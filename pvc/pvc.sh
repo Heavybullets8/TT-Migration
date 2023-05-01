@@ -1,24 +1,22 @@
 #!/bin/bash
 
 get_pvc_info() {
-    local pods
-    pods=$(k3s kubectl get pods -n "$namespace" -o jsonpath='{.items[*].metadata.name}')
+    local pvc_data workloads_data pvc
+    pvc_data=$(k3s kubectl get pvc -n "$namespace" -o json)
+    workloads_data=$(k3s kubectl get deployments,statefulsets,daemonsets -n "$namespace" -o json)
 
-    # Loop over all pods
-    for pod in $pods; do
-        # Get PVC mount information for the current pod
-        pvc_mounts=$(k3s kubectl get pod -n "$namespace" "$pod" -o jsonpath='{.spec.volumes[?(@.persistentVolumeClaim)].name}')
+    while IFS= read -r pvc; do
+        pvc_name=$(echo "$pvc" | jq -r '.metadata.name')
+        volume=$(echo "$pvc" | jq -r '.spec.volumeName')
 
-        # Loop over all PVC mounts in the current pod
-        for pvc_mount in $pvc_mounts; do
-            # Get the mount path of the PVC within the container
-            mount_path=$(k3s kubectl get pod -n "$namespace" "$pod" -o jsonpath="{.spec.containers[*].volumeMounts[?(@.name=='$pvc_mount')].mountPath}")
-            pvc_volume=$(k3s kubectl get pvc -n "$namespace" "$pvc_mount" -o jsonpath='{.spec.volumeName}' 2>/dev/null)
+        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath')
 
-            pvc_info+=("$pvc_mount $pvc_volume $mount_path")
-        done
-    done
-    echo "${pvc_info[@]}"
+        if [ "$mount_path" == "null" ]; then
+            mount_path=""
+        fi
+
+        pvc_info+=("$pvc_name $volume $mount_path")
+    done < <(echo "$pvc_data" | jq -c '.items[]')
 }
 
 rename_original_pvcs() {

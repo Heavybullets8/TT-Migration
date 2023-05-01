@@ -58,7 +58,6 @@ main() {
     check_for_db_pods "${namespace}"
     find_apps_pool
     create_migration_dataset
-
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
     else
