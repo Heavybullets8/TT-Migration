@@ -87,7 +87,8 @@ match_pvcs_with_mountpoints() {
         original_pvc=$(echo "${line}" | awk '{print $1}')
         original_mount_path=$(echo "${line}" | awk '{print $3}')
 
-        for new_pvc_info in "${pvc_info[@]}"; do
+        for index in "${!pvc_info[@]}"; do
+            new_pvc_info="${pvc_info[index]}"
             new_pvc=$(echo "${new_pvc_info}" | awk '{print $1}')
             new_mount_path=$(echo "${new_pvc_info}" | awk '{print $3}')
 
@@ -100,12 +101,16 @@ match_pvcs_with_mountpoints() {
                     exit 1
                 fi
                 # Remove the matched PVCs from the arrays
-                migration_pvcs=("${migration_pvcs[@]/$original_pvc}")
-                pvc_info=("${pvc_info[@]/$new_pvc_info}")
+                unset "migration_pvcs[index]"
+                unset "pvc_info[index]"
                 break
             fi
         done
     done < "$mount_path_file"
+
+    # Rebuild the arrays
+    migration_pvcs=("${migration_pvcs[@]}")
+    pvc_info=("${pvc_info[@]}")
 }
 
 match_remaining_single_pvc_pair() {
