@@ -7,6 +7,13 @@ It follows the steps outlined in this guide: https://docs.dasnipe.com/docs/truen
 ## Guide
 https://docs.dasnipe.com/docs/truenas/HeavyBullet-Migration
 
+## Caution
+Please be aware that the following actions are not supported:
+- Creating replication tasks on PVCs within the ix-applications dataset, with the destination directory also located in the ix-applications dataset
+- Modifying or performing unusual actions within the ix-applications dataset; kindly avoid making changes to this dataset to prevent issues with the script
+- Starting a manual migration and expecting this script to complete the process; this script is intended to manage the entire migration from beginning to end
+- Capturing snapshots of the ix-applications dataset at any point during the migration of an application, from start to finish
+
 
 ## Usage
 
@@ -16,19 +23,19 @@ bash migration.sh
 
 ### Note
 
-If an application fails to stop the NEW application, and throws any errors. You can attempt to run the script again, with:
+If an application fails to stop the NEW application, and throws any errors, you can attempt to run the script again with:
 
 ```bash
 bash migrate.sh -s
 ```
 
-which will skip to the step immediately after deleting the old application.
+This command will skip to the step immediately after deleting the old application.
 
 ## What it doesn't work on
 
-Applications with databases such as mariadb, postgresql, etc.
+Applications with databases such as MariaDB, PostgreSQL, etc.
 
-The script will check to see if these databases exist prior to accepting them for migration, but I include a list down below anyway, for verification.
+The script will check to see if these databases exist prior to accepting them for migration, but a list is provided below for verification.
 
 ## Tested on
 
