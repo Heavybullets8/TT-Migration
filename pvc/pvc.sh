@@ -53,7 +53,13 @@ rename_migration_pvcs() {
     done < "/mnt/$migration_path/mount_paths.txt"
 
     if [ ${#original_pvc_info[@]} -eq 0 ]; then
-        echo "Error: No original PVCs found."
+        echo -e "${red}Error: No original PVCs found.${reset}"
+        exit 1
+    fi
+
+    # Check if the number of original PVCs matches the number of new PVCs
+    if [ ${#original_pvc_info[@]} -ne ${#pvc_info[@]} ]; then
+        echo -e "${red}Error: The number of original PVCs does not match the number of new PVCs.${reset}"
         exit 1
     fi
 
