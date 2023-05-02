@@ -3,7 +3,7 @@
 auto_update_script() {
     git -C "$script_path" fetch
 
-    if ! git -C "$script_path" diff --quiet origin/HEAD; then
+    if ! git -C "$script_path" diff --quiet origin/"$current_version"; then
         echo -e "${yellow}Updating the script to the latest version...${reset}"
         
         if git -C "$script_path" pull; then

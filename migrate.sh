@@ -24,7 +24,8 @@ script_name="migrate.sh"
 args=("$@")
 export no_update=false
 export pvc_info=()
-
+export current_version
+current_version=$(git rev-parse --abbrev-ref HEAD)
 
 # source functions
 source check/check.sh
