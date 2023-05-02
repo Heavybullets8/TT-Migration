@@ -71,6 +71,7 @@ The script will check to see if these databases exist prior to accepting them fo
 | mkvcleaver         | Success |
 | mymediaforalexa    | Success |
 | mysql-workbench    | Success |
+| Netdata            | Failed  |
 | organizr           | Success |
 | omada-controller   | Success |
 | overseerr          | Success |
