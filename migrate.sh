@@ -39,7 +39,7 @@ source pvc/pvc.sh
 source self-update/self-update.sh
 
 script_help() {
-    echo -e "${bold}Usage:${reset} $(basename "$0") [options]"
+    echo -e "${bold}Usage:${reset} bash $(basename "$0") [options]"
     echo
     echo -e "${bold}Options:${reset}"
     echo -e "  ${blue}-s${reset}, ${blue}--skip${reset}       Continue with a previously started migration"
