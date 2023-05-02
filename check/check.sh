@@ -13,7 +13,7 @@ if [[ $(id -u) != 0 ]]; then
     echo -e "${yellow}Would you like to run the script with sudo? (y/n)${reset}"
     read -r answer
     if [[ $answer =~ ^[Yy]$ ]]; then
-        exec sudo bash "$script_path"/$script_name "${args[@]}"
+        exec sudo bash "$script_path/$script_name" "${args[@]}"
     else
         exit 1
     fi
