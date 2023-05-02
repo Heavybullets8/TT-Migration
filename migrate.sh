@@ -48,7 +48,7 @@ while [[ "$#" -gt 0 ]]; do
             no_update=true
             ;;
         -h|--help)
-            help
+            script_help
             exit 0
             ;;
         *)
@@ -59,7 +59,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-help() {
+script_help() {
     echo -e "${bold}Usage:${reset} $(basename "$0") [options]"
     echo
     echo -e "${bold}Options:${reset}"
