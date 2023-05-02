@@ -21,6 +21,14 @@ Please be aware that the following actions are not supported:
 bash migration.sh
 ```
 
+### Options
+
+| Option        | Short Form | Description                                                  |
+|---------------|------------|--------------------------------------------------------------|
+| --skip        | -s         | Continue with a previously started migration                 |
+| --no-update   | -n         | Do not check for script updates                              |
+
+
 ### Note
 
 If an application fails to stop the NEW application, and throws any errors, you can attempt to run the script again with:
