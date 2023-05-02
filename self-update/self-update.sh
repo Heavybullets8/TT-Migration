@@ -12,7 +12,5 @@ auto_update_script() {
         else
             echo -e "${red}Error: Failed to update the script. Please check your repository or try again later.${reset}"
         fi
-    else
-        echo -e "${green}No updates available.${reset}"
     fi
 }
