@@ -1,6 +1,7 @@
 #!/bin/bash
 
 auto_update_script() {
+    git -C "$script_path" config pull.rebase true
     git -C "$script_path" fetch > /dev/null 2>&1
 
     if ! git -C "$script_path" diff --quiet origin/"$current_version"; then
