@@ -278,7 +278,7 @@ cleanup_datasets() {
     # Remove base_path dataset if it has no child datasets
     if ! zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -q -v "^${base_name}$"; then
         echo -e "Removing base path dataset as it has no child datasets..."
-        if zfs -r destroy "$base_path"; then
+        if zfs destroy -r "$base_path"; then
             echo -e "${green}Removed base path dataset: ${blue}$base_path${reset}"
         else
             echo -e "${red}Error: Failed to remove base path dataset: ${blue}$base_path${reset}"
