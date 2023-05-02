@@ -38,6 +38,14 @@ source prompt/prompt.sh
 source pvc/pvc.sh
 source self-update/self-update.sh
 
+script_help() {
+    echo -e "${bold}Usage:${reset} $(basename "$0") [options]"
+    echo
+    echo -e "${bold}Options:${reset}"
+    echo -e "  ${blue}-s${reset}, ${blue}--skip${reset}       Continue with a previously started migration"
+    echo -e "  ${blue}-n${reset}, ${blue}--no-update${reset}  Do not check for script updates"
+}
+
 # Parse arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -58,14 +66,6 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
-
-script_help() {
-    echo -e "${bold}Usage:${reset} $(basename "$0") [options]"
-    echo
-    echo -e "${bold}Options:${reset}"
-    echo -e "  ${blue}-s${reset}, ${blue}--skip${reset}       Continue with a previously started migration"
-    echo -e "  ${blue}-n${reset}, ${blue}--no-update${reset}  Do not check for script updates"
-}
 
 main() {
     check_privileges
