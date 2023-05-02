@@ -22,7 +22,7 @@ prompt_app_name() {
                 echo -e "${yellow}Error: App not found.${reset}"
             fi
         else
-            echo -e "${yellow}\"${new_appname}\" is not valid. Please enter a valid name.${reset}"
+            echo -e "${yellow}\"${appname}\" is not valid. Please enter a valid name.${reset}"
         fi
     done
 }
