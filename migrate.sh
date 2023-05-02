@@ -107,6 +107,4 @@ main() {
     start_app "${appname}"
 }
 
-
-# Run the main function
 main
