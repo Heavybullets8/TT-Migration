@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 create_migration_dataset() {
     local path=${ix_apps_pool}/migration
 
