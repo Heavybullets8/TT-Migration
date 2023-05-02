@@ -14,4 +14,5 @@ auto_update_script() {
             echo -e "${red}Error: Failed to update the script. Please check your repository or try again later.${reset}"
         fi
     fi
+    echo
 }
