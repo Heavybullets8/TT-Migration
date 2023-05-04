@@ -17,6 +17,7 @@ export script=$(readlink -f "$0")
 export script_path=$(dirname "$script")
 export script_name="migrate.sh"
 export args=("$@")
+force=false
 skip=false
 script=$(readlink -f "$0")
 script_path=$(dirname "$script")
@@ -44,6 +45,7 @@ script_help() {
     echo -e "${bold}Options:${reset}"
     echo -e "  ${blue}-s${reset}, ${blue}--skip${reset}       Continue with a previously started migration"
     echo -e "  ${blue}-n${reset}, ${blue}--no-update${reset}  Do not check for script updates"
+    echo -e "  ${blue}--force${reset}       Force migration without checking for db pods"
 }
 
 # Parse arguments
@@ -59,6 +61,9 @@ while [[ "$#" -gt 0 ]]; do
             script_help
             exit 0
             ;;
+        --force)
+            force=true
+            ;;
         *)
             echo "Unknown parameter: $1"
             exit 1
@@ -73,7 +78,9 @@ main() {
         auto_update_script
     fi
     prompt_app_name
-    check_for_db_pods "${namespace}"
+    if [[ "${force}" == false ]]; then
+        check_for_db_pods "${namespace}"
+    fi
     get_pvc_info
     check_pvc_info_empty
     find_apps_pool
