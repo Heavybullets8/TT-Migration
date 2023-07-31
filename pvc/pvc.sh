@@ -211,7 +211,8 @@ get_pvc_parent_path() {
     local volume_name
     volume_name=$(echo "$pvc_info" | awk '{print $2}' | head -n 1)
 
-    pvc_path=$(zfs list -r "${ix_apps_pool}/ix-applications" -o name -H | grep "${volume_name}")
+    pvc_path=$(zfs list -r -t filesystem "${ix_apps_pool}/ix-applications" -o name -H | grep "${volume_name}")
+
 
     if [ -z "${pvc_path}" ]; then
         echo -e "${red}PVC not found${reset}"
