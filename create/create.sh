@@ -36,7 +36,7 @@ create_app_dataset() {
 
 create_backup_pvc() {
     local backup_path=/mnt/${migration_path}/backup
-    local backup_name="${appname}-config-backup.json"  # Use .json to emphasize the data format
+    local backup_name="config-backup.json"  # Use .json to emphasize the data format
 
     DATA=$(midclt call chart.release.get_instance "$appname" | jq -c '.config')
     if [[ -z $DATA ]]; then
@@ -53,7 +53,7 @@ create_backup_pvc() {
 
 create_backup_metadata() {
     local metadata_path=/mnt/${migration_path}/backup
-    local metadata_name="${appname}-metadata-backup.json"
+    local metadata_name="metadata-backup.json"
     local chart_name catalog_train metadata_json
 
     # Fetch metadata
@@ -74,8 +74,8 @@ create_backup_metadata() {
 
 create_application() {
     local backup_path=/mnt/${migration_path}/backup
-    local metadata_name="${appname}-metadata-backup.json"
-    local backup_name="${appname}-config-backup.json"
+    local metadata_name="$backup_path/metadata-backup.json"
+    local backup_name="$backup_path/config-backup.json"
     local metadata chart_name catalog_train DATA command
 
     metadata=$(cat "${metadata_path}/${metadata_name}")
