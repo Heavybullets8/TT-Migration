@@ -33,42 +33,6 @@ check_for_db_pods() {
     fi   
 }
 
-# Function to check if the app exists
-check_if_app_exists() {
-    local app_name=$1
-    echo -e "${bold}Checking if app exists...${reset}"
-    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
-}
-
-check_for_new_app() {
-    # Keep asking to continue until app is found
-    echo -e "Please install the new version of the app from the catalog manually."
-    echo -e "Ensure you use ${blue}${appname}${reset} as the name."
-    while true; do
-        while true; do
-            read -n1 -s -rp "Press 'x' to continue..." key
-            if [[ $key == "x" ]]; then
-                echo -e "\nContinuing..."
-                break
-            else
-                echo -e "\nInvalid key. Please press 'x' to continue."
-            fi
-        done
-
-        echo
-
-        # Check if the app exists
-        if check_if_app_exists "${appname}"; then
-            echo -e "${green}Found: ${blue}${appname}${reset}"
-            echo
-            break
-        else
-            echo -e "App not found. Please install the new version of the app from the catalog manually."
-            echo -e "Ensure you use ${blue}${appname}${reset} as the name."
-        fi
-    done
-}
-
 check_filtered_apps() {
     # Define a function to process each app name
     process_app_name() {

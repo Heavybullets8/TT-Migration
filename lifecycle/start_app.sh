@@ -1,42 +1,60 @@
 #!/bin/bash
 
+check_mounted(){
+    local app_name=$1
+
+    if [[ -d /mnt/mounted_pvc/"$app_name" ]]; then
+        unmount_app_func "$app_name" > /dev/null 2>&1
+    fi
+}
+
+get_apps_pool(){
+    cli -c 'app kubernetes config' | 
+        grep -E "pool\s\|" | 
+        awk -F '|' '{print $3}' | 
+        sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+}
+
 start_app(){
-    app_name=$1
-    replica_count=$(midclt call chart.release.get_instance "$app_name" | jq '.config.controller.replicas // .config.workload.main.replicas // .pod_status.desired')
+    local app_name=$1
 
-    if [[ $replica_count == "0" ]]; then
-        echo -e "${blue}$app_name${red} cannot be started${reset}"
-        echo -e "${yellow}Replica count is 0${reset}"
-        echo -e "${yellow}This could be due to:${reset}"
-        echo -e "${yellow}1. The application does not accept a replica count (external services, cert-manager etc)${reset}"
-        echo -e "${yellow}2. The application is set to 0 replicas in its configuration${reset}"
-        echo -e "${yellow}If you beleive this to be a mistake, please submit a bug report on the github.${reset}"
-        exit
-    fi
+    #check if app is currently mounted
+    check_mounted "$app_name"
 
-    if [[ $replica_count == "null" ]]; then
-        echo -e "${blue}$app_name${red} cannot be started${reset}"
-        echo -e "${yellow}Replica count is null${reset}"
-        echo -e "${yellow}Looks like you found an application HS cannot handle${reset}"
-        echo -e "${yellow}Please submit a bug report on the github.${reset}"
-        exit
-    fi
+    # Check if app is a cnpg instance, or an operator instance
+    output=$(check_filtered_apps "$app_name")
 
-    echo -e "${bold}Starting app...${reset}"
 
-    # Check for cnpg pods and scale the application
-    cnpg=$(k3s kubectl get pods -n ix-"$app_name" -o=name | grep -q -- '-cnpg-' && echo "true" || echo "false")
+    if [[ $output == *"${app_name},stopAll-"* ]]; then
+        ix_apps_pool=$(get_apps_pool)
+        if [[ -z "$ix_apps_pool" ]]; then
+            return 1
+        fi
 
-    if [[ $cnpg == "true" ]]; then
-        k3s kubectl get deployments,statefulsets -n ix-"$app_name" | grep -vE -- "(NAME|^$|-cnpg-)" | awk '{print $1}' | sort -r | xargs -I{} k3s kubectl scale --replicas="$replica_count" -n ix-"$app_name" {} &>/dev/null
-        #TODO: Add a check to ensure the pods are running
-        echo -e "${yellow}Sent the command to start all pods in: $app_name${reset}"
-        echo -e "${yellow}However, HeavyScript cannot monitor the new applications${reset}"
-        echo -e "${yellow}with the new postgres backend to ensure it worked..${reset}"
-    elif cli -c 'app chart_release scale release_name='\""$app_name"\"\ 'scale_options={"replica_count": '"$replica_count}" &> /dev/null; then
-        echo -e "${green}Started with replica count ${blue}$replica_count${reset}"
+        latest_version=$(midclt call chart.release.get_instance "$app_name" | jq -r ".chart_metadata.version")
+        if [[ -z "$latest_version" ]]; then
+            return 1
+        fi
+
+        # Disable stopAll and isStopped
+        if ! helm upgrade -n "ix-$app_name" "$app_name" \
+            "/mnt/$ix_apps_pool/ix-applications/releases/$app_name/charts/$latest_version" \
+            --kubeconfig "/etc/rancher/k3s/k3s.yaml" \
+            --reuse-values \
+            --set global.stopAll=false \
+            --set global.ixChartContext.isStopped=false > /dev/null 2>&1; then 
+            return 1
+        fi
+
     else
-        echo -e "${red}Failed to start ${blue}$app_name${reset}"
+        replicas=$(pull_replicas "$app_name")
+        if [[ -z "$replicas" || "$replicas" == "null" ]]; then
+            return 1
+        fi
+        
+        if ! cli -c 'app chart_release scale release_name='\""$app_name"\"\ 'scale_options={"replica_count": '"$replicas}" > /dev/null 2>&1; then
+            return 1
+        fi
     fi
-
+    return 0
 }

@@ -211,7 +211,7 @@ get_pvc_parent_path() {
     local volume_name
     volume_name=$(echo "$pvc_info" | awk '{print $2}' | head -n 1)
 
-    pvc_path=$(zfs list -r -t filesystem "${ix_apps_pool}/ix-applications" -o name -H | grep "${volume_name}")
+    pvc_path=$(k3s kubectl describe pv "$volume_name" | grep "poolname=" | awk -F '=' '{print $2}')
 
 
     if [ -z "${pvc_path}" ]; then
@@ -219,7 +219,7 @@ get_pvc_parent_path() {
         exit 1
     fi
 
-    pvc_parent_path=$(dirname "${pvc_path}")
+    pvc_parent_path="$pvc_path"
 }
 
 find_most_similar_pvc() {

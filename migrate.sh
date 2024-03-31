@@ -17,7 +17,6 @@ export script=$(readlink -f "$0")
 export script_path=$(dirname "$script")
 export script_name="migrate.sh"
 export args=("$@")
-force=false
 skip=false
 script=$(readlink -f "$0")
 script_path=$(dirname "$script")
@@ -61,9 +60,6 @@ while [[ "$#" -gt 0 ]]; do
             script_help
             exit 0
             ;;
-        --force)
-            force=true
-            ;;
         *)
             echo "Unknown parameter: $1"
             exit 1
@@ -78,9 +74,6 @@ main() {
         auto_update_script
     fi
     prompt_app_name
-    if [[ "${force}" == false ]]; then
-        check_for_db_pods "${namespace}"
-    fi
     get_pvc_info
     check_pvc_info_empty
     find_apps_pool
@@ -92,11 +85,13 @@ main() {
     else
         create_app_dataset
         stop_app_if_needed
-        prompt_create_backup
+        create_backup_pvc
+        create_backup_metadata
+        backup_cnpg_databases "${appname}" "${migration_path}"
         rename_original_pvcs
         delete_original_app
         prompt_rename
-        check_for_new_app
+        create_application
     fi
     
     stop_app_if_needed
@@ -104,10 +99,8 @@ main() {
     get_pvc_info
     check_pvc_info_empty
     
-    if [[ "${rename}" = true ]]; then
-        get_pvc_parent_path
-    fi
-    
+    get_pvc_parent_path
+
     destroy_new_apps_pvcs
     rename_migration_pvcs
     cleanup_datasets
