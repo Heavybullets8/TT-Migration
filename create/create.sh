@@ -103,7 +103,7 @@ create_application() {
                 echo -e "${green}Success${reset}\n"
                 return 0
             elif [[ $job_state == "FAILED" ]]; then
-                echo -e "${red}Error: Failed to create the application.${reset}"
+                echo -e "${yellow}Retrying...${reset}"
                 break
             else
                 sleep 10  # Check again in 10 seconds
