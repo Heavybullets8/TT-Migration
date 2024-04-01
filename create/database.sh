@@ -73,7 +73,7 @@ backup_cnpg_databases() {
     # Dump the database
     if ! dump_database "$appname" "$dump_folder"; then
         echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
-        return 1
+        exit 1
     fi
 
     # Stop the app if it was stopped
