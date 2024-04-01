@@ -50,18 +50,6 @@ wait_for_postgres_pod() {
 backup_cnpg_databases() {
     local appname=$1
     local dump_folder=$2
-
-    echo -e "${bold}Checking for databases...${reset}"
-
-    if k3s kubectl get cluster -A | grep -E '^(ix-.*\s).*-cnpg-main-' | awk '{gsub(/^ix-/, "", $1); print $1}' | sort -u | grep -q "$appname"; then
-        # If this block is executed, it means the app name was found
-        echo -e "${green}Found: ${blue}backing up databases...${reset}"
-    else
-        # If this block is executed, it means the app name was not found
-        echo -e "${blue}No databases found.${reset}"
-        return 0
-    fi
-
     app_status=$(cli -m csv -c 'app chart_release query name,status' | grep "^$appname," | awk -F ',' '{print $2}')
 
     # Start the app if it is stopped
@@ -79,5 +67,17 @@ backup_cnpg_databases() {
     # Stop the app if it was stopped
     if [[ $app_status == "STOPPED" ]]; then
         stop_app "direct" "$appname"
+    fi
+}
+
+check_for_db() {
+    echo -e "${bold}Checking for databases...${reset}"
+
+    if k3s kubectl get cluster -A | grep -E '^(ix-.*\s).*-cnpg-main-' | awk '{gsub(/^ix-/, "", $1); print $1}' | grep -q "$appname"; then
+        echo -e "${red}Found: Cannot automate this applcation migration at this time...${reset}"
+        exit 1
+    else
+        echo -e "${green}No databases found.${reset}"
+        return 0
     fi
 }

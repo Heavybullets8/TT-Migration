@@ -78,6 +78,7 @@ main() {
     get_pvc_info
     check_pvc_info_empty
     find_apps_pool
+    check_for_db
     create_migration_dataset
     get_pvc_parent_path
 
@@ -85,7 +86,7 @@ main() {
         prompt_migration_path
     else
         create_app_dataset
-        backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
+        # backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         stop_app_if_needed
         create_backup_pvc
         create_backup_metadata

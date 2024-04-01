@@ -101,9 +101,9 @@ match_pvcs_with_mountpoints() {
             new_mountpath=$(echo "${new_pvc_info}" | awk '{print $3}')
 
             # do not match if the mount point is empty
-            # if [ -z "$original_mountpath" ] || [ -z "$new_mountpath" ]; then
-            #     continue
-            # fi
+            if [ -z "$original_mountpath" ] || [ -z "$new_mountpath" ]; then
+                continue
+            fi
             
             if [ "$new_mountpath" == "$original_mountpath" ]; then
                 new_volume=$(echo "${new_pvc_info}" | awk '{print $2}')
