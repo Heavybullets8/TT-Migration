@@ -7,7 +7,7 @@ stop_app_if_needed() {
                 awk -F ',' '{print $2}'| 
                 sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     if [[ "$status" != "STOPPED" ]]; then
-        echo -e "\n${bold}Stopping the app...${reset}"
+        echo -e "${bold}Stopping the app...${reset}"
         stop_app "direct" "$appname"
         result=$(handle_stop_code "$?")
         if [[ $? -eq 1 ]]; then
