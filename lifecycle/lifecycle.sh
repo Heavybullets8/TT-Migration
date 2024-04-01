@@ -29,7 +29,7 @@ delete_original_app() {
 
     if [[ $total_pods -gt 0 && $terminating_pods -eq $total_pods ]]; then
         if k3s kubectl delete ns "$namespace" --grace-period=0 --force > /dev/null 2>&1; then
-            echo -e "${green}Successfully removed namespace $namespace.${reset}"
+            echo -e "${green}Successfully removed namespace $namespace.${reset}\n"
         else
             echo -e "${red}Failed to remove namespace $namespace.${reset}"
             exit 1
