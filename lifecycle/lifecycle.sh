@@ -29,14 +29,14 @@ delete_original_app() {
 
     if [[ $total_pods -gt 0 && $terminating_pods -eq $total_pods ]]; then
         if k3s kubectl delete ns "$namespace" --grace-period=0 --force > /dev/null 2>&1; then
-            echo -e "${green}Successfully removed namespace $namespace.${reset}\n"
+            echo -e "${green}Successfully removed namespace $namespace.${reset}"
         else
             echo -e "${red}Failed to remove namespace $namespace.${reset}"
             exit 1
         fi
     fi
 
-    echo -e "${bold}Deleting the original app...${reset}"
+    echo -e "\n${bold}Deleting the original app...${reset}"
     if cli -c "app chart_release delete release_name=\"${appname}\""; then
         echo -e "${green}Success${reset}"
         echo
