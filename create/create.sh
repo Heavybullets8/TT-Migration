@@ -73,17 +73,20 @@ create_backup_metadata() {
 }
 
 create_application() {
-    local backup_path=/mnt/${migration_path}/backup
+    local backup_path="/mnt/${migration_path}/backup"
     local metadata_name="$backup_path/metadata-backup.json"
     local backup_name="$backup_path/config-backup.json"
-    local metadata chart_name catalog_train DATA command
+    local max_retries=3
+    local retry_count=0
+    local job_state
+    local job_id
 
     metadata=$(cat "${metadata_path}/${metadata_name}")
     chart_name=$(echo "$metadata" | jq -r '.chart_name')
     catalog_train=$(echo "$metadata" | jq -r '.catalog_train')
     DATA=$(cat "${metadata_path}/${backup_name}")
 
-    # Construct the reinstallation command
+    # Construct and execute the reinstallation command, capturing the job ID
     command=$(jq -n \
                     --arg release_name "$appname" \
                     --arg chart_name "$chart_name" \
@@ -91,34 +94,55 @@ create_application() {
                     --argjson values "$DATA" \
                     '{release_name: $release_name, catalog: "TRUECHARTS", item: $chart_name, train: $catalog_train, values: $values}')
     
-    midclt call chart.release.create "$command" > /dev/null
+    while [[ $retry_count -lt $max_retries ]]; do
+        job_id=$(midclt call chart.release.create "$command" | jq -r '.')
+        
+        while true; do
+            job_state=$(midclt call core.get_jobs '[["id", "=", '"$job_id"']]' | jq -r '.[0].state')
+            if [[ $job_state == "SUCCESS" ]]; then
+                echo -e "${green}Success${reset}"
+                return 0
+            elif [[ $job_state == "FAILED" ]]; then
+                echo -e "${red}Error: Failed to create the application.${reset}"
+                break
+            else
+                sleep 10  # Check again in 10 seconds
+            fi
+        done
+
+        ((retry_count++))
+    done
+
+    echo -e "${red}Error: Failed to create the application after $max_retries retries.${reset}"
+    return 1
 }
 
-create_and_wait() {
-    local max_retries=3
-    local retry_count=0
+create_and_wait_for_pvcs() {
+    local namespace="ix-$appname"
+    local max_wait=500  # Total wait time for PVCs to be bound
+    local interval=10   # Interval between checks
+    local elapsed_time=0
 
-    echo -e "${bold}Creating the application...${reset}"
-
-    if [[ $skip == true ]]; then
-        wait_for_pvcs 50 && return 0
+    if ! check_if_app_exists "$appname" >/dev/null 2>&1; then
+        echo -e "${bold}Creating the application...${reset}"
+        create_application
     fi
 
-    while [[ $retry_count -lt $max_retries ]]; do
-        create_application
-        sleep 15  # Allow some time for the application to be created
+    echo -e "${bold}Waiting for PVCs to be ready...${reset}"
+    while [[ $elapsed_time -lt $max_wait ]]; do
+        local bound_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
+        local total_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | wc -l)
         
-        if wait_for_pvcs 500; then
-            echo -e "${green}Success:${blue} All PVCs are bound.${reset}"
-            break  # Exit the loop if PVCs are bound
+        if [[ $total_pvcs -gt 0 && $bound_pvcs -eq $total_pvcs ]]; then
+            echo -e "${green}Success:${reset} All PVCs for $appname are bound."
+            return 0
         else
-            echo -e "${yellow}Warning: Waiting for PVCs failed, retrying (${retry_count}/${max_retries})...${reset}"
-            ((retry_count++))
+            sleep $interval
+            elapsed_time=$((elapsed_time + interval))
+            echo "Waiting... ${elapsed_time}s elapsed."
         fi
     done
 
-    if [[ $retry_count -eq $max_retries ]]; then
-        echo -e "${red}Error:${reset} Failed to create the application after ${max_retries} attempts."
-        exit 1
-    fi
+    echo -e "${red}Error:${reset} Not all PVCs for $appname are bound after ${max_wait} seconds."
+    return 1
 }

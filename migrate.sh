@@ -96,7 +96,7 @@ main() {
     fi
     
     prompt_rename
-    create_and_wait
+    create_and_wait_for_pvcs
 
     stop_app_if_needed
     unset pvc_info
