@@ -79,6 +79,7 @@ main() {
 
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
+        migration_path="${ix_apps_pool}/migration/${appname}"
     else
         prompt_app_name
         get_pvc_info
