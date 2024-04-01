@@ -77,7 +77,7 @@ check_for_db() {
         echo -e "${red}Found: Cannot automate this applcation migration at this time...${reset}"
         exit 1
     else
-        echo -e "${green}No databases found.${reset}"
+        echo -e "${green}No databases found.${reset}\n"
         return 0
     fi
 }
