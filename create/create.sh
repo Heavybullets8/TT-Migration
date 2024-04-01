@@ -124,7 +124,7 @@ create_and_wait_for_pvcs() {
     local elapsed_time=0
 
     if ! check_if_app_exists "$appname" >/dev/null 2>&1; then
-        echo -e "${bold}Creating the application...${reset}"
+        echo -e "${bold}Creating the application...${reset}\n"
         create_application
     fi
 
@@ -134,7 +134,7 @@ create_and_wait_for_pvcs() {
         local total_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | wc -l)
         
         if [[ $total_pvcs -gt 0 && $bound_pvcs -eq $total_pvcs ]]; then
-            echo -e "${green}Success:${reset} All PVCs for $appname are bound."
+            echo -e "${green}Success:${reset}"
             return 0
         else
             sleep $interval
