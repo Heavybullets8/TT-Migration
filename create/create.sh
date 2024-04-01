@@ -130,8 +130,9 @@ create_and_wait_for_pvcs() {
 
     echo -e "${bold}Waiting for PVCs to be ready...${reset}"
     while [[ $elapsed_time -lt $max_wait ]]; do
-        local bound_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
-        local total_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | wc -l)
+        local bound_pvcs total_pvcs
+        bound_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
+        total_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | wc -l)
         
         if [[ $total_pvcs -gt 0 && $bound_pvcs -eq $total_pvcs ]]; then
             echo -e "${green}Success:${reset}"
