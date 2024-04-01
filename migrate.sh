@@ -74,17 +74,19 @@ main() {
     if [[ "${no_update}" == false ]]; then
         auto_update_script
     fi
-    prompt_app_name
-    get_pvc_info
-    check_pvc_info_empty
-    find_apps_pool
-    check_for_db
-    create_migration_dataset
-    get_pvc_parent_path
 
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
+        prompt_rename
+        create_and_wait
     else
+        prompt_app_name
+        get_pvc_info
+        check_pvc_info_empty
+        find_apps_pool
+        check_for_db
+        create_migration_dataset
+        get_pvc_parent_path
         create_app_dataset
         # backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         stop_app_if_needed
