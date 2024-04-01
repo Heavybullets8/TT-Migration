@@ -100,7 +100,7 @@ create_application() {
         while true; do
             job_state=$(midclt call core.get_jobs '[["id", "=", '"$job_id"']]' | jq -r '.[0].state')
             if [[ $job_state == "SUCCESS" ]]; then
-                echo -e "${green}Success${reset}"
+                echo -e "${green}Success${reset}\n"
                 return 0
             elif [[ $job_state == "FAILED" ]]; then
                 echo -e "${red}Error: Failed to create the application.${reset}"
@@ -124,7 +124,7 @@ create_and_wait_for_pvcs() {
     local elapsed_time=0
 
     if ! check_if_app_exists "$appname" >/dev/null 2>&1; then
-        echo -e "${bold}Creating the application...${reset}\n"
+        echo -e "${bold}Creating the application...${reset}"
         create_application
     fi
 
