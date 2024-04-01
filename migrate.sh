@@ -26,8 +26,6 @@ export no_update=false
 export pvc_info=()
 export current_version
 current_version=$(git rev-parse --abbrev-ref HEAD)
-retry_count=0
-max_retries=3
 
 # source functions
 source check/check.sh

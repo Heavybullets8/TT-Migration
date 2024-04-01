@@ -98,17 +98,17 @@ create_and_wait() {
     local max_retries=3
     local retry_count=0
 
-    echo -e "\n${bold}Creating the application...${reset}"
+    echo -e "${bold}Creating the application...${reset}"
 
     while [[ $retry_count -lt $max_retries ]]; do
         create_application
         sleep 15  # Allow some time for the application to be created
         
         if wait_for_pvcs; then
-            echo -e "${green}Success:${reset} All PVCs for ${appname} are bound."
+            echo -e "${green}Success:${blue} All PVCs are bound.${reset}"
             break  # Exit the loop if PVCs are bound
         else
-            echo -e "${red}Warning:${reset} Waiting for PVCs failed, retrying (${retry_count}/${max_retries})..."
+            echo -e "${yellow}Warning: Waiting for PVCs failed, retrying (${retry_count}/${max_retries})...${reset}"
             ((retry_count++))
         fi
     done
