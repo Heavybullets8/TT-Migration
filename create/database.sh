@@ -62,27 +62,22 @@ backup_cnpg_databases() {
         return 0
     fi
 
-    for app in "${app_status_lines[@]}"; do
-        app_status=$(cli -m csv -c 'app chart_release query name,status' | grep "^$app," | awk -F ',' '{print $2}')
+    app_status=$(cli -m csv -c 'app chart_release query name,status' | grep "^$appname," | awk -F ',' '{print $2}')
 
-        # Start the app if it is stopped
-        if [[ $app_status == "STOPPED" ]]; then
-            start_app "$appname"
-            wait_for_postgres_pod "$appname"
-        fi
-                                         
-        # Dump the database
-        if ! dump_database "$appname" "$dump_folder"; then
-            echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
-            return 1
-        fi
+    # Start the app if it is stopped
+    if [[ $app_status == "STOPPED" ]]; then
+        start_app "$appname"
+        wait_for_postgres_pod "$appname"
+    fi
+                                        
+    # Dump the database
+    if ! dump_database "$appname" "$dump_folder"; then
+        echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
+        return 1
+    fi
 
-        # Stop the app if it was stopped
-        if [[ $app_status == "STOPPED" ]]; then
-            stop_app "direct" "$appname"
-        fi
-
-
-    done
-
+    # Stop the app if it was stopped
+    if [[ $app_status == "STOPPED" ]]; then
+        stop_app "direct" "$appname"
+    fi
 }
