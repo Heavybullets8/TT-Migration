@@ -55,10 +55,10 @@ backup_cnpg_databases() {
 
     if k3s kubectl get cluster -A | grep -E '^(ix-.*\s).*-cnpg-main-' | awk '{gsub(/^ix-/, "", $1); print $1}' | sort -u | grep -q "$appname"; then
         # If this block is executed, it means the app name was found
-        echo -e "Found, backing up databases..."
+        echo -e "${green}Found: ${blue}backing up databases...${reset}"
     else
         # If this block is executed, it means the app name was not found
-        echo "$appname does not have a database."
+        echo -e "${blue}No databases found.${reset}"
         return 0
     fi
 
@@ -73,7 +73,7 @@ backup_cnpg_databases() {
                                          
         # Dump the database
         if ! dump_database "$appname" "$dump_folder"; then
-            echo "Failed to back up $appname's database."
+            echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
             return 1
         fi
 
