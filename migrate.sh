@@ -30,6 +30,7 @@ current_version=$(git rev-parse --abbrev-ref HEAD)
 # source functions
 source check/check.sh
 source create/create.sh
+source create/database.sh
 source find/find.sh
 source lifecycle/lifecycle.sh
 source lifecycle/start_app.sh
@@ -92,7 +93,6 @@ main() {
         delete_original_app
         prompt_rename
         create_application
-        wait_for_namespace
         wait_for_pvcs
     fi
     

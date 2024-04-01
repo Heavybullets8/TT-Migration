@@ -83,52 +83,46 @@ check_filtered_apps() {
     wait
 }
 
-wait_for_namespace() {
-    local timeout=500
+wait_for_pvcs() {
+    local namespace="ix-$appname"
+    local max_wait=500
     local interval=10
     local elapsed_time=0
 
-    echo -e "${bold}Waiting up to ${timeout} seconds for namespace '${appname}' to be created...${reset}"
+    echo -e "${bold}Checking for existence of PVCs for $appname...${reset}"
 
-    while [[ $elapsed_time -lt $timeout ]]; do
-        if k3s kubectl get namespace "ix-$appname" --no-headers -o custom-columns=":metadata.name" &> /dev/null; then
-            echo -e "${green}Namespace exists.${reset}"
-            return 0
+    # Wait for any PVC to be created first
+    while [[ $elapsed_time -lt $max_wait ]]; do
+        if k3s kubectl get pvc -n "$namespace" --no-headers | grep -q '.*'; then
+            echo -e "${green}PVCs detected for $appname, now waiting for them to be bound...${reset}"
+            break
         else
+            echo "No PVCs found for $appname yet. Waiting for $interval seconds..."
             sleep $interval
             elapsed_time=$((elapsed_time + interval))
         fi
     done
 
-    echo -e "${red}Timeout reached. Namespace 'ix-${appname}' not found.${reset}"
-    exit 1
-}
+    # If PVCs are still not found, return with error
+    if [[ $elapsed_time -eq $max_wait ]]; then
+        echo -e "${red}Timeout reached, no PVCs found for $appname.${reset}"
+        exit 1
+    fi
 
+    # Reset elapsed_time for the bound state check
+    elapsed_time=0
 
-wait_for_pvcs() {
-    local max_wait interval start_time current_time timeout unbound_pvcs
-
-    max_wait=300
-    interval=10 
-
-    start_time=$(date +%s)
-    current_time=$start_time
-    timeout=$((start_time + max_wait))
-
-
-    echo -e "${bold}Waiting for PVCs of $appname to be bound...${reset}"
-
-    while [[ $current_time -lt $timeout ]]; do
-        unbound_pvcs=$(k3s kubectl get pvc -n "ix-$appname" --no-headers | grep -vc 'Bound')
-
+    # Check if all PVCs are bound
+    while [[ $elapsed_time -lt $max_wait ]]; do
+        local unbound_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -vc 'Bound')
         if [[ $unbound_pvcs -eq 0 ]]; then
             echo -e "${green}All PVCs for $appname are bound.${reset}"
             return 0
         else
+            echo "Waiting for all PVCs to be bound. Unbound PVCs: $unbound_pvcs. Checking again in $interval seconds..."
             sleep $interval
+            elapsed_time=$((elapsed_time + interval))
         fi
-
-        current_time=$(date +%s)
     done
 
     echo -e "${red}Timeout reached. Not all PVCs for $appname are bound.${reset}"
