@@ -2,8 +2,8 @@
 
 dump_database() {
     app="$1"
-    output_dir="$2/${app}"
-    output_file="${output_dir}/${app}_${timestamp}.sql"
+    output_dir="$2"
+    output_file="${output_dir}/${app}.sql"
 
     cnpg_pod=$(k3s kubectl get pods -n "ix-$app" --no-headers -o custom-columns=":metadata.name" -l role=primary | head -n 1)
 
