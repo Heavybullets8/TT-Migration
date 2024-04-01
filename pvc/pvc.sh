@@ -28,7 +28,7 @@ check_pvc_info_empty() {
 
 rename_original_pvcs() {
     # Rename the app's PVCs
-    echo -e "${bold}Renaming the app's PVCs...${reset}"
+    echo -e "\n${bold}Renaming the app's PVCs...${reset}"
     mount_path_file="/mnt/$migration_path/mount_paths.txt"
     true > "$mount_path_file"
     for line in "${pvc_info[@]}"; do
