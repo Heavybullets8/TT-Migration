@@ -21,6 +21,21 @@ stop_app_if_needed() {
 }
 
 delete_original_app() {
+    local namespace="ix-$appname"
+
+    echo -e "${bold}Checking for terminating pods in $namespace...${reset}"
+    local terminating_pods=$(k3s kubectl get pods -n "$namespace" --field-selector=status.phase=Terminating --no-headers | wc -l)
+    local total_pods=$(k3s kubectl get pods -n "$namespace" --no-headers | wc -l)
+
+    if [[ $total_pods -gt 0 && $terminating_pods -eq $total_pods ]]; then
+        if k3s kubectl delete ns "$namespace" --grace-period=0 --force > /dev/null 2>&1; then
+            echo -e "${green}Successfully removed namespace $namespace.${reset}"
+        else
+            echo -e "${red}Failed to remove namespace $namespace.${reset}"
+            exit 1
+        fi
+    fi
+
     echo -e "${bold}Deleting the original app...${reset}"
     if cli -c "app chart_release delete release_name=\"${appname}\""; then
         echo -e "${green}Success${reset}"
@@ -30,7 +45,6 @@ delete_original_app() {
         exit 1
     fi
 }
-
 
 check_filtered_apps() {
     # Define a function to process each app name
