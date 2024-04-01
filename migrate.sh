@@ -85,10 +85,10 @@ main() {
         prompt_migration_path
     else
         create_app_dataset
+        backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         stop_app_if_needed
         create_backup_pvc
         create_backup_metadata
-        backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         rename_original_pvcs
         delete_original_app
         prompt_rename
