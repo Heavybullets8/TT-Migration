@@ -112,4 +112,6 @@ prompt_migration_path() {
             echo "Invalid choice. Please enter a valid number."
         fi
     done
+    appname=$(echo "${migration_path}" | awk -F/ '{print $NF}')
+    namespace="ix-${appname}"
 }
