@@ -100,6 +100,11 @@ match_pvcs_with_mountpoints() {
             new_pvc_name=$(echo "${new_pvc_info}" | awk '{print $1}')
             new_mountpath=$(echo "${new_pvc_info}" | awk '{print $3}')
 
+            # do not match if the mount point is empty
+            if [ -z "$original_mountpath" ] || [ -z "$new_mountpath" ]; then
+                continue
+            fi
+            
             if [ "$new_mountpath" == "$original_mountpath" ]; then
                 new_volume=$(echo "${new_pvc_info}" | awk '{print $2}')
                 if zfs rename "$migration_path/${original_pvc_name}" "$pvc_parent_path/${new_volume}"; then
