@@ -26,6 +26,8 @@ export no_update=false
 export pvc_info=()
 export current_version
 current_version=$(git rev-parse --abbrev-ref HEAD)
+retry_count=0
+max_retries=3
 
 # source functions
 source check/check.sh
@@ -92,9 +94,7 @@ main() {
         rename_original_pvcs
         delete_original_app
         prompt_rename
-        sleep 15
-        create_application
-        wait_for_pvcs
+        create_and_wait
     fi
     
     stop_app_if_needed

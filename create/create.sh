@@ -91,5 +91,30 @@ create_application() {
                     --argjson values "$DATA" \
                     '{release_name: $release_name, catalog: "TRUECHARTS", item: $chart_name, train: $catalog_train, values: $values}')
     
-    midclt call chart.release.create "$command"
+    midclt call chart.release.create "$command" > /dev/null
+}
+
+create_and_wait() {
+    local max_retries=3
+    local retry_count=0
+
+    echo -e "\n${bold}Creating the application...${reset}"
+
+    while [[ $retry_count -lt $max_retries ]]; do
+        create_application
+        sleep 15  # Allow some time for the application to be created
+        
+        if wait_for_pvcs; then
+            echo -e "${green}Success:${reset} All PVCs for ${appname} are bound."
+            break  # Exit the loop if PVCs are bound
+        else
+            echo -e "${red}Warning:${reset} Waiting for PVCs failed, retrying (${retry_count}/${max_retries})..."
+            ((retry_count++))
+        fi
+    done
+
+    if [[ $retry_count -eq $max_retries ]]; then
+        echo -e "${red}Error:${reset} Failed to create the application after ${max_retries} attempts."
+        exit 1
+    fi
 }
