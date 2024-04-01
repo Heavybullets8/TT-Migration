@@ -75,15 +75,14 @@ main() {
         auto_update_script
     fi
 
+    find_apps_pool
+
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
-        prompt_rename
-        create_and_wait
     else
         prompt_app_name
         get_pvc_info
         check_pvc_info_empty
-        find_apps_pool
         check_for_db
         create_migration_dataset
         get_pvc_parent_path
@@ -94,10 +93,11 @@ main() {
         create_backup_metadata
         rename_original_pvcs
         delete_original_app
-        prompt_rename
-        create_and_wait
     fi
     
+    prompt_rename
+    create_and_wait
+
     stop_app_if_needed
     unset pvc_info
     get_pvc_info
