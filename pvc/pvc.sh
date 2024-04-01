@@ -154,7 +154,7 @@ match_remaining_pvcs_by_name() {
         most_similar_volume=$(find_most_similar_pvc "$original_pvc_name")
         if zfs rename "$migration_path/${original_pvc_name}" "$pvc_parent_path/${most_similar_volume}"; then
             echo -e "${green}Renamed ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$pvc_parent_path/${most_similar_volume}${reset}"
-            echo -e "${green}Matched by name similarity${green}"
+            echo -e "${green}Matched by name similarity${reset}"
             echo
         else
             echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$pvc_parent_path/${most_similar_volume}${reset}"
