@@ -76,7 +76,7 @@ create_application() {
     local backup_path="/mnt/${migration_path}/backup"
     local metadata_name="$backup_path/metadata-backup.json"
     local backup_name="$backup_path/config-backup.json"
-    local max_retries=3
+    local max_retries=5
     local retry_count=0
     local job_state
     local job_id
