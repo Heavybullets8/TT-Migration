@@ -82,3 +82,55 @@ check_filtered_apps() {
     # Wait for any remaining jobs to finish
     wait
 }
+
+wait_for_namespace() {
+    local timeout=500
+    local interval=10
+    local elapsed_time=0
+
+    echo -e "${bold}Waiting up to ${timeout} seconds for namespace '${appname}' to be created...${reset}"
+
+    while [[ $elapsed_time -lt $timeout ]]; do
+        if k3s kubectl get namespace "ix-$appname" --no-headers -o custom-columns=":metadata.name" &> /dev/null; then
+            echo -e "${green}Namespace exists.${reset}"
+            return 0
+        else
+            sleep $interval
+            elapsed_time=$((elapsed_time + interval))
+        fi
+    done
+
+    echo -e "${red}Timeout reached. Namespace 'ix-${appname}' not found.${reset}"
+    exit 1
+}
+
+
+wait_for_pvcs() {
+    local max_wait interval start_time current_time timeout unbound_pvcs
+
+    max_wait=300
+    interval=10 
+
+    start_time=$(date +%s)
+    current_time=$start_time
+    timeout=$((start_time + max_wait))
+
+
+    echo -e "${bold}Waiting for PVCs of $appname to be bound...${reset}"
+
+    while [[ $current_time -lt $timeout ]]; do
+        unbound_pvcs=$(k3s kubectl get pvc -n "ix-$appname" --no-headers | grep -vc 'Bound')
+
+        if [[ $unbound_pvcs -eq 0 ]]; then
+            echo -e "${green}All PVCs for $appname are bound.${reset}"
+            return 0
+        else
+            sleep $interval
+        fi
+
+        current_time=$(date +%s)
+    done
+
+    echo -e "${red}Timeout reached. Not all PVCs for $appname are bound.${reset}"
+    exit 1
+}

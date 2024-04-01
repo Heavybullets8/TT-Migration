@@ -92,6 +92,8 @@ main() {
         delete_original_app
         prompt_rename
         create_application
+        wait_for_namespace
+        wait_for_pvcs
     fi
     
     stop_app_if_needed
