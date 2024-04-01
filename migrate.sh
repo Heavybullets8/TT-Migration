@@ -92,6 +92,7 @@ main() {
         rename_original_pvcs
         delete_original_app
         prompt_rename
+        sleep 15
         create_application
         wait_for_pvcs
     fi
