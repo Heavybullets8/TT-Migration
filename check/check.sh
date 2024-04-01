@@ -85,7 +85,7 @@ check_filtered_apps() {
 
 wait_for_pvcs() {
     local namespace="ix-$appname"
-    local max_wait=500
+    local max_wait=$1
     local interval=10
     local elapsed_time=0
 

@@ -101,14 +101,14 @@ create_and_wait() {
     echo -e "${bold}Creating the application...${reset}"
 
     if [[ $skip == true ]]; then
-        wait_for_pvcs && return 0
+        wait_for_pvcs 50 && return 0
     fi
 
     while [[ $retry_count -lt $max_retries ]]; do
         create_application
         sleep 15  # Allow some time for the application to be created
         
-        if wait_for_pvcs; then
+        if wait_for_pvcs 500; then
             echo -e "${green}Success:${blue} All PVCs are bound.${reset}"
             break  # Exit the loop if PVCs are bound
         else
