@@ -6,7 +6,10 @@ restore_database() {
 
     echo -e "${bold}Restoring database${reset}..."
 
-    wait_for_postgres_pod "$app"
+    if ! wait_for_postgres_pod "$app"; then
+        echo -e "${red}Postgres pod failed to start.${reset}"
+        exit 1
+    fi
 
     # Get the primary database pod
     cnpg_pod=$(k3s kubectl get pods -n "ix-$app" --no-headers -o custom-columns=":metadata.name" -l role=primary | head -n 1)
