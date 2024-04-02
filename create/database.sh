@@ -1,5 +1,35 @@
 #!/bin/bash
 
+restore_database() {
+    app="$1"
+    dump_file="$2"
+
+    # Get the primary database pod
+    cnpg_pod=$(k3s kubectl get pods -n "ix-$app" --no-headers -o custom-columns=":metadata.name" -l role=primary | head -n 1)
+
+    if [[ -z $cnpg_pod ]]; then
+        echo "Failed to get cnpg pod for $app."
+        exit 1
+    fi
+
+    # Retrieve the database name from the app's configuration
+    db_name=$(midclt call chart.release.get_instance "$app" | jq -r .config.cnpg.main.database)
+
+    if [[ -z $db_name ]]; then
+        echo "Failed to get database name for $app."
+        exit 1
+    fi
+
+    # Restore the database from the dump file
+    if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- psql -d "$db_name" < "$dump_file"; then
+        echo "Database restored successfully."
+        return 0
+    else
+        echo "Failed to restore database."
+        exit 1
+    fi
+}
+
 dump_database() {
     app="$1"
     output_dir="$2"
@@ -74,8 +104,8 @@ check_for_db() {
     echo -e "${bold}Checking for databases...${reset}"
 
     if k3s kubectl get cluster -A | grep -E '^(ix-.*\s).*-cnpg-main-' | awk '{gsub(/^ix-/, "", $1); print $1}' | grep -q "$appname"; then
-        echo -e "${red}Found: Cannot automate this applcation migration at this time...${reset}"
-        exit 1
+        echo -e "${yellow}Found: Attempting a restore...${reset}"
+        database_found=true
     else
         echo -e "${green}No databases found.${reset}\n"
         return 0

@@ -12,6 +12,7 @@ export namespace
 export appname
 export ix_apps_pool
 export migration_path
+export database_found=false
 export rename=false
 export script=$(readlink -f "$0")
 export script_path=$(dirname "$script")
@@ -60,6 +61,9 @@ while [[ "$#" -gt 0 ]]; do
         -n|--no-update)
             no_update=true
             ;;
+        --force)
+            force=true
+            ;;
         -h|--help)
             script_help
             exit 0
@@ -90,7 +94,7 @@ main() {
         create_migration_dataset
         get_pvc_parent_path
         create_app_dataset
-        # backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
+        backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         stop_app_if_needed
         create_backup_pvc
         create_backup_metadata
@@ -110,6 +114,9 @@ main() {
 
     destroy_new_apps_pvcs
     rename_migration_pvcs
+    if [[ "${skip}" == true ]]; then
+        check_for_db && restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
+    fi
     cleanup_datasets
     start_app "${appname}"
 }
