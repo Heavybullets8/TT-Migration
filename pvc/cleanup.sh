@@ -28,7 +28,7 @@ destroy_new_apps_pvcs() {
         max_attempts=2
 
         while ! $success && [ $attempt_count -lt $max_attempts ]; do
-            if output=$(zfs destroy "${to_delete}"); then
+            if output=$(zfs destroy "${to_delete}" 2>&1); then
                 echo -e "${green}Destroyed ${blue}${to_delete}${reset}"
                 success=true
             else
