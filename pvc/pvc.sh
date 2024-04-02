@@ -95,16 +95,17 @@ match_pvcs_with_mountpoints() {
         original_pvc_name=$(echo "${original_pvc_line}" | awk '{print $1}')
         original_mountpath=$(echo "${original_pvc_line}" | awk '{print $3}')
 
+        # Occassionally the mount path is empty, in which case we skip matching by mount point
+        # Which will result in matching by name similarity
+        if [ -z "$original_mountpath" ]; then
+            continue
+        fi
+
         for index in "${!pvc_info[@]}"; do
             new_pvc_info="${pvc_info[index]}"
             new_pvc_name=$(echo "${new_pvc_info}" | awk '{print $1}')
             new_mountpath=$(echo "${new_pvc_info}" | awk '{print $3}')
 
-            # do not match if the mount point is empty
-            if [ -z "$original_mountpath" ] || [ -z "$new_mountpath" ]; then
-                continue
-            fi
-            
             if [ "$new_mountpath" == "$original_mountpath" ]; then
                 new_volume=$(echo "${new_pvc_info}" | awk '{print $2}')
                 if zfs rename "$migration_path/${original_pvc_name}" "$pvc_parent_path/${new_volume}"; then
