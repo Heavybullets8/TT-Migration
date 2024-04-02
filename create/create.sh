@@ -135,7 +135,7 @@ create_and_wait_for_pvcs() {
         total_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | wc -l)
         
         if [[ $total_pvcs -gt 0 && $bound_pvcs -eq $total_pvcs ]]; then
-            echo -e "${green}Success:${reset}"
+            echo -e "${green}Success${reset}"
             return 0
         else
             sleep $interval

@@ -36,7 +36,10 @@ source lifecycle/lifecycle.sh
 source lifecycle/start_app.sh
 source lifecycle/stop_app.sh
 source prompt/prompt.sh
-source pvc/pvc.sh
+source pvc/cleanup.sh
+source pvc/info.sh
+source pvc/match.sh
+source pvc/rename.sh
 source self-update/self-update.sh
 
 script_help() {
