@@ -6,6 +6,8 @@ restore_database() {
 
     echo -e "${bold}Restoring database${reset}..."
 
+    wait_for_postgres_pod "$app"
+
     # Get the primary database pod
     cnpg_pod=$(k3s kubectl get pods -n "ix-$app" --no-headers -o custom-columns=":metadata.name" -l role=primary | head -n 1)
 
@@ -66,9 +68,17 @@ dump_database() {
 wait_for_postgres_pod() {
     appname=$1
 
-    # shellcheck disable=SC2034
-    for i in {1..30}; do
-        pod_status=$(k3s kubectl get pods "${appname}-cnpg-main-1" -n "ix-${appname}" -o jsonpath="{.status.phase}" 2>/dev/null)
+    for ((i = 1; i <= 30; i++)); do
+        # Get the name of the primary pod
+        primary_pod=$(k3s kubectl get pods -n "ix-$appname" --no-headers -o custom-columns=":metadata.name" -l role=primary | head -n 1 2>/dev/null)
+        
+        if [[ -z "$primary_pod" ]]; then
+            sleep 5
+            continue
+        fi
+
+        # Get the status of the primary pod
+        pod_status=$(k3s kubectl get pod "$primary_pod" -n "ix-$appname" -o jsonpath="{.status.phase}" 2>/dev/null)
 
         if [[ "$pod_status" == "Running" ]]; then
             return 0
@@ -78,6 +88,7 @@ wait_for_postgres_pod() {
     done
     return 1
 }
+
 
 backup_cnpg_databases() {
     local appname=$1
