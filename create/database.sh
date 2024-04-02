@@ -28,7 +28,7 @@ restore_database() {
     fi
 
     # Restore the database from the dump file
-    if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- psql -d "$db_name" < "$dump_file"; then
+    if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- pg_restore -d "$db_name" -c -1 < "$dump_file"; then
         echo -e "Database restored successfully.\n"
         return 0
     else
