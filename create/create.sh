@@ -38,7 +38,10 @@ create_backup_pvc() {
     local backup_path=/mnt/${migration_path}/backup
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
 
-    DATA=$(midclt call chart.release.get_instance "$appname" | jq -c '.config')
+    DATA=$(midclt call chart.release.get_instance "$appname" | jq '.config | 
+            walk(if type == "object" then with_entries(select(.key | startswith("ix") | not)) else . end) | 
+            .persistence |= with_entries( if .value.storageClass != "SCALE-ZFS" then .value.storageClass = "" else . end)')
+    
     if [[ -z $DATA ]]; then
         echo -e "${red}Error: Failed to get app config.${reset}"
         exit 1
