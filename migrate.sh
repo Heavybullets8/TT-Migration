@@ -94,7 +94,9 @@ main() {
         create_migration_dataset
         get_pvc_parent_path
         create_app_dataset
-        backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
+        if [[ "${database_found}" == true ]]; then
+            backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
+        fi
         stop_app_if_needed
         create_backup_pvc
         create_backup_metadata
@@ -115,7 +117,10 @@ main() {
     destroy_new_apps_pvcs
     rename_migration_pvcs
     if [[ "${skip}" == true ]]; then
-        check_for_db && restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
+        check_for_db
+    fi
+    if [[ "${database_found}" == true ]]; then
+        restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
     fi
     cleanup_datasets
     start_app "${appname}"
