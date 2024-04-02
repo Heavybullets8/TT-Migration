@@ -38,9 +38,13 @@ create_backup_pvc() {
     local backup_path=/mnt/${migration_path}/backup
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
 
-    DATA=$(midclt call chart.release.get_instance "$appname" | jq '.config | 
-            walk(if type == "object" then with_entries(select(.key | startswith("ix") | not)) else . end) | 
-            .persistence |= with_entries( if .value.storageClass != "SCALE-ZFS" then .value.storageClass = "" else . end)')
+    DATA=$(midclt call chart.release.get_instance "$appname" | jq '
+        .config | 
+        walk(if type == "object" then with_entries(select(.key | startswith("ix") | not)) else . end) | 
+        .persistence |= with_entries( if .value.storageClass != "SCALE-ZFS" then .value.storageClass = "" else . end) |
+        .global.ixChartContext.isStopped = true |
+        .global.stopAll = true 
+    ')
     
     if [[ -z $DATA ]]; then
         echo -e "${red}Error: Failed to get app config.${reset}"
@@ -148,5 +152,5 @@ create_and_wait_for_pvcs() {
     done
 
     echo -e "${red}Error:${reset} Not all PVCs for $appname are bound after ${max_wait} seconds."
-    return 1
+    exit 1
 }
