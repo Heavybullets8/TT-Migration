@@ -100,6 +100,9 @@ main() {
     case $script_progress in
         start)
             prompt_app_name
+            if [[ "${force}" == false ]]; then
+                check_if_system_train
+            fi
             check_for_db
             get_pvc_info
             check_pvc_info_empty

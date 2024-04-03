@@ -26,6 +26,19 @@ check_if_app_exists() {
     cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
 }
 
+check_if_system_train() {
+    echo -e "${bold}Checking if app is in the system train...${reset}"
+    if midclt call chart.release.get_instance "$appname" | jq -r '.catalog_train' | grep -qE "^system$";then
+        echo -e "${red}App is in the system train.${reset} \
+                System train applications are rarely deleted, let alone migrated. Unless you are absolutely sure, \
+                it is recommended to skip this application. Doing so can result in permanent loss of data and \
+                configuration for various services and applications. If you are 100% sure you want to migrate this \
+                application, you can do so by running the script with the ${blue}--force${reset} flag."
+    else
+        echo -e "${green}Passed${reset}\n"
+        exit 1
+    fi
+}
 
 check_filtered_apps() {
     # Define a function to process each app name
