@@ -104,9 +104,7 @@ main() {
             backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         fi
         stop_app_if_needed
-        if [[ "${skip_pvc}" == false ]]; then
-            create_backup_pvc
-        fi
+        create_backup_pvc
         create_backup_metadata
         if [[ "$skip_pvc" == "true" ]]; then
             rename_original_pvcs
