@@ -1,35 +1,35 @@
 #!/bin/bash
 
-check_mounted(){
-    local app_name=$1
+pull_replicas() {
+    local app_name
+    app_name="$1"
 
-    if [[ -d /mnt/mounted_pvc/"$app_name" ]]; then
-        unmount_app_func "$app_name" > /dev/null 2>&1
+    # First Check
+    replica_info=$(midclt call chart.release.get_instance "$app_name" | jq '.config.workload.main.replicas // .config.controller.replicas')
+
+    # Second Check if First Check returns null or 0
+    if [[ "$replica_info" == "null" || "$replica_info" == "0" ]]; then
+        replica_info=$(k3s kubectl get deployments -n "ix-$app_name" --selector=app.kubernetes.io/instance="$app_name" -o=jsonpath='{.items[*].spec.replicas}{"\n"}')
+        # Replace 0 with 1
+        replica_info=$(echo "$replica_info" | awk '{if ($1 == 0) $1 = 1; print $1}')
     fi
-}
 
-get_apps_pool(){
-    cli -c 'app kubernetes config' | 
-        grep -E "pool\s\|" | 
-        awk -F '|' '{print $3}' | 
-        sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+    # Output the replica info or "null" if neither command returned a result
+    if [[ -z "$replica_info" || "$replica_info" == *" "* ]]; then
+        echo "null"
+    else
+        echo "$replica_info"
+    fi
 }
 
 start_app(){
     local app_name=$1
-
-    #check if app is currently mounted
-    check_mounted "$app_name"
 
     # Check if app is a cnpg instance, or an operator instance
     output=$(check_filtered_apps "$app_name")
 
 
     if [[ $output == *"${app_name},stopAll-"* ]]; then
-        ix_apps_pool=$(get_apps_pool)
-        if [[ -z "$ix_apps_pool" ]]; then
-            return 1
-        fi
 
         latest_version=$(midclt call chart.release.get_instance "$app_name" | jq -r ".chart_metadata.version")
         if [[ -z "$latest_version" ]]; then
