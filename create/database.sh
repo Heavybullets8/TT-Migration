@@ -108,7 +108,7 @@ backup_cnpg_databases() {
                                         
     # Dump the database
     if dump_database "$appname" "$dump_folder"; then
-        echo -e "${green}Sucess${reset}"
+        echo -e "${green}Sucess${reset}\n"
     else
         echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
         exit 1
