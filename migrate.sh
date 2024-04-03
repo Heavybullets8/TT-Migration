@@ -133,7 +133,9 @@ main() {
             update_or_append_variable "script_progress" "delete_original_app"
             ;&
         delete_original_app)
-            delete_original_app
+            if [[ "${skip}" == true ]]; then
+                prompt_did_you_delete || delete_original_app
+            fi
             update_or_append_variable "script_progress" "prompt_rename"
             ;&
         prompt_rename)
