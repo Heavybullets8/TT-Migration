@@ -69,14 +69,16 @@ create_backup_metadata() {
 
     # Fetch metadata
     chart_name=$(midclt call chart.release.get_instance "$appname" | jq -r '.chart_metadata.name')
+    catalog=$(midclt call chart.release.get_instance "$appname" | jq -r '.catalog')
     catalog_train=$(midclt call chart.release.get_instance "$appname" | jq -r '.catalog_train')
 
 
     # Construct JSON object with the metadata
     metadata_json=$(jq -n \
                           --arg chart_name "$chart_name" \
+                          --arg catalog "$catalog" \
                           --arg catalog_train "$catalog_train" \
-                          '{chart_name: $chart_name, catalog_train: $catalog_train}')
+                          '{chart_name: $chart_name, catalog: $catalog, catalog_train: $catalog_train}')
     
 
     mkdir -p "$metadata_path"
@@ -96,6 +98,7 @@ create_application() {
 
     metadata=$(cat "${metadata_path}/${metadata_name}")
     chart_name=$(echo "$metadata" | jq -r '.chart_name')
+    catalog=$(echo "$metadata" | jq -r '.catalog')
     catalog_train=$(echo "$metadata" | jq -r '.catalog_train')
     DATA=$(cat "${metadata_path}/${backup_name}")
 
@@ -103,9 +106,10 @@ create_application() {
     command=$(jq -n \
                     --arg release_name "$appname" \
                     --arg chart_name "$chart_name" \
+                    --arg catalog "$catalog" \
                     --arg catalog_train "$catalog_train" \
                     --argjson values "$DATA" \
-                    '{release_name: $release_name, catalog: "TRUECHARTS", item: $chart_name, train: $catalog_train, values: $values}')
+                    '{release_name: $release_name, catalog: $catalog, item: $chart_name, train: $catalog_train, values: $values}')
     
     while [[ $retry_count -lt $max_retries ]]; do
         job_id=$(midclt call chart.release.create "$command" | jq -r '.')
