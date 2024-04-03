@@ -101,6 +101,12 @@ main() {
             get_pvc_parent_path
         fi
         create_app_dataset
+
+        update_or_append_variable "appname" "${appname}"
+        update_or_append_variable "namespace" "${namespace}"
+        update_or_append_variable "database_found" "${database_found}"
+        update_or_append_variable "skip_pvc" "${skip_pvc}"
+        
         if [[ "${database_found}" == true ]]; then
             backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         fi

@@ -125,5 +125,4 @@ check_for_db() {
     else
         echo -e "${green}No databases found.${reset}\n"
     fi
-    update_or_append_variable "database_found" "${database_found}"
 }

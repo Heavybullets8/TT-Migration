@@ -25,8 +25,6 @@ prompt_app_name() {
             echo -e "${yellow}\"${appname}\" is not valid. Please enter a valid name.${reset}"
         fi
     done
-    update_or_append_variable "appname" "${appname}"
-    update_or_append_variable "namespace" "${namespace}"
 }
 
 prompt_rename() {
