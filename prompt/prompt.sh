@@ -62,6 +62,22 @@ prompt_continue_for_db() {
     echo
 }
 
+prompt_continue() {
+    while true; do
+        read -n1 -s -rp "Would you like to continue? [y/n] " key
+        if [[ $key == "y" ]]; then
+            echo
+            break
+        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
+            echo
+            exit
+        else
+            echo -e "${yellow}\nInvalid key. Please press 'y' to continue or 'n' to exit.${reset}"
+        fi
+    done
+    echo
+}
+
 rename_app() {
     while true; do
         # Prompt the user for the new app name

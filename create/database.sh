@@ -127,7 +127,7 @@ check_for_db() {
     echo -e "${yellow}A cnpg database for the application has been detected. The script can attempt a database restoration as part of the migration process. Please note that while the restoration process aims for accuracy, it might not always be successful. In the event of a restoration failure, the database SQL file will remain in the migration backup path for manual intervention.${reset}\n"
 
         prompt_continue_for_db
-        database_found=true
+        migrate_db=true
     else
         echo -e "${green}No databases found.${reset}\n"
     fi

@@ -12,9 +12,9 @@ export namespace
 export appname
 export ix_apps_pool
 export migration_path
-export database_found=false
 export rename=false
-export skip_pvc=false
+export migrate_pvs=false
+export migrate_db=false
 export script_progress="start"
 
 export script=$(readlink -f "$0")
@@ -103,19 +103,23 @@ main() {
             check_for_db
             get_pvc_info
             check_pvc_info_empty
+            if [[ "${migrate_pvs}" == false && "${migrate_dbs}" == false ]]; then
+                echo -e "${yellow}Warning: No PVC's or Databases to migrate, this will effectively just re-install the applicaiton which can be useful for forcing updates.${reset}"
+                prompt_continue 
+            fi
             create_migration_dataset
-            if [[ "${skip_pvc}" == false ]]; then
+            if [[ "${migrate_pvs}" == true ]]; then
                 get_pvc_parent_path
             fi
             create_app_dataset
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
-            update_or_append_variable "database_found" "${database_found}"
-            update_or_append_variable "skip_pvc" "${skip_pvc}"
+            update_or_append_variable "migrate_dbs" "${migrate_dbs}"
+            update_or_append_variable "migrate_pvs" "${migrate_pvs}"
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
         backup_cnpg_databases)
-            if [[ "${database_found}" == true ]]; then
+            if [[ "${migrate_db}" == true ]]; then
                 backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
             fi
             update_or_append_variable "script_progress" "create_backup_pvc"
@@ -130,7 +134,7 @@ main() {
             ;&
         rename_original_pvcs)
             stop_app_if_needed
-            if [[ "$skip_pvc" == false ]]; then
+            if [[ "$migrate_pvs" == true ]]; then
                 rename_original_pvcs
             fi
             update_or_append_variable "script_progress" "delete_original_app"
@@ -156,9 +160,9 @@ main() {
             update_or_append_variable "script_progress" "swap_pvc"
             ;&
         swap_pvc)
-            stop_app_if_needed
-            unset pvc_info
-            if [[ "${skip_pvc}" == false ]]; then
+            if [[ "${migrate_pvs}" == true ]]; then
+                stop_app_if_needed
+                unset pvc_info
                 get_pvc_info
                 check_pvc_info_empty
                 get_pvc_parent_path
@@ -168,7 +172,7 @@ main() {
             update_or_append_variable "script_progress" "restore_database"
             ;&
         restore_database)
-            if [[ "${database_found}" == true ]]; then
+            if [[ "${migrate_db}" == true ]]; then
                 restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
             fi
             update_or_append_variable "script_progress" "cleanup_datasets"

@@ -29,16 +29,9 @@ get_pvc_info() {
 
 check_pvc_info_empty() {
     if [ ${#pvc_info[@]} -eq 0 ]; then
-        
-        # If its a cnpg app, we can continue, since we still can migrate the database
-        if [ $database_found == true ]; then
-            echo -e "${yellow}Warning: No PVCs, only migrating databases.${reset}"
-            skip_pvc=true
-            return
-        fi
-
-        echo -e "${red}Error: pvc_info is empty. No PVCs found in the namespace.${reset}"
-        exit 1
+        migrate_pvs=false
+    else
+        migrate_pvs=true
     fi
 }
 
