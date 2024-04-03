@@ -103,7 +103,7 @@ main() {
             check_for_db
             get_pvc_info
             check_pvc_info_empty
-            if [[ "${migrate_pvs}" == false && "${migrate_dbs}" == false ]]; then
+            if [[ "${migrate_pvs}" == false && "${migrate_db}" == false ]]; then
                 echo -e "${yellow}Warning: No PVC's or Databases to migrate, this will effectively just re-install the applicaiton which can be useful for forcing updates.${reset}"
                 prompt_continue 
             fi
@@ -114,7 +114,7 @@ main() {
             create_app_dataset
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
-            update_or_append_variable "migrate_dbs" "${migrate_dbs}"
+            update_or_append_variable "migrate_dbs" "${migrate_db}"
             update_or_append_variable "migrate_pvs" "${migrate_pvs}"
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
