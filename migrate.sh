@@ -138,6 +138,8 @@ main() {
         delete_original_app)
             if [[ "${skip}" == true ]]; then
                 prompt_did_you_delete || delete_original_app
+            else
+                delete_original_app
             fi
             update_or_append_variable "script_progress" "prompt_rename"
             ;&
@@ -152,7 +154,7 @@ main() {
             update_or_append_variable "script_progress" "wait_for_pvcs"
             ;&
         wait_for_pvcs)
-            create_and_wait_for_pvcs
+            wait_for_pvcs
             update_or_append_variable "script_progress" "swap_pvc"
             ;&
         swap_pvc)
