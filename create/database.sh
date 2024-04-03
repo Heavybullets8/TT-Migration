@@ -29,7 +29,7 @@ restore_database() {
 
     # Restore the database from the dump file
     if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- pg_restore -d "$db_name" --clean --if-exists -1 < "$dump_file"; then
-        echo -e "${green}Database restored successfully.\n${reset}"
+        echo -e "${green}Success\n${reset}"
         return 0
     else
         echo -e "${red}Failed to restore database.\n${reset}"
@@ -108,7 +108,7 @@ backup_cnpg_databases() {
                                         
     # Dump the database
     if dump_database "$appname" "$dump_folder"; then
-        echo -e "${green}Sucess${reset}\n"
+        echo -e "${green}Success${reset}\n"
     else
         echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
         exit 1
