@@ -133,8 +133,8 @@ main() {
             update_or_append_variable "script_progress" "rename_original_pvcs"
             ;&
         rename_original_pvcs)
-            stop_app_if_needed
             if [[ "$migrate_pvs" == true ]]; then
+                stop_app_if_needed
                 rename_original_pvcs
             fi
             update_or_append_variable "script_progress" "delete_original_app"
@@ -156,7 +156,9 @@ main() {
             update_or_append_variable "script_progress" "wait_for_pvcs"
             ;&
         wait_for_pvcs)
-            wait_for_pvcs
+            if [[ "${migrate_pvs}" == true ]]; then
+                wait_for_pvcs
+            fi
             update_or_append_variable "script_progress" "swap_pvc"
             ;&
         swap_pvc)
