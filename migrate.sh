@@ -143,9 +143,15 @@ main() {
             ;&
         prompt_rename)
             prompt_rename
-            update_or_append_variable "script_progress" "create_and_wait_for_pvcs"
+            update_or_append_variable "script_progress" "create_application"
             ;&
-        create_and_wait_for_pvcs)
+        create_application)
+            if ! check_if_app_exists "${appname}"; then
+                create_application
+            fi
+            update_or_append_variable "script_progress" "wait_for_pvcs"
+            ;&
+        wait_for_pvcs)
             create_and_wait_for_pvcs
             update_or_append_variable "script_progress" "swap_pvc"
             ;&

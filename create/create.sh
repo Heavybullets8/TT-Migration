@@ -91,6 +91,8 @@ create_application() {
     local retry_count=0
     local job_state
     local job_id
+    
+    echo -e "${bold}Creating the application...${reset}"
 
     metadata=$(cat "${metadata_path}/${metadata_name}")
     chart_name=$(echo "$metadata" | jq -r '.chart_name')
@@ -128,16 +130,11 @@ create_application() {
     return 1
 }
 
-create_and_wait_for_pvcs() {
+wait_for_pvcs() {
     local namespace="ix-$appname"
     local max_wait=500  # Total wait time for PVCs to be bound
     local interval=10   # Interval between checks
     local elapsed_time=0
-
-    if ! check_if_app_exists "$appname" >/dev/null 2>&1; then
-        echo -e "${bold}Creating the application...${reset}"
-        create_application
-    fi
 
     echo -e "${bold}Waiting for PVCs to be ready...${reset}"
 
