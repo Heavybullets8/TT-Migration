@@ -106,14 +106,14 @@ main() {
         update_or_append_variable "namespace" "${namespace}"
         update_or_append_variable "database_found" "${database_found}"
         update_or_append_variable "skip_pvc" "${skip_pvc}"
-        
+
         if [[ "${database_found}" == true ]]; then
             backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
         fi
         stop_app_if_needed
         create_backup_pvc
         create_backup_metadata
-        if [[ "$skip_pvc" == "true" ]]; then
+        if [[ "$skip_pvc" == false ]]; then
             rename_original_pvcs
         fi
         delete_original_app
