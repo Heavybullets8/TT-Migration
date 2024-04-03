@@ -62,22 +62,6 @@ prompt_continue_for_db() {
     echo
 }
 
-prompt_did_you_delete() {
-    while true; do
-        read -n1 -s -rp "Did you delete the orignal app? (if not, I will attempt to) [y/n] " key
-        if [[ $key == "y" ]]; then
-            echo
-            return 0
-        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
-            echo
-            return 1
-        else
-            echo -e "${yellow}\nInvalid key. Please press 'y' to confirm or 'n' to skip.${reset}"
-        fi
-    done
-    echo
-}
-
 rename_app() {
     while true; do
         # Prompt the user for the new app name

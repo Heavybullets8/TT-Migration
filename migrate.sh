@@ -136,8 +136,8 @@ main() {
             update_or_append_variable "script_progress" "delete_original_app"
             ;&
         delete_original_app)
-            if [[ "${skip}" == true ]]; then
-                prompt_did_you_delete || delete_original_app
+            if [[ "${skip}" == true ]] && check_if_app_exists "${appname}"; then
+                delete_original_app
             else
                 delete_original_app
             fi
