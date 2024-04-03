@@ -96,7 +96,7 @@ wait_for_postgres_pod() {
 backup_cnpg_databases() {
     local appname=$1
     local dump_folder=$2
-    app_status=$(cli -m csv -c 'app chart_release query name,status' | grep "^$appname," | awk -F ',' '{print $2}')
+    app_status=$(cli -m csv -c 'app chart_release query name,status' | grep "^$appname," | awk -F ',' '{print $2}' | tr -d " \t\r" )
 
     # Start the app if it is stopped
     if [[ $app_status == "STOPPED" ]]; then
