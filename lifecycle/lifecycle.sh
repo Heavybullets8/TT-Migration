@@ -31,7 +31,7 @@ delete_original_app() {
         k3s kubectl delete pods --all -n "$namespace" --grace-period=0 --force > /dev/null 2>&1
     fi
 
-    echo -e "${bold}Deleting the original app...${reset}"
+    echo -e "\n${bold}Deleting the original app...${reset}"
     if cli -c "app chart_release delete release_name=\"${appname}\""; then
         echo -e "${green}Success${reset}"
         echo

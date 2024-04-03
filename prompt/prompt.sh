@@ -45,6 +45,23 @@ prompt_rename() {
     echo
 }
 
+prompt_continue_for_db() {
+    while true; do
+        read -n1 -s -rp "Would you like the script to attempt the restore? [y/n] " key
+        if [[ $key == "y" ]]; then
+            echo
+            echo -e "${green}Attempting a restore...${reset}\n"
+            break
+        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
+            echo
+            exit
+        else
+            echo -e "${yellow}\nInvalid key. Please press 'y' to rename the app or 'n' to skip.${reset}"
+        fi
+    done
+    echo
+}
+
 rename_app() {
     while true; do
         # Prompt the user for the new app name

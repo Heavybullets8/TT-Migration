@@ -98,6 +98,8 @@ backup_cnpg_databases() {
     local dump_folder=$2
     app_status=$(cli -m csv -c 'app chart_release query name,status' | grep "^$appname," | awk -F ',' '{print $2}' | tr -d " \t\r" )
 
+    echo -e "${bold}Dumping database...${reset}"
+
     # Start the app if it is stopped
     if [[ $app_status == "STOPPED" ]]; then
         start_app "$appname"
@@ -105,7 +107,9 @@ backup_cnpg_databases() {
     fi
                                         
     # Dump the database
-    if ! dump_database "$appname" "$dump_folder"; then
+    if dump_database "$appname" "$dump_folder"; then
+        echo -e "${green}Sucess${reset}"
+    else
         echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
         exit 1
     fi
@@ -120,7 +124,11 @@ check_for_db() {
     echo -e "${bold}Checking for databases...${reset}"
 
     if k3s kubectl get cluster -A | grep -E '^(ix-.*\s).*-cnpg-main-' | awk '{gsub(/^ix-/, "", $1); print $1}' | grep -q "$appname"; then
-        echo -e "${yellow}Found: Attempting a restore...${reset}\n"
+    echo -e "${yellow}A cnpg database for the application has been detected. The script can attempt a database restoration as part of the migration process. 
+            Please note that while the restoration process aims for accuracy, it might not always be successful. 
+            In the event of a restoration failure, the database SQL file will remain in the migration backup path for manual intervention.${reset}\n"
+
+        prompt_continue_for_db
         database_found=true
     else
         echo -e "${green}No databases found.${reset}\n"

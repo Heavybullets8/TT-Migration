@@ -52,7 +52,7 @@ script_help() {
     echo -e "${bold}Options:${reset}"
     echo -e "  ${blue}-s${reset}, ${blue}--skip${reset}       Continue with a previously started migration"
     echo -e "  ${blue}-n${reset}, ${blue}--no-update${reset}  Do not check for script updates"
-    echo -e "  ${blue}--force${reset}       Force migration without checking for db pods"
+    echo -e "  ${blue}--force${reset}                         Force migration without checking for db pods"
 }
 
 # Parse arguments
