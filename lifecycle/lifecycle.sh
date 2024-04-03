@@ -22,6 +22,7 @@ stop_app_if_needed() {
 
 delete_original_app() {
     local namespace="ix-$appname"
+    local dataset="${ix_apps_pool}/ix-applications/releases/${appname}"
 
     echo -e "${bold}Checking for pods in $namespace...${reset}"
     local total_pods
@@ -32,14 +33,25 @@ delete_original_app() {
     fi
 
     echo -e "\n${bold}Deleting the original app...${reset}"
-    if cli -c "app chart_release delete release_name=\"${appname}\""; then
+    if output=$(cli -c "app chart_release delete release_name=\"${appname}\"" 2>&1); then
         echo -e "${green}Success${reset}"
-        echo
     else
-        echo -e "${red}Error: Failed to delete the old version of the app.${reset}"
-        exit 1
+        echo "$output" | grep -q "cannot destroy '${dataset}'" && dataset_busy=true || dataset_busy=false
+        if [[ "$dataset_busy" == true ]]; then
+            echo -e "${yellow}Dataset is busy, attempting workaround...${reset}"
+            if zfs set mountpoint=/mnt/temporary_mount "$dataset" && zfs destroy -r "$dataset"; then
+                echo -e "${green}Workaround success: ${dataset} destroyed.${reset}"
+            else
+                echo -e "${red}Workaround failed: Could not destroy ${dataset}.${reset}"
+                return 1
+            fi
+        else
+            echo -e "${red}Error: Failed to delete the old version of the app. Error details: ${output}${reset}"
+            return 1
+        fi
     fi
 }
+
 
 
 check_filtered_apps() {
