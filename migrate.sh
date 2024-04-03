@@ -96,7 +96,9 @@ main() {
         get_pvc_info
         check_pvc_info_empty
         create_migration_dataset
-        get_pvc_parent_path
+        if [[ "${skip_pvc}" == false ]]; then
+            get_pvc_parent_path
+        fi
         create_app_dataset
         if [[ "${database_found}" == true ]]; then
             backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
