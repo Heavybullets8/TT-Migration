@@ -14,6 +14,8 @@ export ix_apps_pool
 export migration_path
 export database_found=false
 export rename=false
+export skip_pvc=false
+
 export script=$(readlink -f "$0")
 export script_path=$(dirname "$script")
 export script_name="migrate.sh"
@@ -32,6 +34,7 @@ current_version=$(git rev-parse --abbrev-ref HEAD)
 source check/check.sh
 source create/create.sh
 source create/database.sh
+source create/vars.sh
 source find/find.sh
 source lifecycle/lifecycle.sh
 source lifecycle/start_app.sh
@@ -86,11 +89,12 @@ main() {
 
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
+        import_variables
     else
         prompt_app_name
+        check_for_db
         get_pvc_info
         check_pvc_info_empty
-        check_for_db
         create_migration_dataset
         get_pvc_parent_path
         create_app_dataset
@@ -100,7 +104,9 @@ main() {
         stop_app_if_needed
         create_backup_pvc
         create_backup_metadata
-        rename_original_pvcs
+        if [[ "$skip_pvc" == "true" ]]; then
+            rename_original_pvcs
+        fi
         delete_original_app
     fi
     
@@ -109,16 +115,14 @@ main() {
 
     stop_app_if_needed
     unset pvc_info
-    get_pvc_info
-    check_pvc_info_empty
-    
-    get_pvc_parent_path
-
-    destroy_new_apps_pvcs
-    rename_migration_pvcs
-    if [[ "${skip}" == true ]]; then
-        check_for_db
+    if [[ "${skip_pvc}" == false ]]; then
+        get_pvc_info
+        check_pvc_info_empty
+        get_pvc_parent_path
+        destroy_new_apps_pvcs
+        rename_migration_pvcs
     fi
+    
     if [[ "${database_found}" == true ]]; then
         restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
     fi

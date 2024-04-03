@@ -15,7 +15,7 @@ restore_database() {
     cnpg_pod=$(k3s kubectl get pods -n "ix-$app" --no-headers -o custom-columns=":metadata.name" -l role=primary | head -n 1)
 
     if [[ -z $cnpg_pod ]]; then
-        echo -e "Failed to get cnpg pod for $app."
+        echo -e "${red}Failed to get cnpg pod for $app.${reset}"
         exit 1
     fi
 
@@ -23,16 +23,16 @@ restore_database() {
     db_name=$(midclt call chart.release.get_instance "$app" | jq -r .config.cnpg.main.database)
 
     if [[ -z $db_name ]]; then
-        echo -e "Failed to get database name for $app."
+        echo -e "${red}Failed to get database name for $app.${reset}"
         exit 1
     fi
 
     # Restore the database from the dump file
     if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- pg_restore -d "$db_name" --clean --if-exists -1 < "$dump_file"; then
-        echo -e "Database restored successfully.\n"
+        echo -e "${green}Database restored successfully.\n${reset}"
         return 0
     else
-        echo -e "Failed to restore database.\n"
+        echo -e "${red}Failed to restore database.\n${reset}"
         exit 1
     fi
 }
@@ -45,7 +45,7 @@ dump_database() {
     cnpg_pod=$(k3s kubectl get pods -n "ix-$app" --no-headers -o custom-columns=":metadata.name" -l role=primary | head -n 1)
 
     if [[ -z $cnpg_pod ]]; then
-        echo "Failed to get cnpg pod for $app."
+        echo -e "${red}Failed to get cnpg pod for $app.${reset}"
         return 1
     fi
 
@@ -53,7 +53,7 @@ dump_database() {
     db_name=$(midclt call chart.release.get_instance "$app" | jq .config.cnpg.main.database)
 
     if [[ -z $db_name ]]; then
-        echo "Failed to get database name for $app."
+        echo -e "${red}Failed to get database name for $app.${reset}"
         return 1
     fi
 
@@ -125,4 +125,5 @@ check_for_db() {
     else
         echo -e "${green}No databases found.${reset}\n"
     fi
+    update_or_append_variable "database_found" "${database_found}"
 }
