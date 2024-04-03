@@ -89,7 +89,8 @@ main() {
 
     if [[ "${skip}" == true ]]; then
         prompt_migration_path
-        import_variables
+        # import_variables
+        source "/mnt/$migration_path/variables.txt"
     else
         prompt_app_name
         check_for_db
