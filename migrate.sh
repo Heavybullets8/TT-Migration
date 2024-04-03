@@ -148,7 +148,7 @@ main() {
             update_or_append_variable "script_progress" "create_application"
             ;&
         create_application)
-            if ! check_if_app_exists "${appname}"; then
+            if ! check_if_app_exists "${appname}" >/dev/null 2>&1; then
                 create_application
             fi
             update_or_append_variable "script_progress" "wait_for_pvcs"
