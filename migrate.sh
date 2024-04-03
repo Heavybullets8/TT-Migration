@@ -17,19 +17,22 @@ export migrate_pvs=false
 export migrate_db=false
 export script_progress="start"
 
+# flags
+export force=false
+export skip=false
+export no_update=false
+
+
 export script=$(readlink -f "$0")
 export script_path=$(dirname "$script")
 export script_name="migrate.sh"
 export args=("$@")
-skip=false
 script=$(readlink -f "$0")
 script_path=$(dirname "$script")
 script_name="migrate.sh"
 args=("$@")
-
 cd "$script_path" || { echo "Error: Failed to change to script directory"; exit; } 
 
-export no_update=false
 export pvc_info=()
 export current_version
 current_version=$(git rev-parse --abbrev-ref HEAD)
