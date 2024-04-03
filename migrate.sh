@@ -26,6 +26,9 @@ script=$(readlink -f "$0")
 script_path=$(dirname "$script")
 script_name="migrate.sh"
 args=("$@")
+
+cd "$script_path" || { echo "Error: Failed to change to script directory"; exit; } 
+
 export no_update=false
 export pvc_info=()
 export current_version
@@ -53,7 +56,7 @@ script_help() {
     echo -e "${bold}Options:${reset}"
     echo -e "  ${blue}-s${reset}, ${blue}--skip${reset}       Continue with a previously started migration"
     echo -e "  ${blue}-n${reset}, ${blue}--no-update${reset}  Do not check for script updates"
-    echo -e "  ${blue}--force${reset}                         Force migration without checking for db pods"
+    echo -e "  ${blue}--force${reset}               Force migration without checking for db pods"
 }
 
 # Parse arguments
