@@ -15,6 +15,7 @@ export migration_path
 export database_found=false
 export rename=false
 export skip_pvc=false
+export script_progress="start"
 
 export script=$(readlink -f "$0")
 export script_path=$(dirname "$script")
@@ -91,52 +92,87 @@ main() {
         prompt_migration_path
         # import_variables
         source "/mnt/$migration_path/variables.txt"
-    else
-        prompt_app_name
-        check_for_db
-        get_pvc_info
-        check_pvc_info_empty
-        create_migration_dataset
-        if [[ "${skip_pvc}" == false ]]; then
-            get_pvc_parent_path
-        fi
-        create_app_dataset
-
-        update_or_append_variable "appname" "${appname}"
-        update_or_append_variable "namespace" "${namespace}"
-        update_or_append_variable "database_found" "${database_found}"
-        update_or_append_variable "skip_pvc" "${skip_pvc}"
-
-        if [[ "${database_found}" == true ]]; then
-            backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
-        fi
-        stop_app_if_needed
-        create_backup_pvc
-        create_backup_metadata
-        if [[ "$skip_pvc" == false ]]; then
-            rename_original_pvcs
-        fi
-        delete_original_app
     fi
-    
-    prompt_rename
-    create_and_wait_for_pvcs
 
-    stop_app_if_needed
-    unset pvc_info
-    if [[ "${skip_pvc}" == false ]]; then
-        get_pvc_info
-        check_pvc_info_empty
-        get_pvc_parent_path
-        destroy_new_apps_pvcs
-        rename_migration_pvcs
-    fi
-    
-    if [[ "${database_found}" == true ]]; then
-        restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
-    fi
-    cleanup_datasets
-    start_app "${appname}"
+    case $script_progress in
+        start)
+            prompt_app_name
+            check_for_db
+            get_pvc_info
+            check_pvc_info_empty
+            create_migration_dataset
+            if [[ "${skip_pvc}" == false ]]; then
+                get_pvc_parent_path
+            fi
+            create_app_dataset
+            update_or_append_variable "appname" "${appname}"
+            update_or_append_variable "namespace" "${namespace}"
+            update_or_append_variable "database_found" "${database_found}"
+            update_or_append_variable "skip_pvc" "${skip_pvc}"
+            update_or_append_variable "script_progress" "backup_cnpg_databases"
+            ;& 
+        backup_cnpg_databases)
+            if [[ "${database_found}" == true ]]; then
+                backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
+            fi
+            update_or_append_variable "script_progress" "create_backup_pvc"
+            ;&
+        create_backup_pvc)
+            create_backup_pvc
+            update_or_append_variable "script_progress" "create_backup_metadata"
+            ;&
+        create_backup_metadata)
+            create_backup_metadata
+            update_or_append_variable "script_progress" "rename_original_pvcs"
+            ;&
+        rename_original_pvcs)
+            stop_app_if_needed
+            if [[ "$skip_pvc" == false ]]; then
+                rename_original_pvcs
+            fi
+            update_or_append_variable "script_progress" "delete_original_app"
+            ;&
+        delete_original_app)
+            delete_original_app
+            update_or_append_variable "script_progress" "prompt_rename"
+            ;&
+        prompt_rename)
+            prompt_rename
+            update_or_append_variable "script_progress" "create_and_wait_for_pvcs"
+            ;&
+        create_and_wait_for_pvcs)
+            create_and_wait_for_pvcs
+            update_or_append_variable "script_progress" "swap_pvc"
+            ;&
+        swap_pvc)
+            stop_app_if_needed
+            unset pvc_info
+            if [[ "${skip_pvc}" == false ]]; then
+                get_pvc_info
+                check_pvc_info_empty
+                get_pvc_parent_path
+                destroy_new_apps_pvcs
+                rename_migration_pvcs
+            fi
+            update_or_append_variable "script_progress" "restore_database"
+            ;&
+        restore_database)
+            if [[ "${database_found}" == true ]]; then
+                restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
+            fi
+            update_or_append_variable "script_progress" "cleanup_datasets"
+            ;&
+        cleanup_datasets)
+            cleanup_datasets
+            ;&
+        start_app)
+            start_app "${appname}"
+            ;;
+        *)
+            echo -e "${red}Error: Invalid script progress${reset}"
+            exit 1
+            ;;
+    esac
 }
 
 main
