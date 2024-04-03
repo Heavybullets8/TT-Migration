@@ -5,14 +5,18 @@ update_or_append_variable() {
     local value="$2"
     local file="/mnt/$migration_path/variables.txt"
 
-    if grep -q "^${variable_name}=" "$file"; then
-        # Variable exists, update it
+    if [ ! -f "$file" ]; then
+        echo "${variable_name}=${value}" > "$file"
+        return
+    fi
+
+    if grep -q "^${variable_name}=" "$file" 2>/dev/null; then
         sed -i "s/^${variable_name}=.*/${variable_name}=${value}/" "$file"
     else
-        # Variable does not exist, append it
         echo "${variable_name}=${value}" >> "$file"
     fi
 }
+
 
 import_variables() {
     local file_path="/mnt/$migration_path/variables.txt"
