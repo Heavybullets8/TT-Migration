@@ -136,9 +136,7 @@ main() {
             update_or_append_variable "script_progress" "delete_original_app"
             ;&
         delete_original_app)
-            if [[ "${skip}" == true ]] && check_if_app_exists "${appname}"; then
-                delete_original_app
-            else
+            if check_if_app_exists "${appname}" >/dev/null 2>&1; then
                 delete_original_app
             fi
             update_or_append_variable "script_progress" "prompt_rename"
