@@ -11,6 +11,11 @@ restore_database() {
 
     echo -e "${bold}Restoring database${reset}..."
 
+    app_status=$(cli -m csv -c 'app chart_release query name,status' | grep "^$appname," | awk -F ',' '{print $2}' | tr -d " \t\r" )
+    if [[ $app_status == "STOPPED" ]]; then
+        start_app "$app"
+    fi
+
     if ! wait_for_postgres_pod "$app"; then
         echo -e "${red}Postgres pod failed to start.${reset}"
         exit 1
