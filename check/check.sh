@@ -21,28 +21,9 @@ fi
 }
 
 check_if_app_exists() {
+    local appname=$1
     echo -e "${bold}Checking if app exists...${reset}"
     cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${appname}$" 
-}
-
-wait_for_app() {
-    local timeout=500
-    local elapsed_time=0
-    local interval=10
-
-    echo -e "${bold}Waiting for app '${appname}' to exist...${reset}"
-
-    while [ $elapsed_time -lt $timeout ]; do
-        if check_if_app_exists "$appname"; then
-            echo -e "${green}Success${reset}"
-            return 0
-        fi
-        sleep $interval
-        ((elapsed_time += interval))
-    done
-
-    echo -e "${red}Timeout reached. App '${appname}' not found after ${timeout} seconds.${reset}"
-    exit 1
 }
 
 check_if_system_train() {

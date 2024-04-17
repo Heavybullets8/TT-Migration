@@ -5,7 +5,7 @@ update_or_append_variable() {
     local value="$2"
     local file="/mnt/$migration_path/variables.txt"
 
-    # Check if the value contains spaces that require quoting
+    # Check if the value contains spaces or special characters that require quoting
     if [[ "$value" =~ [[:space:]] ]]; then
         value="\"$value\""
     fi
@@ -16,7 +16,8 @@ update_or_append_variable() {
     fi
 
     if grep -q "^${variable_name}=" "$file" 2>/dev/null; then
-        sed -i "s/^${variable_name}=.*/${variable_name}=${value}/" "$file"
+        # Using a different delimiter ('|') to avoid issues with paths that contain '/'
+        sed -i "s|^${variable_name}=.*|${variable_name}=${value}|" "$file"
     else
         echo "${variable_name}=${value}" >> "$file"
     fi
