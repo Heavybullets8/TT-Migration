@@ -5,6 +5,11 @@ update_or_append_variable() {
     local value="$2"
     local file="/mnt/$migration_path/variables.txt"
 
+    # Check if the value contains spaces that require quoting
+    if [[ "$value" =~ [[:space:]] ]]; then
+        value="\"$value\""
+    fi
+
     if [ ! -f "$file" ]; then
         echo "${variable_name}=${value}" > "$file"
         return
