@@ -2,7 +2,7 @@
 
 restore_database() {
     app="$1"
-    dump_file="$2"
+    dump_file=$(find "/mnt/${migration_path}/backup/" -type f -name '*.sql' -print -quit)
 
     echo -e "${bold}Restoring database${reset}..."
 

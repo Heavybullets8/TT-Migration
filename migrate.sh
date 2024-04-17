@@ -194,7 +194,7 @@ main() {
             ;&
         restore_database)
             if [[ "${migrate_db}" == true ]]; then
-                restore_database "${appname}" "/mnt/${migration_path}/backup/${appname}.sql"
+                restore_database "${appname}"
             fi
             update_or_append_variable "script_progress" "cleanup_datasets"
             ;&
