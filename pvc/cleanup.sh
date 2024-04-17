@@ -52,7 +52,7 @@ destroy_new_apps_pvcs() {
 
 cleanup_datasets() {
     local base_path="${ix_apps_pool}/migration"
-    local app_dataset="${base_path}/${appname}"
+    local app_dataset="${migration_path}"
 
     # Remove the app dataset
     echo -e "${bold}Cleaning up app dataset...${reset}"
