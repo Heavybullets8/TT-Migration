@@ -20,6 +20,26 @@ stop_app_if_needed() {
     echo
 }
 
+start_app_if_needed() {
+    # Stop application if not stopped
+    status=$(cli -m csv -c 'app chart_release query name,status' | 
+                grep "^$appname," | 
+                awk -F ',' '{print $2}'| 
+                sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    if [[ "$status" == "STOPPED" ]]; then
+        echo -e "${bold}Starting the app...${reset}"
+        if start_app "${appname}"; then
+            echo -e "${green}Success${reset}"
+        else
+            echo -e "${red}Error: Failed to start the app.${reset}"
+            exit 1
+        fi
+    fi
+    echo
+}
+
+
+
 delete_original_app() {
     local namespace="ix-$appname"
     local dataset="${ix_apps_pool}/ix-applications/releases/${appname}"

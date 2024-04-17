@@ -194,6 +194,7 @@ main() {
             ;&
         restore_database)
             if [[ "${migrate_db}" == true ]]; then
+                start_app_if_needed
                 restore_database "${appname}"
             fi
             update_or_append_variable "script_progress" "cleanup_datasets"
