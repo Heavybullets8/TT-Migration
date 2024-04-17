@@ -132,3 +132,23 @@ check_for_db() {
         echo -e "${green}No databases found.${reset}\n"
     fi
 }
+
+search_for_database_file() {
+    local search_directory="$1"
+    local database_filename="$2"
+    local database_path="${search_directory}/${database_filename}" 
+
+    if [[ -f "$database_path" ]]; then
+        return 0
+    elif [[ -f "${database_path}.gz" ]]; then
+        echo -e "${yellow}Found compressed database file. Decompressing...${reset}"
+        if gunzip "${database_path}.gz"; then
+            return 0
+        else
+            echo -e "${red}Error decompressing database file.${reset}"
+            return 1
+        fi
+    else
+        return 1
+    fi
+}

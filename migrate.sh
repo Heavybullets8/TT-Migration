@@ -126,7 +126,16 @@ main() {
             ;& 
         backup_cnpg_databases)
             if [[ "${migrate_db}" == true ]]; then
-                backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
+                if prompt_dump_type; then  
+                    backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
+                else 
+                    if search_for_database_file "/mnt/${migration_path}/backup" "${appname}.sql"; then
+                        echo -e "${green}Database file found. ${reset}" 
+                    else
+                        echo -e "${yellow}Database file not found. Please provide the database file in the backup folder (/mnt/${migration_path}/backup) and re-run the script with the --skip flag, then select the manual option again.${reset}"
+                        exit 1 
+                    fi
+                fi
             fi
             update_or_append_variable "script_progress" "create_backup_pvc"
             ;&
