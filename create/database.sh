@@ -135,20 +135,29 @@ check_for_db() {
 
 search_for_database_file() {
     local search_directory="$1"
-    local database_filename="$2"
-    local database_path="${search_directory}/${database_filename}" 
+    local database_path
 
-    if [[ -f "$database_path" ]]; then
-        return 0
-    elif [[ -f "${database_path}.gz" ]]; then
+    # Find any .sql or .sql.gz file
+    database_path=$(find "$search_directory" -maxdepth 1 -type f \( -name "*.sql" -o -name "*.sql.gz" \) -print -quit)
+
+    if [[ -z "$database_path" ]]; then
+        return 1  # No database file found
+    fi
+
+    # Handle compressed files
+    if [[ "$database_path" =~ \.gz$ ]]; then
         echo -e "${yellow}Found compressed database file. Decompressing...${reset}"
-        if gunzip "${database_path}.gz"; then
-            return 0
-        else
+        if ! gunzip -c "$database_path" > "${search_directory}/${appname}.sql"; then
             echo -e "${red}Error decompressing database file.${reset}"
             return 1
         fi
-    else
-        return 1
+        database_path="${search_directory}/${appname}.sql"  # Update path after decompression
     fi
+
+    # Rename the file to appname.sql
+    if [[ "$database_path" != "${search_directory}/${appname}.sql" ]]; then
+        mv "$database_path" "${search_directory}/${appname}.sql"
+    fi
+
+    return 0 
 }
