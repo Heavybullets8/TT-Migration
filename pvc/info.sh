@@ -26,6 +26,10 @@ get_pvc_info() {
     done < <(echo "$pvc_data" | jq -c '.items[]')
 }
 
+get_original_pvs_count() {
+    original_pvs_count=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
+    update_or_append_variable original_pvs_count "$original_pvs_count"
+}
 
 check_pvc_info_empty() {
     if [ ${#pvc_info[@]} -eq 0 ]; then

@@ -10,6 +10,7 @@ export bold='\033[1m'
 export gray='\033[38;5;7m'
 export namespace
 export appname
+export original_pvs_count
 export ix_apps_pool
 export migration_path
 export rename=false
@@ -117,6 +118,7 @@ main() {
             create_app_dataset
             if [[ "${migrate_pvs}" == true ]]; then
                 get_pvc_parent_path
+                get_original_pvs_count
             fi
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
