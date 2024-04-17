@@ -114,10 +114,10 @@ main() {
                 prompt_continue 
             fi
             create_migration_dataset
+            create_app_dataset
             if [[ "${migrate_pvs}" == true ]]; then
                 get_pvc_parent_path
             fi
-            create_app_dataset
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
             update_or_append_variable "migrate_db" "${migrate_db}"
