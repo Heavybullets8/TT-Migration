@@ -173,6 +173,7 @@ main() {
             update_or_append_variable "script_progress" "wait_for_pvcs"
             ;&
         wait_for_pvcs)
+            wait_for_app
             if [[ "${migrate_pvs}" == true ]]; then
                 wait_for_pvcs
             fi

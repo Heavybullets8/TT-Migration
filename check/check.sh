@@ -26,6 +26,26 @@ check_if_app_exists() {
     cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
 }
 
+wait_for_app() {
+    local timeout=500
+    local elapsed_time=0
+    local interval=10
+
+    echo -e "${bold}Waiting for app '${app_name}' to exist...${reset}"
+
+    while [ $elapsed_time -lt $timeout ]; do
+        if check_if_app_exists "$app_name"; then
+            echo -e "${green}Success${reset}"
+            return 0
+        fi
+        sleep $interval
+        ((elapsed_time += interval))
+    done
+
+    echo -e "${red}Timeout reached. App '${app_name}' not found after ${timeout} seconds.${reset}"
+    exit 1
+}
+
 check_if_system_train() {
     echo -e "${bold}Checking if app is in the system train...${reset}"
     if midclt call chart.release.get_instance "$appname" | jq -r '.catalog_train' | grep -qE "^system$";then

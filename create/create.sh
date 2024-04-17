@@ -141,26 +141,21 @@ wait_for_pvcs() {
     local elapsed_time=0
 
     echo -e "${bold}Waiting for PVCs to be ready...${reset}"
+    while [[ $elapsed_time -lt $max_wait ]]; do
+        local bound_pvcs total_pvcs
+        bound_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
+        total_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | wc -l)
+        
+        if [[ $total_pvcs -gt 0 && $bound_pvcs -eq $total_pvcs ]]; then
+            echo -e "${green}Success${reset}"
+            return 0
+        else
+            sleep $interval
+            elapsed_time=$((elapsed_time + interval))
+            echo "Waiting... ${elapsed_time}s elapsed."
+        fi
+    done
 
-    if [[ "$skip_pvc" == true ]]; then
-        echo -e "${yellow}Skipped${reset}"
-    else
-        while [[ $elapsed_time -lt $max_wait ]]; do
-            local bound_pvcs total_pvcs
-            bound_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
-            total_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | wc -l)
-            
-            if [[ $total_pvcs -gt 0 && $bound_pvcs -eq $total_pvcs ]]; then
-                echo -e "${green}Success${reset}"
-                return 0
-            else
-                sleep $interval
-                elapsed_time=$((elapsed_time + interval))
-                echo "Waiting... ${elapsed_time}s elapsed."
-            fi
-        done
-
-        echo -e "${red}Error:${reset} Not all PVCs for $appname are bound after ${max_wait} seconds."
-        exit 1
-    fi
+    echo -e "${red}Error:${reset} Not all PVCs for $appname are bound after ${max_wait} seconds."
+    exit 1
 }
