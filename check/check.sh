@@ -21,9 +21,8 @@ fi
 }
 
 check_if_app_exists() {
-    local app_name=$1
     echo -e "${bold}Checking if app exists...${reset}"
-    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
+    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${appname}$" 
 }
 
 wait_for_app() {
@@ -31,10 +30,10 @@ wait_for_app() {
     local elapsed_time=0
     local interval=10
 
-    echo -e "${bold}Waiting for app '${app_name}' to exist...${reset}"
+    echo -e "${bold}Waiting for app '${appname}' to exist...${reset}"
 
     while [ $elapsed_time -lt $timeout ]; do
-        if check_if_app_exists "$app_name"; then
+        if check_if_app_exists "$appname"; then
             echo -e "${green}Success${reset}"
             return 0
         fi
@@ -42,7 +41,7 @@ wait_for_app() {
         ((elapsed_time += interval))
     done
 
-    echo -e "${red}Timeout reached. App '${app_name}' not found after ${timeout} seconds.${reset}"
+    echo -e "${red}Timeout reached. App '${appname}' not found after ${timeout} seconds.${reset}"
     exit 1
 }
 
