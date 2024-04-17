@@ -128,7 +128,8 @@ main() {
             if [[ "${migrate_db}" == true ]]; then
                 if prompt_dump_type; then  
                     backup_cnpg_databases "${appname}" "/mnt/${migration_path}/backup"
-                else 
+                else
+                    mkdir -p "/mnt/${migration_path}/backup"
                     if search_for_database_file "/mnt/${migration_path}/backup" "${appname}.sql"; then
                         echo -e "${green}Database file found. ${reset}" 
                     else
