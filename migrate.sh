@@ -98,7 +98,6 @@ main() {
         prompt_migration_path
         # import_variables
         source "/mnt/$migration_path/variables.txt"
-        get_pvc_info
     fi
 
     case $script_progress in
@@ -133,6 +132,7 @@ main() {
                     mkdir -p "/mnt/${migration_path}/backup"
                     if search_for_database_file "/mnt/${migration_path}/backup" "${appname}.sql"; then
                         echo -e "${green}Database file found. ${reset}" 
+                        [[ "${migrate_pvs}" == true ]] && get_pvc_info
                     else
                         echo -e "${yellow}Database file not found. Please provide the database file in the backup folder ${blue}/mnt/${migration_path}/backup${yellow} and re-run the script with the ${blue}--skip${yellow} flag, then select the manual option again.${reset}"
                         exit 1 

@@ -48,4 +48,5 @@ get_pvc_parent_path() {
     fi
 
     pvc_parent_path="$pvc_path"
+    update_or_append_variable pvc_parent_path "$pvc_parent_path"
 }
