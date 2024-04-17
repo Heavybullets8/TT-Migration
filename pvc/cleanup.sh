@@ -52,39 +52,26 @@ destroy_new_apps_pvcs() {
 
 cleanup_datasets() {
     local base_path="${ix_apps_pool}/migration"
-    local child_dataset datasets_to_remove base_name
+    local app_dataset="${base_path}/${appname}"
 
-    base_name="$base_path"
-
-    # List child datasets
-    while IFS= read -r child_dataset; do
-        # Check if a child dataset has grandchild datasets
-        if ! zfs list -H -d 1 -o name -t filesystem -r "$child_dataset" 2>/dev/null | grep -q -v "^${child_dataset}$"; then
-            datasets_to_remove+=("$child_dataset")
-        fi
-    done < <(zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -v "^${base_name}$")
-
-    # Remove child datasets without grandchild datasets
-    if [ ${#datasets_to_remove[@]} -gt 0 ]; then
-        echo -e "${bold}Cleaning up...${reset}"
-        for dataset in "${datasets_to_remove[@]}"; do
-            if zfs destroy "$dataset"; then
-                echo -e "${green}Removed empty dataset: ${blue}$dataset${reset}"
-            else
-                echo -e "${red}Error: Failed to remove empty dataset: ${blue}$dataset${reset}"
-            fi
-        done
-        echo
+    # Remove the app dataset
+    echo -e "${bold}Cleaning up app dataset...${reset}"
+    if zfs destroy "${app_dataset}"; then
+        echo -e "${green}Removed app dataset: ${blue}${app_dataset}${reset}"
+    else
+        echo -e "${red}Error: Failed to remove app dataset: ${blue}${app_dataset}${reset}"
     fi
+    echo
 
-    # Remove base_path dataset if it has no child datasets
-    if ! zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -q -v "^${base_name}$"; then
+    # Check if the base path has any remaining child datasets
+    if ! zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -q -v "^${base_path}$"; then
+        # Remove the base path dataset if it's empty
         echo -e "Removing base path dataset as it has no child datasets..."
-        if zfs destroy -r "$base_path"; then
-            echo -e "${green}Removed base path dataset: ${blue}$base_path${reset}"
+        if zfs destroy "$base_path"; then
+            echo -e "${green}Removed base path dataset: ${blue}${base_path}${reset}"
         else
-            echo -e "${red}Error: Failed to remove base path dataset: ${blue}$base_path${reset}"
+            echo -e "${red}Error: Failed to remove base path dataset: ${blue}${base_path}${reset}"
         fi
-        echo
+            echo
     fi
 }
