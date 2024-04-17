@@ -120,7 +120,7 @@ main() {
             create_app_dataset
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
-            update_or_append_variable "migrate_dbs" "${migrate_db}"
+            update_or_append_variable "migrate_db" "${migrate_db}"
             update_or_append_variable "migrate_pvs" "${migrate_pvs}"
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
