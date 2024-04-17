@@ -98,6 +98,7 @@ main() {
         prompt_migration_path
         # import_variables
         source "/mnt/$migration_path/variables.txt"
+        get_pvc_info
     fi
 
     case $script_progress in
