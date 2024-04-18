@@ -21,6 +21,7 @@ prompt_app_name() {
                 echo -e "\nIf its an old migration, you can remove the dataset with:"
                 echo -e "     zfs destroy -r \"${ix_apps_pool}/migration/${appname}\"${reset}"
                 echo -e "Please only do this if you are certain the application migration dataset listed is not from a recently failed migration.${reset}"
+                exit 1
             fi
 
             # Check if the app exists
