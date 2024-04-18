@@ -1,5 +1,5 @@
 # Migration Script for TrueNAS SCALE
-This script is designed to migrate most applications on TrueNAS SCALE. Occasionally, breaking changes occur which make updates impossible. This script may help overcome such issues by facilitating safe and effective migration of applications.
+This script is designed to migrate most applications on TrueNAS SCALE. Occasionally, breaking changes occur which make updates impossible. This script may help overcome such issues by facilitating safe and effective migration of applications. Works with PVC's, CNPG Databases, both, or neither. 
 
 <br>
 
