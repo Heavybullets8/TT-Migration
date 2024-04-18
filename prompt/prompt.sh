@@ -17,9 +17,9 @@ prompt_app_name() {
             if zfs list "${ix_apps_pool}/migration/${appname}" &> /dev/null; then
                 echo -e "${red}Error: ${blue}${appname}${red} is already in the migration pool: ${ix_apps_pool}/migration/${appname}${reset}"
                 echo -e "\nIf the application has failed, and you want to complete from a previous step:"
-                echo -e "     use the ${blue}--skip${reset} flag and select ${blue}${appname}${blue}"
+                echo -e "     use the ${blue}--skip${reset} flag and select ${blue}${appname}${reset}"
                 echo -e "\nIf its an old migration, you can remove the dataset with:"
-                echo -e "     zfs destroy -r \"${ix_apps_pool}/migration/${appname}\"${reset}"
+                echo -e "     ${blue}zfs destroy -r \"${ix_apps_pool}/migration/${appname}\"${reset}"
                 echo -e "Please only do this if you are certain the application migration dataset listed is not from a recently failed migration.${reset}"
                 exit 1
             fi
