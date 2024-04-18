@@ -20,53 +20,27 @@ if [[ $(id -u) != 0 ]]; then
 fi
 }
 
-# Check if namespace has any database pods
-check_for_db_pods() {
-    local namespace=$1
-    local db_regex='-(postgresql|mariadb|mysql|mongodb|redis|mssql|cnpg)'
-    if k3s kubectl get pods,statefulsets -n "$namespace" -o=name | grep -E -- "$db_regex" | grep -v "pod/svclb"; then
-        echo "The application contains a database pod or statefulset."
-        echo "This migration script does not support migrating databases."
-        echo "You may be able to restore the application following this guide instead:"
-        echo "https://truecharts.org/manual/SCALE/guides/migration-pvc"
-        exit 1
-    fi   
-}
-
-# Function to check if the app exists
 check_if_app_exists() {
-    local app_name=$1
+    local appname=$1
     echo -e "${bold}Checking if app exists...${reset}"
-    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${app_name}$"
+    cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${appname}$" 
 }
 
-check_for_new_app() {
-    # Keep asking to continue until app is found
-    echo -e "Please install the new version of the app from the catalog manually."
-    echo -e "Ensure you use ${blue}${appname}${reset} as the name."
-    while true; do
-        while true; do
-            read -n1 -s -rp "Press 'x' to continue..." key
-            if [[ $key == "x" ]]; then
-                echo -e "\nContinuing..."
-                break
-            else
-                echo -e "\nInvalid key. Please press 'x' to continue."
-            fi
-        done
-
-        echo
-
-        # Check if the app exists
-        if check_if_app_exists "${appname}"; then
-            echo -e "${green}Found: ${blue}${appname}${reset}"
-            echo
-            break
-        else
-            echo -e "App not found. Please install the new version of the app from the catalog manually."
-            echo -e "Ensure you use ${blue}${appname}${reset} as the name."
-        fi
-    done
+check_if_system_train() {
+    echo -e "${bold}Checking if app is in the system train...${reset}"
+    if midclt call chart.release.get_instance "$appname" | jq -r '.catalog_train' | grep -qE "^system$";then
+        echo -e "${red}App is in the system train.${reset}"\
+        "\nSystem train applications are rarely deleted,"\
+        "\nlet alone migrated. Unless you are absolutely"\
+        "\nsure, it is recommended to skip this application."\
+        "\nDoing so can result in permanent loss of data and"\
+        "\nconfiguration for various services and applications."\
+        "\nIf you are 100% sure you want to migrate this application,"\
+        "\nyou can do so by running the script with the ${blue}--force${reset} flag."
+        exit 1
+    else
+        echo -e "${green}Passed${reset}\n"
+    fi
 }
 
 check_filtered_apps() {

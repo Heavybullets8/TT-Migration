@@ -27,23 +27,6 @@ prompt_app_name() {
     done
 }
 
-prompt_create_backup() {
-    echo "Please copy the app's config manually from the GUI:"
-    echo "    Apps > Installed Applications > ${appname} > 3 dots on top right of app card > Edit"
-    echo "I personally open two tabs, one tab with the old config open, and another tab with the new config open."
-    echo "The next steps involve deleting the app, so please ensure you have screenshots or a tab open with the old config."
-    while true; do
-        read -n1 -s -rp "Press 'x' to continue..." key
-        if [[ $key == "x" ]]; then
-            echo -e "\nContinuing..."
-            echo
-            break
-        else
-            echo -e "${yellow}\nInvalid key. Please press 'x' to continue.${reset}"
-        fi
-    done
-}
-
 prompt_rename() {
     while true; do
         read -n1 -s -rp "Do you want to rename the app? [y/n] " key
@@ -60,6 +43,59 @@ prompt_rename() {
         fi
     done
     echo
+}
+
+prompt_continue_for_db() {
+    while true; do
+        read -n1 -s -rp "Would you like the script to attempt the restore? [y/n] " key
+        if [[ $key == "y" ]]; then
+            echo
+            echo -e "${green}Attempting a restore...${reset}\n"
+            break
+        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
+            echo
+            exit
+        else
+            echo -e "${yellow}\nInvalid key. Please press 'y' to rename the app or 'n' to skip.${reset}"
+        fi
+    done
+    echo
+}
+
+prompt_continue() {
+    while true; do
+        read -n1 -s -rp "Would you like to continue? [y/n] " key
+        if [[ $key == "y" ]]; then
+            echo
+            break
+        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
+            echo
+            exit
+        else
+            echo -e "${yellow}\nInvalid key. Please press 'y' to continue or 'n' to exit.${reset}"
+        fi
+    done
+    echo
+}
+
+prompt_dump_type() {
+    while true; do 
+        echo
+        echo -e "${yellow}Since a CNPG pod was found, the script can attempt to automatically create a database dump. Note that this requires the CNPG pod to have the ability to run successfully. If you have a recent CNPG database dump from another source (e.g., HeavyScript), you can provide that instead.${reset}"
+        echo -e "${yellow}The defualt action is to have the script attempt to create a database dump, and should always be used unless your CNPG pod is problematic.${reset}"
+        echo 
+        read -n1 -s -rp "Would you like to provide your own database dump file? [y/N] " key
+
+        if [[ $key == "y" || $key == "Y" ]]; then 
+            echo
+            return 1 # Manual
+        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then 
+            echo
+            return 0 # Automatic
+        else
+            echo -e "${yellow}\nInvalid key. Please press 'y' for manual database handling or 'n' (or Enter) for automatic.${reset}"
+        fi
+    done 
 }
 
 rename_app() {
@@ -79,6 +115,8 @@ rename_app() {
             echo -e "${yellow}\"${new_appname}\" is not valid. Please enter a valid name.${reset}"
         fi
     done
+    update_or_append_variable "appname" "${appname}"
+    update_or_append_variable "namespace" "${namespace}"
 }
 
 prompt_migration_path() {
