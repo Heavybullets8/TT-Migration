@@ -147,8 +147,8 @@ main() {
                         echo -e "${yellow}Database file not found. Please provide the database file in the backup folder ${blue}/mnt/${migration_path}/backup${yellow} and re-run the script with the ${blue}--skip${yellow} flag, then select the manual option again.${reset}"
                         exit 1 
                     fi
-                    [[ "${migrate_pvs}" == true ]] && get_pvc_info
                 fi
+                [[ "${migrate_pvs}" == true && $skip == true ]] && get_pvc_info
             fi
             update_or_append_variable "script_progress" "create_backup_pvc"
             ;&
