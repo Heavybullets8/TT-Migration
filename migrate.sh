@@ -54,15 +54,6 @@ source pvc/match.sh
 source pvc/rename.sh
 source self-update/self-update.sh
 
-trap on_exit EXIT
-
-function on_exit {
-    local exit_status=$?
-    if [ $exit_status -ne 0 ]; then
-        echo -e "Use {blue}$script --skip${reset} to get back to your previous step to try again."
-    fi
-}
-
 script_help() {
     echo -e "${bold}Usage:${reset} bash $(basename "$0") [options]"
     echo
@@ -95,6 +86,15 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+trap on_exit EXIT
+
+function on_exit {
+    local exit_status=$?
+    if [[ $exit_status -ne 0 && $skip == false ]]; then
+        echo -e "Use {$blue}sudo bash $script --skip${reset} to get back to your previous step to try again."
+    fi
+}
 
 main() {
     check_privileges
