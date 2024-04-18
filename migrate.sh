@@ -87,15 +87,6 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-trap on_exit EXIT
-
-function on_exit {
-    local exit_status=$?
-    if [[ $exit_status -ne 0 && $skip == false && -n $script_progress ]]; then
-        echo -e "Use ${blue}sudo bash $script_path/$script_name --skip${reset} to get back to your previous step to try again."
-    fi
-}
-
 main() {
     check_privileges
     if [[ "${no_update}" == false ]]; then
