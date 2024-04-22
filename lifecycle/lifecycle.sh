@@ -43,11 +43,11 @@ delete_original_app() {
                 echo -e "${green}Workaround success: ${dataset} destroyed.${reset}"
             else
                 echo -e "${red}Workaround failed: Could not destroy ${dataset}.${reset}"
-                return 1
+                exit 1
             fi
         else
             echo -e "${red}Error: Failed to delete the old version of the app. Error details: ${output}${reset}"
-            return 1
+            exit 1
         fi
     fi
 }
