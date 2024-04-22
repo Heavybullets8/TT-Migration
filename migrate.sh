@@ -110,8 +110,21 @@ main() {
             check_for_db
             get_pvc_info
             check_pvc_info_empty
-            if [[ "${migrate_pvs}" == false && "${migrate_db}" == false ]]; then
-                echo -e "${yellow}Warning: No PVC's or Databases to migrate, this will effectively just re-install the applicaiton which can be useful for forcing updates.${reset}"
+            if [[ "${migrate_pvs}" == false ]]; then
+                echo -e "\nItems found to be migrated:"
+                
+                if [[ "${migrate_db}" == true ]]; then
+                    echo -e "  - CNPG Databases: ${green}Yes${reset}"
+                else
+                    echo -e "  - CNPG Databases: No"
+                fi
+                echo -e "  - Persistent Volumes: No"
+                echo -e "\nNotes:"
+                if [[ "${migrate_db}" == false ]]; then
+                    echo -e "  - This operation will effectively reinstall the application without migrating any data, other than the chart information."
+                fi
+                echo -e "  - Since there are no PVC's this is NOT a required migration for DragonFish."
+                echo -e "  - Unless otherwise specified, it is reccomended not to proceed with this migration."
                 prompt_continue 
             fi
             create_migration_dataset
