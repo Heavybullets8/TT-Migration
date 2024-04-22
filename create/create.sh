@@ -40,9 +40,23 @@ create_backup_pvc() {
 
     DATA=$(midclt call chart.release.get_instance "$appname" | jq '
         .config | 
-        walk(if type == "object" then with_entries(select(.key | startswith("ix") | not)) else . end) | 
+        walk(
+            if type == "object" then 
+                with_entries(select(.key | startswith("ix") | not)) 
+            else 
+                . 
+            end
+        ) | 
         if has("persistence") then
-            .persistence |= with_entries( if .value.storageClass != "SCALE-ZFS" then .value.storageClass = "" else . end)
+            .persistence |= (
+                with_entries(
+                    if .value | has("storageClass") then 
+                        .value.storageClass = "" 
+                    else 
+                        . 
+                    end
+                )
+            )
         else
             .
         end |
