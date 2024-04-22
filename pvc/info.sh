@@ -16,7 +16,7 @@ get_pvc_info() {
         local pvc_name volume mount_path
         pvc_name=$(echo "$pvc" | jq -r '.metadata.name')
         volume=$(echo "$pvc" | jq -r '.spec.volumeName')
-        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath')
+        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath' | head -n 1)
 
         if [ "$mount_path" == "null" ]; then
             mount_path=""
