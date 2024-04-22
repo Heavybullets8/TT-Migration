@@ -16,6 +16,7 @@ export migration_path
 export rename=false
 export migrate_pvs=false
 export migrate_db=false
+export cnpgpvc=false
 export script_progress="start"
 
 # flags
@@ -110,7 +111,7 @@ main() {
             check_for_db
             get_pvc_info
             check_pvc_info_empty
-            if [[ "${migrate_pvs}" == false ]]; then
+            if [[ "${migrate_pvs}" == false && "$cnpgpvc" == false ]]; then
                 echo -e "\nItems found to be migrated:"
                 
                 if [[ "${migrate_db}" == true ]]; then
