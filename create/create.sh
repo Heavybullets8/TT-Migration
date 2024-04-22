@@ -37,9 +37,9 @@ create_app_dataset() {
 create_backup_pvc() {
     local backup_path=/mnt/${migration_path}/backup
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
-
+    
     DATA=$(midclt call chart.release.get_instance "$appname" | jq '
-        .config | 
+        .config |
         walk(
             if type == "object" then 
                 with_entries(select(.key | startswith("ix") | not)) 
@@ -47,23 +47,17 @@ create_backup_pvc() {
                 . 
             end
         ) | 
-        if has("persistence") then
-            .persistence |= (
-                with_entries(
-                    if .value | has("storageClass") then 
-                        .value.storageClass = "" 
-                    else 
-                        . 
-                    end
-                )
-            )
-        else
-            .
-        end |
+        walk(
+            if type == "object" and has("storageClass") and .storageClass == "SCALE-ZFS" then
+                .storageClass = ""
+            else
+                .
+            end
+        ) |
         .global.ixChartContext.isStopped = true |
         .global.stopAll = true 
     ')
-    
+
     if [[ -z $DATA ]]; then
         echo -e "${red}Error: Failed to get app config.${reset}"
         exit 1
