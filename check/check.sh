@@ -26,6 +26,25 @@ check_if_app_exists() {
     cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${appname}$" 
 }
 
+check_health() {
+    echo -e "${bold}Checking app health...${reset}"
+    if output=$(cli -c "app chart_release update chart_release=\"$appname\" values={}" 2>&1); then
+        # If the command succeeded, print nothing
+        echo -e "${green}Passed${reset}\n"
+    else
+        # If the command failed, print the error output and advice
+        echo -e "${red}Failed${reset}"
+        echo "Output:"
+        echo "$output"
+        echo -e "${red}This was the result of preforming an empty edit, you probably need to make changes in the chart edit configuration in the GUI.${reset}"
+        echo -e "${red}Please resolve the issues above prior to running the migration.${reset}"
+        echo -e "${red}Make sure to check Truecharts #announcements for migrations you may have missed.${reset}"
+        echo -e "${red}If you want to force the migration, you can run the script with the ${blue}--force${reset} flag.${reset}"
+        echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
+        exit 1
+    fi
+}
+
 check_if_system_train() {
     echo -e "${bold}Checking if app is in the system train...${reset}"
     if midclt call chart.release.get_instance "$appname" | jq -r '.catalog_train' | grep -qE "^system$";then
