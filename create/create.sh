@@ -138,6 +138,8 @@ create_application() {
     done
 
     echo -e "${red}Error: Failed to create the application after $max_retries retries.${reset}"
+    echo -e "Job ID: $job_id"
+    echo -e "Error Output:\n$job_state"
     exit 1
 }
 
