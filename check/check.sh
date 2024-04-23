@@ -28,6 +28,20 @@ check_if_app_exists() {
 
 check_health() {
     echo -e "${bold}Checking app health...${reset}"
+
+    # Check if the namespace is either 'enterprise' or 'operators'
+    catalog_train_label=$(k3s kubectl get namespace "$namespace" -o jsonpath='{.metadata.labels.catalog_train}')
+    if [[ "$catalog_train_label" == "enterprise" || "$catalog_train_label" == "operators" ]]; then
+        echo -e "${red}The namespace ${blue}'$namespace'${red} is configured under the ${blue}'$catalog_train_label'${red} train.${reset}"
+        echo -e "${red}That train no longer exists, and you need to migrate to the new train.${reset}"
+        echo -e "Please visit ${blue}https://truecharts.org/news/train-renames/${reset} and run the script."
+        echo -e "Afterwards, you need to update that application then you can attempt the migration again."
+        echo -e "If you want to force the migration, you can run the script with the ${blue}--force${reset} flag."
+        echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
+        exit 1
+    fi
+
+    # Perform the empty edit to check the application health
     if output=$(cli -c "app chart_release update chart_release=\"$appname\" values={}" 2>&1); then
         # If the command succeeded, print nothing
         echo -e "${green}Passed${reset}\n"
@@ -36,7 +50,7 @@ check_health() {
         echo -e "${red}Failed${reset}"
         echo "Output:"
         echo "$output"
-        echo -e "${red}This was the result of preforming an empty edit, you probably need to make changes in the chart edit configuration in the GUI.${reset}"
+        echo -e "${red}This was the result of performing an empty edit, you probably need to make changes in the chart edit configuration in the GUI.${reset}"
         echo -e "${red}Please resolve the issues above prior to running the migration.${reset}"
         echo -e "${red}Make sure to check Truecharts #announcements for migrations you may have missed.${reset}"
         echo -e "${red}If you want to force the migration, you can run the script with the ${blue}--force${reset} flag.${reset}"
