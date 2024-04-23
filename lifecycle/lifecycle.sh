@@ -29,7 +29,7 @@ delete_original_app() {
     total_pods=$(k3s kubectl get pods -n "$namespace" --no-headers)
 
     if [[ -n "$total_pods" ]]; then
-        k3s kubectl delete pods --all -n "$namespace" --grace-period=0 --force
+        k3s kubectl delete pods --all -n "$namespace" --grace-period=0 --force > /dev/null 2>&1
     fi
 
     echo -e "\n${bold}Deleting the original app...${reset}"

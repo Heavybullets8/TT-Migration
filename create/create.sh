@@ -138,7 +138,7 @@ create_application() {
     done
 
     echo -e "${red}Error: Failed to create the application after $max_retries retries.${reset}"
-    return 1
+    exit 1
 }
 
 wait_for_pvcs() {
