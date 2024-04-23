@@ -29,7 +29,7 @@ delete_original_app() {
     total_pods=$(sudo k3s kubectl get pods -n "$namespace" --no-headers)
 
     if [[ -n "$total_pods" ]]; then
-        k3s kubectl delete pods --all -n "$namespace" --grace-period=0 --force > /dev/null 2>&1
+        sudo k3s kubectl delete pods --all -n "$namespace" --grace-period=0 --force > /dev/null 2>&1
     fi
 
     echo -e "\n${bold}Deleting the original app...${reset}"
@@ -39,10 +39,21 @@ delete_original_app() {
         echo "$output" | grep -q "cannot destroy '${dataset}'" && dataset_busy=true || dataset_busy=false
         if [[ "$dataset_busy" == true ]]; then
             echo -e "${yellow}Dataset is busy, attempting workaround...${reset}"
+            # Save the current mountpoint to revert back if needed
+            original_mountpoint=$(zfs get -H -o value mountpoint "$dataset")
+
+            # Attempt to set a new temporary mountpoint and destroy the dataset
             if zfs set mountpoint=/mnt/temporary_mount "$dataset" && zfs destroy -r "$dataset"; then
                 echo -e "${green}Workaround success: ${dataset} destroyed.${reset}"
+                zfs set mountpoint="$original_mountpoint" "$dataset" || echo -e "${red}Failed to reset mountpoint for ${dataset} after destruction.${reset}"
             else
-                echo -e "${red}Workaround failed: Could not destroy ${dataset}.${reset}"
+                echo -e "${red}Workaround failed: Could not destroy ${dataset}. Reverting mountpoint.${reset}"
+                zfs set mountpoint="$original_mountpoint" "$dataset" || echo -e "${red}Failed to revert mountpoint for ${dataset}.${reset}"
+                echo -e "${red}You may need to manually destroy the dataset using the following command:${reset}"
+                echo -e "${blue}zfs destroy -r \"$dataset\"${reset}"
+                echo -e "${red}Once the dataset is manually removed, you can rerun this script with the ${blue}--skip${red} flag to continue.${reset}"
+                echo -e "The dataset needs to be removed otherwise when the new application attempts to install, it will error out due to the dataset already existing."
+                echo -e "Occasionally users may need to restart their server, then attempt the destroy command upon startup"
                 exit 1
             fi
         else
@@ -51,6 +62,7 @@ delete_original_app() {
         fi
     fi
 }
+
 
 
 
