@@ -133,7 +133,7 @@ backup_cnpg_databases() {
 check_for_db() {
     echo -e "${bold}Checking for databases...${reset}"
 
-    if k3s kubectl get cluster -A | grep -E '^(ix-.*\s).*-cnpg-main-' | awk '{gsub(/^ix-/, "", $1); print $1}' | grep -q "$appname"; then
+    if k3s kubectl get cluster -A --ignore-not-found | grep -E '^(ix-.*\s).*-cnpg-main-' | awk '{gsub(/^ix-/, "", $1); print $1}' | grep -q "$appname"; then
     echo -e "${yellow}A cnpg database for the application has been detected. The script can attempt a database restoration as part of the migration process. Please note that while the restoration process aims for accuracy, it might not always be successful. In the event of a restoration failure, the database SQL file will remain in the migration backup path for manual intervention.${reset}\n"
 
         prompt_continue_for_db
