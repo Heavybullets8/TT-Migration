@@ -26,44 +26,33 @@ delete_original_app() {
 
     echo -e "${bold}Checking for pods in $namespace...${reset}"
     local total_pods
-    total_pods=$(sudo k3s kubectl get pods -n "$namespace" --no-headers)
+    total_pods=$(k3s kubectl get pods -n "$namespace" --no-headers)
 
     if [[ -n "$total_pods" ]]; then
-        sudo k3s kubectl delete pods --all -n "$namespace" --grace-period=0 --force > /dev/null 2>&1
+        k3s kubectl delete pods --all -n "$namespace" --grace-period=0 --force
     fi
 
     echo -e "\n${bold}Deleting the original app...${reset}"
-    if output=$(cli -c "app chart_release delete release_name=\"${appname}\"" 2>&1); then
-        echo -e "${green}Success${reset}"
-    else
-        echo "$output" | grep -q "cannot destroy '${dataset}'" && dataset_busy=true || dataset_busy=false
-        if [[ "$dataset_busy" == true ]]; then
-            echo -e "${yellow}Dataset is busy, attempting workaround...${reset}"
-            # Save the current mountpoint to revert back if needed
-            original_mountpoint=$(zfs get -H -o value mountpoint "$dataset")
+    if ! output=$(cli -c "app chart_release delete release_name=\"${appname}\"" 2>&1); then
+        echo -e "${red}Error: Failed to delete the app.${reset}"
+        echo -e "${bold}Command error output:${reset}"
+        echo -e "${output}"
 
-            # Attempt to set a new temporary mountpoint and destroy the dataset
-            if zfs set mountpoint=/mnt/temporary_mount "$dataset" && zfs destroy -r "$dataset"; then
-                echo -e "${green}Workaround success: ${dataset} destroyed.${reset}"
-                zfs set mountpoint="$original_mountpoint" "$dataset" || echo -e "${red}Failed to reset mountpoint for ${dataset} after destruction.${reset}"
-            else
-                echo -e "${red}Workaround failed: Could not destroy ${dataset}. Reverting mountpoint.${reset}"
-                zfs set mountpoint="$original_mountpoint" "$dataset" || echo -e "${red}Failed to revert mountpoint for ${dataset}.${reset}"
-                echo -e "${red}You may need to manually destroy the dataset using the following command:${reset}"
-                echo -e "${blue}zfs destroy -r \"$dataset\"${reset}"
-                echo -e "${red}Once the dataset is manually removed, you can rerun this script with the ${blue}--skip${red} flag to continue.${reset}"
-                echo -e "The dataset needs to be removed otherwise when the new application attempts to install, it will error out due to the dataset already existing."
-                echo -e "Occasionally users may need to restart their server, then attempt the destroy command upon startup"
-                exit 1
-            fi
+        if [[ "$output" == *"dataset is busy"* ]]; then
+            echo -e "\n${red}The dataset ${blue}'${dataset}'${red} is busy. This usually means resources are still in use.${reset}"
+            echo -e "${red}Please check and ensure all resources using the dataset are terminated. You may need to manually destroy the dataset using the command:${reset}"
+            echo -e "${blue}zfs destroy -r \"${dataset}\"${reset}"
+            echo -e "After confirming that the namespace and ALL related datasets (except migrated PVs, if any) are destroyed, you can retry the operation using the ${blue}--skip${reset} flag."
         else
-            echo -e "${red}Error: Failed to delete the old version of the app. Error details: ${output}${reset}"
-            exit 1
+            echo -e "\nPlease ensure all pods are terminated and no resources are in use before trying again."
+            echo -e "Rerun the script with ${blue}--skip${reset} after you are certain everything is deleted."
         fi
+        echo -e "You may need to restart your server and then attempt the delete command upon startup."
+        exit 1
+    else
+        echo -e "${green}Success${reset}"
     fi
 }
-
-
 
 
 check_filtered_apps() {
