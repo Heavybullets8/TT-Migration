@@ -139,7 +139,8 @@ create_application() {
 
     echo -e "${red}Error: Failed to create the application after $max_retries retries.${reset}"
     echo -e "Job ID: $job_id"
-    echo -e "Error Output:\n$job_state"
+    echo -e "Error Output:"
+    echo -e "$(midclt call core.get_jobs '[["id", "=", '"$job_id"']]' | jq -r '.')"
     exit 1
 }
 
