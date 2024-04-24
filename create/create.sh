@@ -44,6 +44,8 @@ restore_traefik_ingress() {
         exit 1
     fi
 
+    # Read the ingress backup from the file
+    local ingress_backup
     ingress_backup=$(<"$ingress_backup_file")
 
     if [[ -z "$ingress_backup" ]]; then
@@ -51,14 +53,20 @@ restore_traefik_ingress() {
         exit 1
     fi
 
-    local output
-    local status
-    output=$(cli -c "$(cat <<EOF
-app chart_release update chart_release="$appname" values='{"ingress": $ingress_backup}'
-EOF
-)")
-    status=$?
+    # Properly construct the JSON payload to update the chart release settings
+    local update_payload
+    update_payload=$(jq -n --argjson values "$ingress_backup" '{values: $values}')
+    if [[ $? -ne 0 ]]; then
+        echo -e "${red}Failed to create update payload.${reset}"
+        exit 1
+    fi
 
+    # Execute the command to update the chart release with the new settings
+    local output
+    output=$(cli -c "app chart_release update chart_release=\"$appname\" data='$update_payload'" 2>&1)
+    local status=$?
+
+    # Check the exit status of the command
     if [[ $status -eq 0 ]]; then
         echo -e "${green}Success${reset}"
     else
@@ -66,6 +74,7 @@ EOF
         echo "$output"
     fi
 }
+
 
 
 
