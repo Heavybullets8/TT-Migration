@@ -86,7 +86,7 @@ create_backup_pvc() {
         # Set Traefik ingress integration to false
         
         # Backup the entire ingress configuration
-        ingress_backup=$(echo "$DATA" | jq -c '.config.ingress')
+        ingress_backup=$(echo "$DATA" | jq -c '{ingress: .config.ingress}')
 
         DATA=$(echo "$DATA" | jq '.config.ingress.main.integrations.traefik.enabled = false')
         update_or_append_variable traefik_ingress_integration_enabled true
