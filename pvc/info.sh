@@ -9,8 +9,13 @@ get_pvc_info() {
     while IFS= read -r pvc; do
         # Check for CNPG related annotations or labels
         if echo "$pvc" | jq -e '.metadata.labels | to_entries[] | select(.key | startswith("cnpg.io/"))' >/dev/null; then
-            cnpgpvc=true
             # This is a CNPG PVC, skip it
+            continue
+        fi
+
+        # Skip any PVCs that have names ending with "-redis-0"
+        if echo "$pvc" | jq -r '.metadata.name' | grep -q -- '-redis-0$'; then
+            # This is a Redis PVC, skip it
             continue
         fi
 
