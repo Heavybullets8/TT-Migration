@@ -38,6 +38,8 @@ delete_original_app() {
         k3s kubectl delete all --all -n "$namespace" --grace-period=0 --force > /dev/null 2>&1
     fi
 
+    k3s kubectl get zv -o name -n openebs|xargs -i k3s kubectl patch {} -p '{"metadata":{"finalizers":[]}}' --type=merge -n openebs
+
     echo -e "\n${bold}Deleting the original app...${reset}"
     if ! output=$(cli -c "app chart_release delete release_name=\"${appname}\"" 2>&1); then
         echo -e "${red}Error: Failed to delete the app.${reset}"
