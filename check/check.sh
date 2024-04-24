@@ -38,28 +38,32 @@ check_health() {
     catalog=$(echo "$output" | jq -r '.catalog // empty')
     chart_name=$(echo "$output" | jq -r '.chart_metadata.name // empty')
 
+    # Check if necessary details are available
     if [[ -z "$catalog_train" || -z "$catalog" || -z "$chart_name" ]]; then
-        echo -e "${red}Failed to get either the catalog_train or catalog or chart_metadata.name${reset}"
+        echo -e "${red}Failed to get either the catalog_train, catalog, or chart_metadata.name.${reset}"
         exit 1
     fi
 
-    # Check if the train still hosts the specified application
-    output=$(midclt call app.available '[["name", "=", "'"$chart_name"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq '.')
+    # Fetch available trains for the app within the catalog
+    available_trains=$(midclt call app.available '[["name", "=", "'"$chart_name"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq -r '.[] | .train')
 
     # Check for the existence of the app in the current train
-    train_exists=$(echo "$output" | jq -r '.[] | select(.name == "'"$chart_name"'" and .catalog == "'"$catalog"'") | .train' | grep -c "^$catalog_train$")
+    train_exists=$(echo "$available_trains" | grep -c "^$catalog_train$")
 
     if [[ "$train_exists" -eq 0 ]]; then
-        echo -e "${red}The namespace ${blue}'$namespace'${red} is configured under the ${blue}'$catalog_train'${red} train which no longer hosts the chart ${blue}'$chart_name'${red}.${reset}"
-        echo -e "${red}This train no longer exists for the specified application, and you need to migrate to a new train.${reset}"
+        # Print available trains and suggest the first available one as the new train
+        new_train=$(echo "$available_trains" | head -n 1)
+        echo -e "${red}The chart: ${blue}$chart_name${reset} is not in the current train: ${blue}$catalog_train${reset}."
+        echo -e "${red}You need to migrate this chart to a new train. Suggested new train: ${blue}$new_train${reset}"
         echo -e "Please visit ${blue}https://truecharts.org/news/train-renames/${reset} for information on how to migrate to a new train."
         echo -e "After updating the train, you can attempt the migration again."
         echo -e "If you want to force the migration, you can run the script with the ${blue}--force${reset} flag."
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         exit 1
     else
-        echo -e "${green}Correct train${reset}"
+        echo -e "${green}The application '$chart_name' is correctly configured on the '$catalog_train' train in the '$catalog' catalog.${reset}"
     fi
+
 
     # Perform the empty edit to check the application health
     if output=$(cli -c "app chart_release update chart_release=\"$appname\" values={}" 2>&1); then
