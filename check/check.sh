@@ -53,7 +53,7 @@ check_health() {
     if [[ "$train_exists" -eq 0 ]]; then
         # Print available trains and suggest the first available one as the new train
         new_train=$(echo "$available_trains" | head -n 1)
-        echo -e "${red}The chart: ${blue}$chart_name${reset} is not in the current train: ${blue}$catalog_train${reset}."
+        echo -e "${red}The chart: ${blue}$chart_name${red} is not in the current train: ${blue}$catalog_train${reset}."
         echo -e "${red}You need to migrate this chart to a new train. Suggested new train: ${blue}$new_train${reset}"
         echo -e "Please visit ${blue}https://truecharts.org/news/train-renames/${reset} for information on how to migrate to a new train."
         echo -e "After updating the train, you can attempt the migration again."
