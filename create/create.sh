@@ -53,17 +53,11 @@ restore_traefik_ingress() {
         exit 1
     fi
 
-    # Properly construct the JSON payload to update the chart release settings
-    local update_payload
-    update_payload=$(jq -n --argjson values "$ingress_backup" '{values: $values}')
-    if [[ $? -ne 0 ]]; then
-        echo -e "${red}Failed to create update payload.${reset}"
-        exit 1
-    fi
+    echo "$ingress_backup_file"
 
     # Execute the command to update the chart release with the new settings
     local output
-    output=$(cli -c "app chart_release update chart_release=\"$appname\" data='$update_payload'" 2>&1)
+    output=$(cli -c "app chart_release update chart_release=\"$appname\" values=$ingress_backup" 2>&1)
     local status=$?
 
     # Check the exit status of the command
@@ -72,6 +66,7 @@ restore_traefik_ingress() {
     else
         echo -e "${red}Failed${reset}"
         echo "$output"
+        exit 1
     fi
 }
 
@@ -91,7 +86,7 @@ create_backup_pvc() {
         # Set Traefik ingress integration to false
         
         # Backup the entire ingress configuration
-        ingress_backup=$(echo "$DATA" | jq '.config.ingress')
+        ingress_backup=$(echo "$DATA" | jq -c '.config.ingress')
 
         DATA=$(echo "$DATA" | jq '.config.ingress.main.integrations.traefik.enabled = false')
         update_or_append_variable traefik_ingress_integration_enabled true
