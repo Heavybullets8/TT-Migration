@@ -29,16 +29,26 @@ check_if_app_exists() {
 check_health() {
     echo -e "${bold}Checking app health...${reset}"
 
-    # Check if the namespace is either 'enterprise' or 'operators'
-    catalog_train_label=$(k3s kubectl get namespace "$namespace" -o jsonpath='{.metadata.labels.catalog_train}')
-    if [[ "$catalog_train_label" == "enterprise" || "$catalog_train_label" == "operators" ]]; then
-        echo -e "${red}The namespace ${blue}'$namespace'${red} is configured under the ${blue}'$catalog_train_label'${red} train.${reset}"
-        echo -e "${red}That train no longer exists, and you need to migrate to the new train.${reset}"
-        echo -e "Please visit ${blue}https://truecharts.org/news/train-renames/${reset} and run the script."
-        echo -e "Afterwards, you need to update that application then you can attempt the migration again."
+    # Check the current train label and catalog of the namespace
+    catalog_train=$(k3s kubectl get namespace "$namespace" -o jsonpath='{.metadata.labels.catalog_train}')
+    catalog=$(k3s kubectl get namespace "$namespace" -o jsonpath='{.metadata.labels.catalog}')
+
+    # Check if the train still hosts the specified application
+    output=$(midclt call app.available '[["name", "=", "'"$appname"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq '.')
+
+    # Check for the existence of the app in the current train
+    train_exists=$(echo "$output" | jq -r '.[] | select(.name == "'"$appname"'" and .catalog == "'"$catalog"'") | .train' | grep -c "^$catalog_train$")
+
+    if [[ "$train_exists" -eq 0 ]]; then
+        echo -e "${red}The namespace ${blue}'$namespace'${red} is configured under the ${blue}'$catalog_train'${red} train which no longer hosts the application ${blue}'$appname'${red}.${reset}"
+        echo -e "${red}This train no longer exists for the specified application, and you need to migrate to a new train.${reset}"
+        echo -e "Please visit ${blue}https://truecharts.org/news/train-renames/${reset} for information on how to migrate to a new train."
+        echo -e "After updating the train, you can attempt the migration again."
         echo -e "If you want to force the migration, you can run the script with the ${blue}--force${reset} flag."
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         exit 1
+    else
+        echo -e "${blue}The application '$appname' is correctly configured on the '$catalog_train' train in the '$namespace' namespace.${reset}"
     fi
 
     # Perform the empty edit to check the application health
