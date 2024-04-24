@@ -24,23 +24,34 @@ delete_original_app() {
     local namespace="ix-$appname"
     local dataset="${ix_apps_pool}/ix-applications/releases/${appname}"
 
-    echo -e "${bold}Checking for pods in $namespace...${reset}"
+    echo -e "\n${bold}Beginning deletion of the app please wait...${reset}"
+
+    sleep 10
+    stop_app_if_needed
+    sleep 10
+
+
+    echo -e "${bold}Checking for lingering resources...${reset}"
     local total_objects
     total_objects=$(k3s kubectl get all -n "$namespace" --no-headers)
 
     if [[ -n "$total_objects" ]]; then
+        echo -e "${bold}Deleting all resources gracefully...${reset}"
         timeout 120s k3s kubectl delete all --all -n "$namespace" --grace-period=10 > /dev/null 2>&1 
     fi
 
     total_objects=$(k3s kubectl get all -n "$namespace" --no-headers)
 
     if [[ -n "$total_objects" ]]; then
+        echo -e "${bold}Deleting all resources forcefully...${reset}"
         k3s kubectl delete all --all -n "$namespace" --grace-period=0 --force > /dev/null 2>&1
     fi
 
-    k3s kubectl get zv -o name -n openebs|xargs -i k3s kubectl patch {} -p '{"metadata":{"finalizers":[]}}' --type=merge -n openebs
 
-    echo -e "\n${bold}Deleting the original app...${reset}"
+    echo -e "${bold}Handling finalizers...${reset}"
+    k3s kubectl get zv -o name -n openebs | xargs -I {} k3s kubectl patch {} -p '{"metadata":{"finalizers":[]}}' --type=merge -n openebs
+
+    echo -e "${bold}Calling ix API to delete the app...${reset}"
     if ! output=$(cli -c "app chart_release delete release_name=\"${appname}\"" 2>&1); then
         echo -e "${red}Error: Failed to delete the app.${reset}"
         echo -e "${bold}Command error output:${reset}"
