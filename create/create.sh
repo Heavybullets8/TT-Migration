@@ -36,12 +36,25 @@ create_app_dataset() {
 restore_traefik_ingress() {
     echo -e "\n${bold}Restoring Traefik ingress...${reset}"
 
-    # Construct the JSON payload to update the chart release settings
-    update_values="{\"ingress\": {\"main\": {\"integrations\": {\"traefik\": {\"enabled\": true}}}}}"
+    local backup_path="/mnt/${migration_path}/backup"
+    local ingress_backup_file="${backup_path}/ingress_backup.json"
+
+    # Load the backed-up ingress configuration from the file
+    local ingress_backup
+    ingress_backup=$(<"$ingress_backup_file")
+
+    # Check if the backup file exists
+    if [[ ! -f "$ingress_backup_file" ]]; then
+        echo -e "${red}Ingress backup file not found.${reset}"
+        return 1
+    fi
+
+    # Construct the JSON payload to update the chart release settings using the backed-up configuration
+    local update_values="{\"ingress\": $ingress_backup}"
 
     # Execute the command to update the chart release with the new settings
     local output
-    output=$(cli -c "app chart_release update chart_release=\"$appname\" values=$update_values" 2>&1)
+    output=$(cli -c "app chart_release update chart_release=\"$appname\" values='$update_values'" 2>&1)
     local status=$?
 
     # Check the exit status of the command
@@ -64,6 +77,11 @@ create_backup_pvc() {
     if echo "$DATA" | jq -e '.chart_metadata.name == "traefik" and .config.ingress.main.integrations.traefik.enabled == true' >/dev/null; then
         traefik_ingress_integration_enabled=true
         # Set Traefik ingress integration to false
+        
+        # Backup the entire ingress configuration
+        ingress_backup=$(echo "$data" | jq '.config.ingress')
+        echo "$ingress_backup" > "${backup_path}/ingress_backup.json"
+
         DATA=$(echo "$DATA" | jq '.config.ingress.main.integrations.traefik.enabled = false')
         update_or_append_variable traefik_ingress_integration_enabled true
     fi
