@@ -38,6 +38,14 @@ check_health() {
     catalog=$(echo "$output" | jq -r '.catalog // empty')
     chart_name=$(echo "$output" | jq -r '.chart_metadata.name // empty')
 
+    ################################################
+    ################## Temp Fix ####################
+    ################################################
+    if [[ $chart_name == "traefik" ]]; then
+        echo -e "${red}Traefik is currently not supported for migrations, please check back soon.${reset}"
+        exit 1
+    fi
+
     # Check if necessary details are available
     if [[ -z "$catalog_train" || -z "$catalog" || -z "$chart_name" ]]; then
         echo -e "${red}Failed to get either the catalog_train, catalog, or chart_metadata.name.${reset}"
