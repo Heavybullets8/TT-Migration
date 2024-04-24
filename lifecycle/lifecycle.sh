@@ -47,7 +47,7 @@ delete_original_app() {
             echo -e "\nPlease ensure all pods are terminated and no resources are in use before trying again."
             echo -e "Rerun the script with ${blue}--skip${reset} after you are certain everything is deleted."
         fi
-        echo -e "You may need to restart your server and then attempt the delete command upon startup."
+        echo -e "As a last resort you can attempt to unset your apps pool, or restart your server and then attempt the delete command again"
         exit 1
     else
         echo -e "${green}Success${reset}"
