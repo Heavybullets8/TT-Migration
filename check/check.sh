@@ -50,7 +50,7 @@ check_health() {
     train_exists=$(echo "$output" | jq -r '.[] | select(.name == "'"$chart_name"'" and .catalog == "'"$catalog"'") | .train' | grep -c "^$catalog_train$")
 
     if [[ "$train_exists" -eq 0 ]]; then
-        echo -e "${red}The namespace ${blue}'$namespace'${red} is configured under the ${blue}'$catalog_train'${red} train which no longer hosts the application ${blue}'$appname'${red}.${reset}"
+        echo -e "${red}The namespace ${blue}'$namespace'${red} is configured under the ${blue}'$catalog_train'${red} train which no longer hosts the chart ${blue}'$chart_name'${red}.${reset}"
         echo -e "${red}This train no longer exists for the specified application, and you need to migrate to a new train.${reset}"
         echo -e "Please visit ${blue}https://truecharts.org/news/train-renames/${reset} for information on how to migrate to a new train."
         echo -e "After updating the train, you can attempt the migration again."
