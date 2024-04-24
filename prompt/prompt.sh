@@ -93,7 +93,7 @@ prompt_dump_type() {
     while true; do 
         echo
         echo -e "${yellow}Since a CNPG pod was found, the script can attempt to automatically create a database dump. Note that this requires the CNPG pod to have the ability to run successfully. If you have a recent CNPG database dump from another source (e.g., HeavyScript), you can provide that instead.${reset}"
-        echo -e "${yellow}The defualt action is to have the script attempt to create a database dump, and should always be used unless your CNPG pod is problematic.${reset}"
+        echo -e "${yellow}The default action is to have the script attempt to create a database dump, and should always be used unless your CNPG pod is problematic.${reset}"
         echo 
         read -n1 -s -rp "Would you like to provide your own database dump file? [y/N] " key
 
