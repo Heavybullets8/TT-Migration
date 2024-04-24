@@ -99,7 +99,7 @@ check_health() {
     ############# Check same pool ###############
     #############################################
     local openebs_pool
-    openebs_pool=$(sudo k3s kubectl get storageclass -o=json | jq -r '.items[] | select(.metadata.annotations."storageclass.kubernetes.io/is-default-class" == "true") | .parameters.poolname | split("/")[0]' )
+    openebs_pool=$(k3s kubectl get storageclass -o=json | jq -r '.items[] | select(.metadata.annotations."storageclass.kubernetes.io/is-default-class" == "true") | .parameters.poolname | split("/")[0]')
 
     if [[ "$ix_apps_pool" != "$openebs_pool" ]]; then
         echo -e "${red}OpenEBS dataset location: ${blue}$openebs_pool${red} does not match the location of the ix-applications pool: ${red}$ix_apps_pool${reset}"
