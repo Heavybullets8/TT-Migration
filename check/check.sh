@@ -58,13 +58,13 @@ check_health() {
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         exit 1
     else
-        echo -e "${blue}The application '$appname' is correctly configured on the '$catalog_train' train in the '$namespace' namespace.${reset}"
+        echo -e "${green}Correct train${reset}"
     fi
 
     # Perform the empty edit to check the application health
     if output=$(cli -c "app chart_release update chart_release=\"$appname\" values={}" 2>&1); then
         # If the command succeeded, print nothing
-        echo -e "${green}Passed${reset}\n"
+        echo -e "${green}Passed empty edit${reset}\n"
     else
         # If the command failed, print the error output and advice
         echo -e "${red}Failed${reset}"
