@@ -29,7 +29,7 @@ delete_original_app() {
     total_objects=$(k3s kubectl get all -n "$namespace" --no-headers)
 
     if [[ -n "$total_objects" ]]; then
-        k3s kubectl delete all --all -n "$namespace" --grace-period=10  > /dev/null 2>&1
+        timeout 120s k3s kubectl delete all --all -n "$namespace" --grace-period=10 > /dev/null 2>&1 
     fi
 
     total_objects=$(k3s kubectl get all -n "$namespace" --no-headers)
@@ -56,6 +56,7 @@ delete_original_app() {
             echo -e "Rerun the script with ${blue}--skip${reset} after you are certain everything is deleted."
         fi
         echo -e "As a last resort you can attempt to unset your apps pool, or restart your server and then attempt the delete command again"
+        echo -e "Prior to doing either of those, please check with a support member to see if it is necessary."
         exit 1
     else
         echo -e "${green}Success${reset}"
