@@ -18,6 +18,7 @@ export migrate_pvs=false
 export migrate_db=false
 export cnpgpvc=false
 export script_progress="start"
+export traefik_ingress_integration_enabled=false
 
 # flags
 export force=false
@@ -210,6 +211,12 @@ main() {
         restore_database)
             if [[ "${migrate_db}" == true ]]; then
                 restore_database "${appname}"
+            fi
+            update_or_append_variable "script_progress" "restore_traefik_ingress"
+            ;&
+        restore_traefik_ingress)
+            if [[ "${traefik_ingress_integration_enabled}" == true ]]; then
+                restore_traefik_ingress
             fi
             update_or_append_variable "script_progress" "cleanup_datasets"
             ;&

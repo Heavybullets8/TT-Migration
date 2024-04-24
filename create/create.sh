@@ -33,11 +33,42 @@ create_app_dataset() {
     migration_path=$path
 }
 
+restore_traefik_ingress() {
+    echo -e "\n${bold}Restoring Traefik ingress...${reset}"
+
+    # Construct the JSON payload to update the chart release settings
+    update_values="{\"ingress\": {\"main\": {\"integrations\": {\"traefik\": {\"enabled\": true}}}}}"
+
+    # Execute the command to update the chart release with the new settings
+    local output
+    output=$(cli -c "app chart_release update chart_release=\"$appname\" values=$update_values" 2>&1)
+    local status=$?
+
+    # Check the exit status of the command
+    if [[ $status -eq 0 ]]; then
+        echo -e "${green}Success${reset}"
+    else
+        echo -e "${red}Failed${reset}"
+        echo "$output"
+    fi
+}
+
 create_backup_pvc() {
     local backup_path=/mnt/${migration_path}/backup
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
     
-    DATA=$(midclt call chart.release.get_instance "$appname" | jq '
+    # Fetch the application configuration
+    DATA=$(midclt call chart.release.get_instance "$appname" | jq '.')
+    
+    # Check if the application is Traefik and if the Traefik ingress integration is enabled
+    if echo "$DATA" | jq -e '.chart_metadata.name == "traefik" and .config.ingress.main.integrations.traefik.enabled == true' >/dev/null; then
+        traefik_ingress_integration_enabled=true
+        # Set Traefik ingress integration to false
+        DATA=$(echo "$DATA" | jq '.config.ingress.main.integrations.traefik.enabled = false')
+        update_or_append_variable traefik_ingress_integration_enabled true
+    fi
+
+    DATA=$(echo "$DATA" | jq '
         .config |
         walk(
             if type == "object" then 

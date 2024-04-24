@@ -41,10 +41,10 @@ check_health() {
     ################################################
     ################## Temp Fix ####################
     ################################################
-    if [[ $chart_name == "traefik" ]]; then
-        echo -e "${red}Traefik is currently not supported for migrations, please check back soon.${reset}"
-        exit 1
-    fi
+    # if [[ $chart_name == "traefik" ]]; then
+    #     echo -e "${red}Traefik is currently not supported for migrations, please check back soon.${reset}"
+    #     exit 1
+    # fi
 
     # Check if necessary details are available
     if [[ -z "$catalog_train" || -z "$catalog" || -z "$chart_name" ]]; then
