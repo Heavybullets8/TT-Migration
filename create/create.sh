@@ -42,7 +42,7 @@ restore_traefik_ingress() {
     # Ensure the backup file exists
     if [[ ! -f "$ingress_backup_file" ]]; then
         echo -e "${red}Ingress backup file not found.${reset}"
-        return 1
+        exit 1
     fi
 
     # Read and parse the ingress backup
@@ -64,6 +64,7 @@ restore_traefik_ingress() {
     else
         echo -e "${red}Failed${reset}"
         echo "$output"
+        exit 1
     fi
 }
 
@@ -81,7 +82,7 @@ create_backup_pvc() {
         # Set Traefik ingress integration to false
         
         # Backup the entire ingress configuration
-        ingress_backup=$(echo "$data" | jq '.config.ingress')
+        ingress_backup=$(echo "$DATA" | jq '.config.ingress')
 
         DATA=$(echo "$DATA" | jq '.config.ingress.main.integrations.traefik.enabled = false')
         update_or_append_variable traefik_ingress_integration_enabled true
