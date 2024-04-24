@@ -27,17 +27,27 @@ check_if_app_exists() {
 }
 
 check_health() {
+    local chart_name catalog catalog_train output train_exists
     echo -e "${bold}Checking app health...${reset}"
 
     # Check the current train label and catalog of the namespace
-    catalog_train=$(k3s kubectl get namespace "$namespace" -o jsonpath='{.metadata.labels.catalog_train}')
-    catalog=$(k3s kubectl get namespace "$namespace" -o jsonpath='{.metadata.labels.catalog}')
+    output=$(midclt call chart.release.get_instance "$appname" | jq '.')
+
+    # Extract values with jq, outputting raw strings
+    catalog_train=$(echo "$output" | jq -r '.catalog_train // empty')
+    catalog=$(echo "$output" | jq -r '.catalog // empty')
+    chart_name=$(echo "$output" | jq -r '.chart_metadata.name // empty')
+
+    if [[ -z "$catalog_train" || -z "$catalog" || -z "$chart_name" ]]; then
+        echo -e "${red}Failed to get either the catalog_train or catalog or chart_metadata.name${reset}"
+        exit 1
+    fi
 
     # Check if the train still hosts the specified application
-    output=$(midclt call app.available '[["name", "=", "'"$appname"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq '.')
+    output=$(midclt call app.available '[["name", "=", "'"$chart_name"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq '.')
 
     # Check for the existence of the app in the current train
-    train_exists=$(echo "$output" | jq -r '.[] | select(.name == "'"$appname"'" and .catalog == "'"$catalog"'") | .train' | grep -c "^$catalog_train$")
+    train_exists=$(echo "$output" | jq -r '.[] | select(.name == "'"$chart_name"'" and .catalog == "'"$catalog"'") | .train' | grep -c "^$catalog_train$")
 
     if [[ "$train_exists" -eq 0 ]]; then
         echo -e "${red}The namespace ${blue}'$namespace'${red} is configured under the ${blue}'$catalog_train'${red} train which no longer hosts the application ${blue}'$appname'${red}.${reset}"
