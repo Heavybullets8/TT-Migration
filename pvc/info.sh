@@ -33,7 +33,7 @@ get_pvc_info() {
 }
 
 get_original_pvs_count() {
-    original_pvs_count=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
+    original_pvs_count=$(k3s kubectl get pvc -n "$namespace" --no-headers -o custom-columns=NAME:.metadata.name,STATUS:.status.phase | grep -vE '(-cnpg-|-redis-0)' | grep -c 'Bound')
     update_or_append_variable original_pvs_count "$original_pvs_count"
 }
 
