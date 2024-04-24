@@ -46,7 +46,7 @@ restore_traefik_ingress() {
     # Check if the backup file exists
     if [[ ! -f "$ingress_backup_file" ]]; then
         echo -e "${red}Ingress backup file not found.${reset}"
-        return 1
+        exit 1
     fi
 
     # Construct the JSON payload to update the chart release settings using the backed-up configuration
@@ -80,7 +80,6 @@ create_backup_pvc() {
         
         # Backup the entire ingress configuration
         ingress_backup=$(echo "$data" | jq '.config.ingress')
-        echo "$ingress_backup" > "${backup_path}/ingress_backup.json"
 
         DATA=$(echo "$DATA" | jq '.config.ingress.main.integrations.traefik.enabled = false')
         update_or_append_variable traefik_ingress_integration_enabled true
@@ -113,6 +112,10 @@ create_backup_pvc() {
 
     # Ensure backup directory exists
     mkdir -p "$backup_path"
+
+    if [[ $traefik_ingress_integration_enabled == true ]]; then
+        echo "$ingress_backup" > "${backup_path}/ingress_backup.json"
+    fi
 
     # Save data to backup path
     echo "$DATA" > "${backup_path}/${backup_name}"
