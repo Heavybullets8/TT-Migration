@@ -30,6 +30,13 @@ check_health() {
     local chart_name catalog catalog_train output train_exists
     echo -e "${bold}Checking app health...${reset}"
 
+
+
+    #############################################
+    ########### Check train #####################
+    #############################################
+
+
     # Check the current train label and catalog of the namespace
     output=$(midclt call chart.release.get_instance "$appname" | jq '.')
 
@@ -37,14 +44,6 @@ check_health() {
     catalog_train=$(echo "$output" | jq -r '.catalog_train // empty')
     catalog=$(echo "$output" | jq -r '.catalog // empty')
     chart_name=$(echo "$output" | jq -r '.chart_metadata.name // empty')
-
-    ################################################
-    ################## Temp Fix ####################
-    ################################################
-    # if [[ $chart_name == "traefik" ]]; then
-    #     echo -e "${red}Traefik is currently not supported for migrations, please check back soon.${reset}"
-    #     exit 1
-    # fi
 
     # Check if necessary details are available
     if [[ -z "$catalog_train" || -z "$catalog" || -z "$chart_name" ]]; then
@@ -73,6 +72,11 @@ check_health() {
     fi
 
 
+
+    #############################################
+    ############# Empty edit ####################
+    #############################################
+
     # Perform the empty edit to check the application health
     if output=$(cli -c "app chart_release update chart_release=\"$appname\" values={}" 2>&1); then
         # If the command succeeded, print nothing
@@ -88,6 +92,21 @@ check_health() {
         echo -e "${red}If you want to force the migration, you can run the script with the ${blue}--force${reset} flag.${reset}"
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         exit 1
+    fi
+
+
+    #############################################
+    ############# Check same pool ###############
+    #############################################
+    local openebs_pool
+    openebs_pool=$(sudo k3s kubectl get storageclass -o=json | jq -r '.items[] | select(.metadata.annotations."storageclass.kubernetes.io/is-default-class" == "true") | .parameters.poolname | split("/")[0]' )
+
+    if [[ "$ix_apps_pool" != "$openebs_pool" ]]; then
+        echo -e "${red}OpenEBS dataset location: ${blue}$openebs_pool${red} does not match the location of the ix-applications pool: ${red}$ix_apps_pool${reset}"
+        echo -e "${red}You need to change the dataset of the ${blue}$openebs_pool${red} to a dataset in the ${blue}$ix_apps_pool${red}.${reset}"
+        exit 1
+    else
+        echo -e "${green}Correct pool${reset}"
     fi
 }
 
