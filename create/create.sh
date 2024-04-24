@@ -39,34 +39,34 @@ restore_traefik_ingress() {
     local backup_path="/mnt/${migration_path}/backup"
     local ingress_backup_file="${backup_path}/ingress_backup.json"
 
-    # Ensure the backup file exists
     if [[ ! -f "$ingress_backup_file" ]]; then
         echo -e "${red}Ingress backup file not found.${reset}"
         exit 1
     fi
 
-    # Read and parse the ingress backup
-    local ingress_backup
     ingress_backup=$(<"$ingress_backup_file")
 
-    # Properly construct the JSON payload to update the chart release settings
-    local update_values
-    update_values=$(jq -n --argjson ingressData "$ingress_backup" '{"ingress": $ingressData}')
+    if [[ -z "$ingress_backup" ]]; then
+        echo -e "${red}Ingress backup is empty.${reset}"
+        exit 1
+    fi
 
-    # Execute the command to update the chart release with the new settings
     local output
-    output=$(cli -c "app chart_release update chart_release=\"$appname\" values='$update_values'" 2>&1)
-    local status=$?
+    local status
+    output=$(cli -c "$(cat <<EOF
+app chart_release update chart_release="$appname" values='{"ingress": $ingress_backup}'
+EOF
+)")
+    status=$?
 
-    # Check the exit status of the command
     if [[ $status -eq 0 ]]; then
         echo -e "${green}Success${reset}"
     else
         echo -e "${red}Failed${reset}"
         echo "$output"
-        exit 1
     fi
 }
+
 
 
 create_backup_pvc() {
