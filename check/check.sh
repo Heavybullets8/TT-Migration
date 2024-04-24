@@ -61,7 +61,7 @@ check_health() {
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         exit 1
     else
-        echo -e "${green}The application '$chart_name' is correctly configured on the '$catalog_train' train in the '$catalog' catalog.${reset}"
+        echo -e "${green}Correct train${reset}"
     fi
 
 
