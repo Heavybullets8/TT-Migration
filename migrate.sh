@@ -152,7 +152,7 @@ main() {
         rename_original_pvcs)
             if [[ "$migrate_pvs" == true ]]; then
                 stop_app_if_needed || exit 1
-                rename_original_pvcs
+                rename_original_pvcs || exit 1
             fi
             update_or_append_variable "script_progress" "delete_original_app"
             ;&
