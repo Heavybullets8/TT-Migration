@@ -2,7 +2,7 @@
 
 
 rename_original_pvcs() {
-    local pvc_backup_file="${backup_path}/pvcs_new.json"
+    local pvc_backup_file="${backup_path}/pvcs_original.json"
 
     # Confirm the existence of the JSON file
     if [ ! -f "$pvc_backup_file" ]; then
