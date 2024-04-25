@@ -19,7 +19,7 @@ get_pvc_info() {
         pvc_name=$(echo "$pvc" | jq -r '.metadata.name')
         volume=$(echo "$pvc" | jq -r '.spec.volumeName')
         mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec.volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name).containers[].volumeMounts[] | select(.name == $volume.name).mountPath' | head -n 1)
-        pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}' | tr -d '[:space:]')
+        pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}')
 
         # Format entry as JSON object and append to file, handling commas for valid JSON
         if [ "$first_entry" = true ]; then
@@ -41,10 +41,11 @@ get_pvc_info() {
             pvc_volume_name: $volume, 
             mount_path: $mount_path, 
             pvc_parent_path: $pvc_parent_path, 
-            original_rename_complete: $original_rename_complete 
-            matched: $matched
+            original_rename_complete: $original_rename_complete, 
+            matched: $matched,
             destroyed: $destroyed
         }' >> "$pvc_backup_file"
+
 
 
     done < <(echo "$pvc_data" | jq -c '.items[]')
