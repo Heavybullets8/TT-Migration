@@ -4,7 +4,7 @@
 match_pvcs_with_mountpoints() {
     local original_pvc_info_file="$1"
     local new_pvc_info_file="$2"
-    local original_pvc_name original_mountpath new_pvc_name new_mountpath new_volume migration_path
+    local original_pvc_name original_mountpath new_pvc_name new_mountpath new_volume
     local new_pvc_parent_path new_volume 
     local failed=0
 
