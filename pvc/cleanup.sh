@@ -1,34 +1,52 @@
 #!/bin/bash
 
-update_json_file() {
-    local file_path=$1        # Path to the JSON file
-    local jq_filter=$2        # jq filter to select the right elements
-    local jq_update=$3        # jq update expression
-    local temp_json=$(mktemp)
 
-    # Ensure the file exists
-    if [ ! -f "$file_path" ]; then
-        echo -e "${red}Error: JSON file does not exist at $file_path${reset}"
+destroy_new_apps_pvcs() {
+    local new_app_pvc_info="${backup_path}/pvcs_new.json"
+
+
+    echo -e "${bold}Destroying the new app's PVCs...${reset}"
+
+    if $(jq '. | length' "$new_app_pvc_info") -eq 0; then
+        echo -e "${red}Error: No new PVCs found.${reset}"
         return 1
     fi
 
-    # Construct the full jq command from filter and update parameters
-    local full_jq_command="map(if $jq_filter then $jq_update else . end)"
+    while read -r pvc_entry; do
+        local pvc_parent_path volume_name
+        volume_name=$(echo "$pvc_entry" | jq -r '.pvc_volume_name')
+        pvc_parent_path=$(echo "$pvc_entry" | jq -r '.pvc_parent_path')
 
-    # Read, filter, update, and write back to a temporary file
-    if ! jq "$full_jq_command" "$file_path" > "$temp_json"; then 
-        echo -e "${red}Failed to update JSON file at $file_path${reset}"
-        rm "$temp_json"  # Clean up temporary file on failure
-        return 1
-    fi
-    
-    # Move the updated file back
-    if ! mv "$temp_json" "$file_path"; then
-        echo -e "${red}Failed to move updated JSON file back to original location: $file_path${reset}"
-        return 1
-    fi
+        to_delete="$pvc_parent_path/${volume_name}"
 
-    echo -e "${green}Successfully updated JSON file at $file_path${reset}"
+        success=false
+        attempt_count=0
+        max_attempts=2
+
+        while ! $success && [ $attempt_count -lt $max_attempts ]; do
+            if output=$(zfs destroy "${to_delete}" 2>&1); then
+                echo -e "${green}Destroyed ${blue}${to_delete}${reset}"
+                update_json_file "$pvc_backup_file" \
+                                ".volume_name == \"$volume_name\"" \
+                                ".destroyed = true"
+                success=true
+            else
+                if echo "$output" | grep -q "dataset is busy" && [ $attempt_count -eq 0 ]; then
+                    echo -e "${yellow}Dataset is busy, restarting middlewared and retrying...${green}"
+                    systemctl restart middlewared
+                    sleep 5
+                    stop_app_if_needed "$appname"
+                    sleep 5
+                else
+                    echo -e "${red}Error: Failed to destroy ${blue}${to_delete}${reset}"
+                    echo -e "${red}Error message: ${reset}$output"
+                    return 1
+                fi
+            fi
+            attempt_count=$((attempt_count + 1))
+        done
+    done < <(jq -c '.[] | select(.destroyed == false)' "$new_app_pvc_info")
+    echo
     return 0
 }
 
