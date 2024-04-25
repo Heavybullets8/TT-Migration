@@ -45,7 +45,7 @@ destroy_new_apps_pvcs() {
             fi
             attempt_count=$((attempt_count + 1))
         done
-    done < <(jq -c '.[] | select(.destroyed | not)' "$new_app_pvc_info")
+    done < <(jq -c '.[] | select(.destroyed=false)' "$new_app_pvc_info")
     echo
     return 0
 }
