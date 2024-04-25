@@ -15,7 +15,6 @@ match_pvcs_with_mountpoints() {
     # Iterate over each original PVC and attempt to match with new PVCs based on mount points
     while read -r original_pvc; do
         original_pvc_name=$(echo "$original_pvc" | jq -r '.pvc_name')
-        original_volume=$(echo "$original_pvc" | jq -r '.pvc_volume_name')
         original_mountpath=$(echo "$original_pvc" | jq -r '.mount_path')
 
 
@@ -32,8 +31,8 @@ match_pvcs_with_mountpoints() {
 
 
             if [ "$new_mountpath" == "$original_mountpath" ]; then
-                if zfs rename "$migration_path/${original_volume}" "$new_pvc_parent_path/${new_volume}"; then
-                    echo -e "${green}Renamed ${blue}$migration_path/${original_volume}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
+                if zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${new_volume}"; then
+                    echo -e "${green}Renamed ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
                     echo -e "${green}Matched by mount point:${green}"
                     echo -e "${blue}${original_pvc_name}${reset} -> ${blue}${new_pvc_name}${reset}"
                     echo -e "${blue}${original_mountpath}${reset} = ${blue}${new_mountpath}${reset}"
@@ -51,7 +50,7 @@ match_pvcs_with_mountpoints() {
                     # Break out of the inner loop as we found a match
                     break
                 else
-                    echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_volume}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
+                    echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
                     failed=1
                 fi
             fi
@@ -71,14 +70,13 @@ match_remaining_single_pvc_pair() {
     local new_pvc=$(jq -c '.[] | select(.matched == false)' "$new_app_pvc_info")
 
     local original_pvc_name=$(echo "$original_pvc" | jq -r '.pvc_name')
-    local original_volume=$(echo "$original_pvc" | jq -r '.pvc_volume_name')
 
     local new_pvc_name=$(echo "$new_pvc" | jq -r '.pvc_name')
     local new_volume=$(echo "$new_pvc" | jq -r '.pvc_volume_name')
     local new_pvc_parent_path=$(echo "$new_pvc" | jq -r '.pvc_parent_path')
 
-    if zfs rename "$migration_path/${original_volume}" "$new_pvc_parent_path/${new_volume}"; then
-        echo -e "${green}Renamed ${blue}$migration_path/${original_volume}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
+    if zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${new_volume}"; then
+        echo -e "${green}Renamed ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
         echo -e "${green}Single pair left:${green}"
         echo -e "${blue}${original_pvc_name}${reset} -> ${blue}${new_pvc_name}${reset}"
         echo
@@ -93,7 +91,7 @@ match_remaining_single_pvc_pair() {
                          ".matched = true"
 
     else
-        echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_volume}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
+        echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
         return 1
     fi
 
@@ -142,7 +140,7 @@ match_remaining_pvcs_by_name() {
 
     echo "$original_pvcs" | while IFS= read -r original_pvc; do
         local original_pvc_name=$(echo "$original_pvc" | jq -r '.pvc_name')
-        local original_volume=$(echo "$original_pvc" | jq -r '.pvc_volume_name')
+
         
         # Call to find the most similar PVC and volume name from the new PVCs
         read -r most_similar_volume most_similar_pvc <<< "$(find_most_similar_pvc "$original_pvc_name" "$new_pvcs")"
@@ -154,8 +152,8 @@ match_remaining_pvcs_by_name() {
 
         new_pvc_parent_path=$(jq -r --arg vol "$most_similar_volume" '.[] | select(.pvc_volume_name == $vol) | .pvc_parent_path' "$new_app_pvc_info")
 
-        if zfs rename "$migration_path/${original_volume}" "$new_pvc_parent_path/${most_similar_volume}"; then
-            echo -e "${green}Renamed ${blue}$migration_path/${original_volume}${reset} to ${blue}$new_pvc_parent_path/${most_similar_volume}${reset}"
+        if zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${most_similar_volume}"; then
+            echo -e "${green}Renamed ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${most_similar_volume}${reset}"
             echo -e "${green}Matched by name similarity: ${blue}${original_pvc_name}${reset} -> ${blue}${most_similar_pvc}${reset}"
             echo
 
@@ -169,7 +167,7 @@ match_remaining_pvcs_by_name() {
                              ".matched = true"
 
         else
-            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_volume}${reset} to ${blue}$new_pvc_parent_path/${most_similar_volume}${reset}"
+            echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${most_similar_volume}${reset}"
             return 1
         fi
     done
