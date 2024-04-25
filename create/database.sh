@@ -2,10 +2,10 @@
 
 restore_database() {
     app="$1"
-    dump_file=$(find "/mnt/${migration_path}/backup/" -type f -name '*.sql' -print -quit)
+    dump_file=$(find "${backup_path}" -type f -name '*.sql' -print -quit)
 
     if [[ -z $dump_file ]]; then
-        echo -e "${red}No database dump file found in ${blue}${migration_path}${reset}"
+        echo -e "${red}No database dump file found in ${blue}${backup_path}${reset}"
         return 1
     fi
 
