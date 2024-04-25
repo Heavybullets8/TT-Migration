@@ -61,6 +61,16 @@ check_health() {
         return 1
     fi
 
+    if [[ -z "$available_trains" ]]; then
+        echo -e "${red}This chart doesnt appear anywhere in the catalog${reset}"
+        echo -e "${red}A migration would fail to install the application, since there is nowhere to install the application from.${reset}"
+        echo -e "${red}Please check the chart name and catalog and try again.${reset}"
+        echo -e "Chart name: ${blue}$chart_name${reset}"
+        echo -e "Catalog: ${blue}$catalog${reset}"
+        echo -e "Catalog train: ${blue}$catalog_train${reset}"
+        return 1
+    fi
+
     # Check for the existence of the app in the current train
     train_exists=$(echo "$available_trains" | grep -c "^$catalog_train$")
 
