@@ -54,9 +54,10 @@ get_pvc_parent_path() {
 
     if [ -z "${pvc_path}" ]; then
         echo -e "${red}PVC not found${reset}"
-        exit 1
+        return 1
     fi
 
     pvc_parent_path="$pvc_path"
     update_or_append_variable pvc_parent_path "$pvc_parent_path"
+    return 0
 }

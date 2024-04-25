@@ -10,7 +10,7 @@ find_apps_pool() {
     # Check if the apps pool exists
     if [ -z "${ix_apps_pool}" ]; then
         echo -e "${red}No apps pool found!${reset}"
-        exit 1
+        return 1
     fi
     echo -e "${green}Found: ${blue}${ix_apps_pool}${reset}\n"
     return 0

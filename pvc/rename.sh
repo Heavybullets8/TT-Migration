@@ -17,10 +17,11 @@ rename_original_pvcs() {
             echo "$pvc_name $volume_name $mount_path" >> "$mount_path_file"
         else
             echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"
-            exit 1
+            return 1
         fi
     done
     echo
+    return 0
 }
 
 rename_migration_pvcs() {
@@ -36,31 +37,32 @@ rename_migration_pvcs() {
 
     if [ ${#original_pvc_info[@]} -eq 0 ]; then
         echo -e "${red}Error: No original PVCs found.${reset}"
-        exit 1
+        return 1
     fi
 
     # Check if the number of original PVCs matches the number of new PVCs
     if [ ${#original_pvc_info[@]} -ne ${#pvc_info[@]} ]; then
         echo -e "${red}Error: The number of original PVCs does not match the number of new PVCs.${reset}"
-        exit 1
+        return 1
     fi
 
     # Match PVCs with the same mount points
-    match_pvcs_with_mountpoints
+    match_pvcs_with_mountpoints || return 1
 
     if [ ${#pvc_info[@]} -eq 0 ]; then
         echo
-        return
+        return 0
     fi
 
     # Match the remaining single PVC pair
     if [ ${#original_pvc_info[@]} -eq 1 ] && [ ${#pvc_info[@]} -eq 1 ]; then
-        match_remaining_single_pvc_pair
-        return
+        match_remaining_single_pvc_pair || return 1
+        return 0
     fi
 
     # Match the remaining PVCs based on their names
-    match_remaining_pvcs_by_name
+    match_remaining_pvcs_by_name || return 1
 
     echo
+    return 0
 }

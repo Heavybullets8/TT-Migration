@@ -6,7 +6,7 @@ restore_database() {
 
     if [[ -z $dump_file ]]; then
         echo -e "${red}No database dump file found in ${blue}${migration_path}${reset}"
-        exit 1
+        return 1
     fi
 
     echo -e "${bold}Restoring database${reset}..."
@@ -18,7 +18,7 @@ restore_database() {
 
     if ! wait_for_postgres_pod "$app"; then
         echo -e "${red}Postgres pod failed to start.${reset}"
-        exit 1
+        return 1
     fi
 
     # Get the primary database pod
@@ -26,7 +26,7 @@ restore_database() {
 
     if [[ -z $cnpg_pod ]]; then
         echo -e "${red}Failed to get cnpg pod for $app.${reset}"
-        exit 1
+        return 1
     fi
 
     # Retrieve the database name from the app's configuration
@@ -37,7 +37,7 @@ restore_database() {
 
     if [[ -z $db_name ]]; then
         echo -e "${red}Failed to get database name for $app.${reset}"
-        exit 1
+        return 1
     fi
 
     # Restore the database from the dump file
@@ -46,7 +46,7 @@ restore_database() {
         return 0
     else
         echo -e "${red}Failed to restore database.\n${reset}"
-        exit 1
+        return 1
     fi
 }
 
@@ -127,13 +127,14 @@ backup_cnpg_databases() {
         echo -e "${green}Success${reset}\n"
     else
         echo -e "${red}Failed to back up ${blue}$appname${red}'s database.${reset}"
-        exit 1
+        return 1
     fi
 
     # Stop the app if it was stopped
     if [[ $app_status == "STOPPED" ]]; then
         stop_app "direct" "$appname"
     fi
+    return 0
 }
 
 check_for_db() {
@@ -147,6 +148,7 @@ check_for_db() {
     else
         echo -e "${green}No databases found.${reset}\n"
     fi
+    return 0
 }
 
 search_for_database_file() {

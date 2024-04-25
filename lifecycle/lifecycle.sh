@@ -12,12 +12,13 @@ stop_app_if_needed() {
         result=$(handle_stop_code "$?")
         if [[ $? -eq 1 ]]; then
             echo -e "${red}${result}${reset}"
-            exit 1
+            return 1
         else
             echo -e "${green}${result}${reset}"
         fi
     fi
     echo
+    return 0
 }
 
 delete_original_app() {
@@ -27,7 +28,7 @@ delete_original_app() {
     echo -e "\n${bold}Beginning deletion of the app please wait...${reset}"
 
     sleep 10
-    stop_app_if_needed
+    stop_app_if_needed || return 1
     sleep 10
 
 
@@ -68,10 +69,11 @@ delete_original_app() {
         fi
         echo -e "As a last resort you can attempt to unset your apps pool, or restart your server and then attempt the delete command again"
         echo -e "Prior to doing either of those, please check with a support member to see if it is necessary."
-        exit 1
+        return 1
     else
         echo -e "${green}Success${reset}"
     fi
+    return 0
 }
 
 

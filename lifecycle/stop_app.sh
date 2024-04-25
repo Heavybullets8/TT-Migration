@@ -67,7 +67,7 @@ stop_app() {
 
     # If the status is STOPPED and the output does not contain a line with the pattern "${app_name},stopAll"
     if [[ "$status" == "STOPPED" ]] && ! echo "$output" | grep -q "${app_name},stopAll"; then
-        return 0 # Exit the function
+        return 0 # return the function
     fi
 
     # Check if the output contains the desired namespace and "cnpg" or "operator"

@@ -11,9 +11,10 @@ create_migration_dataset() {
             echo
         else
             echo -e "${red}Error: Failed to create migration dataset.${reset}"
-            exit 1
+            return 1
         fi
     fi
+    return 0
 }
 
 create_app_dataset() {
@@ -27,10 +28,11 @@ create_app_dataset() {
             echo
         else
             echo "${red}Error: Failed to create app dataset.${reset}"
-            exit 1
+            return 1
         fi
     fi
     migration_path=$path
+    return 0
 }
 
 restore_traefik_ingress() {
@@ -41,7 +43,7 @@ restore_traefik_ingress() {
 
     if [[ ! -f "$ingress_backup_file" ]]; then
         echo -e "${red}Ingress backup file not found.${reset}"
-        exit 1
+        return 1
     fi
 
     # Read the ingress backup from the file
@@ -50,7 +52,7 @@ restore_traefik_ingress() {
 
     if [[ -z "$ingress_backup" ]]; then
         echo -e "${red}Ingress backup is empty.${reset}"
-        exit 1
+        return 1
     fi
 
     echo "$ingress_backup_file"
@@ -60,13 +62,14 @@ restore_traefik_ingress() {
     output=$(cli -c "app chart_release update chart_release=\"$appname\" values=$ingress_backup" 2>&1)
     local status=$?
 
-    # Check the exit status of the command
+    # Check the return status of the command
     if [[ $status -eq 0 ]]; then
         echo -e "${green}Success${reset}"
+        return 0
     else
         echo -e "${red}Failed${reset}"
         echo "$output"
-        exit 1
+        return 1
     fi
 }
 
@@ -80,7 +83,7 @@ create_backup_pvc() {
     # Fetch the application configuration
     if ! DATA=$(midclt call chart.release.get_instance "$appname" | jq '.'); then
         echo -e "${red}Failed to get app config.${reset}"
-        exit 1
+        return 1
     fi
     
     # Check if the application is Traefik and if the Traefik ingress integration is enabled
@@ -117,7 +120,7 @@ create_backup_pvc() {
 
     if [[ -z $DATA ]]; then
         echo -e "${red}Error: Failed to get app config.${reset}"
-        exit 1
+        return 1
     fi
 
     # Ensure backup directory exists
@@ -129,6 +132,7 @@ create_backup_pvc() {
 
     # Save data to backup path
     echo "$DATA" > "${backup_path}/${backup_name}"
+    return 0
 }
 
 create_backup_metadata() {
@@ -139,7 +143,7 @@ create_backup_metadata() {
     # Fetch metadata
     if ! app_details=$(midclt call chart.release.get_instance "$appname"); then
         echo -e "${red}Failed to fetch application details.${reset}"
-        exit 1
+        return 1
     fi
 
     # Extract the required fields from the JSON output using jq
@@ -150,7 +154,7 @@ create_backup_metadata() {
     # Check if necessary details are available
     if [[ -z "$chart_name" || -z "$catalog" || -z "$catalog_train" ]]; then
         echo -e "${red}Failed to get either the chart name, catalog, or catalog train.${reset}"
-        exit 1
+        return 1
     fi
 
     # Construct JSON object with the metadata
@@ -163,6 +167,7 @@ create_backup_metadata() {
 
     mkdir -p "$metadata_path"
     echo "$metadata_json" > "${metadata_path}/${metadata_name}"
+    return 0
 }
 
 create_application() {
@@ -214,7 +219,7 @@ create_application() {
     echo -e "Job ID: $job_id"
     echo -e "Error Output:"
     echo -e "$(midclt call core.get_jobs '[["id", "=", '"$job_id"']]' | jq -r '.')"
-    exit 1
+    return 1
 }
 
 wait_for_pvcs() {
@@ -239,5 +244,5 @@ wait_for_pvcs() {
     done
 
     echo -e "${red}Error:${reset} Not all PVCs for $appname are bound after ${max_wait} seconds."
-    exit 1
+    return 1
 }

@@ -15,7 +15,7 @@ if [[ $(id -u) != 0 ]]; then
     if [[ $answer =~ ^[Yy]$ ]]; then
         exec sudo bash "$script_path/$script_name" "${args[@]}"
     else
-        exit 1
+        return 1
     fi
 fi
 }
@@ -40,7 +40,7 @@ check_health() {
     if ! output=$(midclt call chart.release.get_instance "$appname" | jq '.'); then
         echo -e "${red}Failed to get the app details.${reset}"
         echo "$output"
-        exit 1
+        return 1
     fi
 
     # Extract values with jq, outputting raw strings
@@ -51,14 +51,14 @@ check_health() {
     # Check if necessary details are available
     if [[ -z "$catalog_train" || -z "$catalog" || -z "$chart_name" ]]; then
         echo -e "${red}Failed to get either the catalog_train, catalog, or chart_metadata.name.${reset}"
-        exit 1
+        return 1
     fi
 
     # Fetch available trains for the app within the catalog
     if ! available_trains=$(midclt call app.available '[["name", "=", "'"$chart_name"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq -r '.[] | .train'); then
         echo -e "${red}Failed to fetch available trains${reset}"
         echo "$available_trains"
-        exit 1
+        return 1
     fi
 
     # Check for the existence of the app in the current train
@@ -73,7 +73,7 @@ check_health() {
         echo -e "After updating the train, you can attempt the migration again."
         echo -e "If you want to force the migration, you can run the script with the ${blue}--force${reset} flag."
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
-        exit 1
+        return 1
     else
         echo -e "${green}Valid train${reset}"
     fi
@@ -92,7 +92,7 @@ check_health() {
         "\nconfiguration for various services and applications."\
         "\nIf you are 100% sure you want to migrate this application,"\
         "\nyou can do so by running the script with the ${blue}--force${reset} flag."
-    exit 1
+        return 1
     else
         echo -e "${green}Not system train${reset}\n"
     fi
@@ -116,7 +116,7 @@ check_health() {
         echo -e "${red}Make sure to check Truecharts #announcements for migrations you may have missed.${reset}"
         echo -e "${red}If you want to force the migration, you can run the script with the ${blue}--force${reset} flag.${reset}"
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
-        exit 1
+        return 1
     fi
 
 
@@ -129,10 +129,11 @@ check_health() {
     if [[ "$ix_apps_pool" != "$openebs_pool" ]]; then
         echo -e "${red}OpenEBS dataset location: ${blue}$openebs_pool${red} does not match the location of the ix-applications pool: ${red}$ix_apps_pool${reset}"
         echo -e "${red}You need to change the dataset of the ${blue}$openebs_pool${red} to a dataset in the ${blue}$ix_apps_pool${red}.${reset}"
-        exit 1
+        return 1
     else
         echo -e "${green}Correct pool${reset}"
     fi
+    return 0
 }
 
 check_filtered_apps() {

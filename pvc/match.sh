@@ -27,7 +27,7 @@ match_pvcs_with_mountpoints() {
                     echo
                 else
                     echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$pvc_parent_path/${new_volume}${reset}"
-                    exit 1
+                    return 1
                 fi
                 # Remove the matched PVCs from the arrays
                 unset "original_pvc_info[index]"
@@ -40,6 +40,7 @@ match_pvcs_with_mountpoints() {
     # Rebuild the arrays
     original_pvc_info=("${original_pvc_info[@]}")
     pvc_info=("${pvc_info[@]}")
+    return 0
 }
 
 # Matches PVC names by name similarity, such as "pgadmin-config" == "pgadmin-config"
@@ -83,9 +84,10 @@ match_remaining_single_pvc_pair() {
             echo
         else
             echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$pvc_parent_path/${new_volume}${reset}"
-            exit 1
+            return 1
         fi
     fi
+    return 0
 }
 
 match_remaining_pvcs_by_name() {
@@ -98,7 +100,8 @@ match_remaining_pvcs_by_name() {
             echo
         else
             echo -e "${red}Error: Failed to rename ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$pvc_parent_path/${most_similar_volume}${reset}"
-            exit 1
+            return 1
         fi
     done
+    return 0
 }

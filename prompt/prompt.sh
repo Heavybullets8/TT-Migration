@@ -21,7 +21,7 @@ prompt_app_name() {
                 echo -e "\nIf its an old migration, you can remove the dataset with:"
                 echo -e "     ${blue}zfs destroy -r \"${ix_apps_pool}/migration/${appname}\"${reset}"
                 echo -e "Please only do this if you are certain the application migration dataset listed is not from a recently failed migration.${reset}"
-                exit 1
+                return 1
             fi
 
             # Check if the app exists
@@ -65,7 +65,7 @@ prompt_continue_for_db() {
             break
         elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
             echo
-            exit
+            return 1
         else
             echo -e "${yellow}\nInvalid key. Please press 'y' to rename the app or 'n' to skip.${reset}"
         fi
@@ -81,7 +81,7 @@ prompt_continue() {
             break
         elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
             echo
-            exit
+            return 1
         else
             echo -e "${yellow}\nInvalid key. Please press 'y' to continue or 'n' to exit.${reset}"
         fi
@@ -137,7 +137,7 @@ prompt_migration_path() {
     # Check if there are any datasets and exit if there are none
     if [ -z "${app_list}" ]; then
         echo "No datasets found within migration."
-        exit 1
+        return 1
     fi
 
     # Present the list of datasets to the user with number options
@@ -161,4 +161,5 @@ prompt_migration_path() {
             echo "Invalid choice. Please enter a valid number."
         fi
     done
+    return 0
 }

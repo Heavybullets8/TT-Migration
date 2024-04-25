@@ -15,7 +15,7 @@ destroy_new_apps_pvcs() {
 
     if [ ${#new_pvcs[@]} -eq 0 ]; then
         echo -e "${red}Error: No new PVCs found.${reset}"
-        exit 1
+        return 1
     fi
 
     for new_pvc in "${new_pvcs[@]}"; do
@@ -41,13 +41,14 @@ destroy_new_apps_pvcs() {
                 else
                     echo -e "${red}Error: Failed to destroy ${blue}${to_delete}${reset}"
                     echo -e "${red}Error message: ${reset}$output"
-                    exit 1
+                    return 1
                 fi
             fi
             attempt_count=$((attempt_count + 1))
         done
     done
     echo
+    return 0
 }
 
 cleanup_datasets() {
@@ -60,6 +61,7 @@ cleanup_datasets() {
         echo -e "${green}Removed app dataset: ${blue}${app_dataset}${reset}"
     else
         echo -e "${red}Error: Failed to remove app dataset: ${blue}${app_dataset}${reset}"
+        return 1
     fi
     echo
 
@@ -71,7 +73,9 @@ cleanup_datasets() {
             echo -e "${green}Removed base path dataset: ${blue}${base_path}${reset}"
         else
             echo -e "${red}Error: Failed to remove base path dataset: ${blue}${base_path}${reset}"
+            return 1
         fi
             echo
     fi
+    return 0
 }
