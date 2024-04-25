@@ -25,7 +25,7 @@ rename_original_pvcs() {
             echo -e "${green}Renamed ${blue}${old_pvc_name}${reset} to ${blue}${new_pvc_name}${reset}"
             # Update the JSON file to set original_rename_complete to true for this PVC
             update_json_file "$pvc_backup_file" \
-                            ".[] | select(.pvc_name == \"$pvc_name\")" \
+                            ".pvc_name == \"$pvc_name\"" \
                             ".original_rename_complete = true"
         else
             echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"

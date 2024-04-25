@@ -39,12 +39,12 @@ match_pvcs_with_mountpoints() {
 
                     # Update the original PVC to mark it as completed
                     update_json_file "$original_pvc_info_file" \
-                                     ".[] | select(.pvc_name == \"$original_pvc_name\")" \
+                                     ".pvc_name == \"$original_pvc_name\"" \
                                      ".matched = true"
 
                     # Update the new PVC to mark it as completed
                     update_json_file "$new_pvc_info_file" \
-                                     ".[] | select(.pvc_name == \"$new_pvc_name\")" \
+                                     ".pvc_name == \"$new_pvc_name\"" \
                                      ".matched = true"
                     # Break out of the inner loop as we found a match
                     break
@@ -81,11 +81,11 @@ match_remaining_single_pvc_pair() {
 
         # Update the JSON file to mark the original and new PVCs as completed
         update_json_file "$original_app_pvc_info" \
-                         ".[] | select(.pvc_name == \"$original_pvc_name\")" \
+                         ".pvc_name == \"$original_pvc_name\"" \
                          ".matched = true"
 
         update_json_file "$new_app_pvc_info" \
-                         ".[] | select(.pvc_name == \"$new_pvc_name\")" \
+                         ".pvc_name == \"$new_pvc_name\"" \
                          ".matched = true"
 
     else
@@ -156,11 +156,11 @@ match_remaining_pvcs_by_name() {
 
             # Update the JSON file to mark the original and new PVCs as completed
             update_json_file "$original_app_pvc_info" \
-                             ".[] | select(.pvc_name == \"$original_pvc_name\")" \
+                             ".pvc_name == \"$original_pvc_name\"" \
                              ".matched = true"
 
             update_json_file "$new_app_pvc_info" \
-                             ".[] | select(.pvc_name == \"$most_similar_pvc\")" \
+                             ".pvc_name == \"$most_similar_pvc\"" \
                              ".matched = true"
 
         else
