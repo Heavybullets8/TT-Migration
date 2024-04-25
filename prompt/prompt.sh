@@ -161,7 +161,7 @@ prompt_migration_path() {
             local backup_path="/mnt/${migration_path}/backup"
             
             # Check for critical migration files
-            if [[ ! -f "${backup_path}/pvcs_new.json" ]] || [[ ! -f "${backup_path}/pvcs_original.json" ]]; then
+            if [[ ! -f "${backup_path}/pvcs_original.json" ]]; then
                 echo -e "${red}Error: It looks like this migration is from an earlier version of the script.${reset}"
                 echo -e "To continue with this specific migration, please switch to the legacy branch:"
                 echo -e "${blue}git fetch --all${reset}"
