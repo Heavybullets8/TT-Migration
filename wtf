@@ -1,0 +1,3944 @@
+admin@truenas[~/TT-Migration]$ sudo bash -x migrate.sh
++ export 'reset=\033[0m'
++ reset='\033[0m'
++ export 'red=\033[0;31m'
++ red='\033[0;31m'
++ export 'yellow=\033[1;33m'
++ yellow='\033[1;33m'
++ export 'green=\033[0;32m'
++ green='\033[0;32m'
++ export 'blue=\033[0;34m'
++ blue='\033[0;34m'
++ export 'bold=\033[1m'
++ bold='\033[1m'
++ export 'gray=\033[38;5;7m'
++ gray='\033[38;5;7m'
++ export namespace
++ export appname
++ export original_pvs_count
++ export ix_apps_pool
++ export migration_path
++ export rename=false
++ rename=false
++ export migrate_pvs=false
++ migrate_pvs=false
++ export migrate_db=false
++ migrate_db=false
++ export cnpgpvc=false
++ cnpgpvc=false
++ export script_progress=start
++ script_progress=start
++ export traefik_ingress_integration_enabled=false
++ traefik_ingress_integration_enabled=false
++ export backup_path
++ export force=false
++ force=false
++ export skip=false
++ skip=false
++ export no_update=false
++ no_update=false
+++ readlink -f migrate.sh
++ export script=/home/admin/TT-Migration/migrate.sh
++ script=/home/admin/TT-Migration/migrate.sh
+++ dirname /home/admin/TT-Migration/migrate.sh
++ export script_path=/home/admin/TT-Migration
++ script_path=/home/admin/TT-Migration
++ export script_name=migrate.sh
++ script_name=migrate.sh
++ args=()
++ export args
+++ readlink -f migrate.sh
++ script=/home/admin/TT-Migration/migrate.sh
+++ dirname /home/admin/TT-Migration/migrate.sh
++ script_path=/home/admin/TT-Migration
++ script_name=migrate.sh
++ args=("$@")
++ cd /home/admin/TT-Migration
++ pvc_info=()
++ export pvc_info
++ export current_version
+++ git rev-parse --abbrev-ref HEAD
++ current_version=improve-pvc-renaming
++ source check/check.sh
++ source create/create.sh
++ source create/database.sh
++ source create/vars.sh
++ source find/find.sh
++ source lifecycle/lifecycle.sh
++ source lifecycle/start_app.sh
++ source lifecycle/stop_app.sh
++ source prompt/prompt.sh
++ source pvc/cleanup.sh
++ source pvc/info.sh
++ source pvc/match.sh
++ source pvc/rename.sh
++ source self-update/self-update.sh
++ [[ 0 -gt 0 ]]
++ main
++ check_privileges
+++ id -u
++ [[ 0 != 0 ]]
++ [[ false == false ]]
++ auto_update_script
++ git -C /home/admin/TT-Migration config pull.rebase true
++ git -C /home/admin/TT-Migration fetch
++ git -C /home/admin/TT-Migration diff --quiet origin/improve-pvc-renaming
++ find_apps_pool
++ echo -e '\033[1mFinding apps pool...\033[0m'
+Finding apps pool...
+++ cli -c 'app kubernetes config'
+++ grep -E 'pool\s\|'
+++ awk -F '|' '{print $3}'
+++ sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
++ ix_apps_pool='tank long name'
++ '[' -z 'tank long name' ']'
++ echo -e '\033[0;32mFound: \033[0;34mtank long name\033[0m\n'
+Found: tank long name
+
++ return 0
++ [[ false == true ]]
++ case $script_progress in
++ prompt_app_name
++ true
++ read -r -p 'Enter the application name: ' appname
+Enter the application name: wallos
++ [[ wallos =~ ^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$ ]]
+++ echo wallos
+++ tr '[:upper:]' '[:lower:]'
++ appname_lowercase=wallos
++ appname=wallos
++ namespace=ix-wallos
++ zfs list 'tank long name/migration/wallos'
++ check_if_app_exists wallos
++ local appname=wallos
++ echo -e '\033[1mChecking if app exists...\033[0m'
+Checking if app exists...
++ cli -m csv -c 'app chart_release query name'
++ tr -d ' \t\r'
++ grep -qE '^wallos$'
++ echo -e '\033[0;32mFound: \033[0;34mwallos\033[0m'
+Found: wallos
++ echo
+
++ break
++ [[ false == false ]]
++ check_health
++ local chart_name catalog catalog_train output train_exists
++ echo -e '\033[1mChecking app health...\033[0m'
+Checking app health...
+++ midclt call chart.release.get_instance wallos
+++ jq .
++ output='{
+  "name": "wallos",
+  "info": {
+    "first_deployed": "2024-04-24T19:01:24.785497121-07:00",
+    "last_deployed": "2024-04-24T19:01:35.604537754-07:00",
+    "deleted": "",
+    "description": "Upgrade complete",
+    "status": "deployed",
+    "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"
+  },
+  "config": {
+    "TZ": "America/Los_Angeles",
+    "addons": {
+      "codeserver": {
+        "enabled": false
+      },
+      "netshoot": {
+        "enabled": false
+      },
+      "vpn": {
+        "type": "disabled"
+      }
+    },
+    "deviceList": [],
+    "docs": {
+      "confirmDocs": true
+    },
+    "donateNag": {
+      "confirmDonate": true
+    },
+    "global": {
+      "ixChartContext": {
+        "addNvidiaRuntimeClass": false,
+        "hasNFSCSI": true,
+        "hasSMBCSI": true,
+        "isInstall": true,
+        "isStopped": false,
+        "isUpdate": false,
+        "isUpgrade": false,
+        "kubernetes_config": {
+          "cluster_cidr": "172.16.0.0/16",
+          "cluster_dns_ip": "172.17.0.10",
+          "service_cidr": "172.17.0.0/16"
+        },
+        "nfsProvisioner": "nfs.csi.k8s.io",
+        "nvidiaRuntimeClassName": "nvidia",
+        "operation": "INSTALL",
+        "smbProvisioner": "smb.csi.k8s.io",
+        "storageClassName": "ix-storage-class-wallos",
+        "upgradeMetadata": {}
+      },
+      "stopAll": false
+    },
+    "image": {
+      "pullPolicy": "IfNotPresent",
+      "repository": "docker.io/bellamy/wallos",
+      "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+    },
+    "imagePullSecretList": [],
+    "ingress": {
+      "main": {
+        "enabled": false
+      }
+    },
+    "ingressList": [],
+    "ixCertificateAuthorities": {},
+    "ixCertificates": {},
+    "ixChartContext": {
+      "addNvidiaRuntimeClass": false,
+      "hasNFSCSI": true,
+      "hasSMBCSI": true,
+      "isInstall": true,
+      "isStopped": false,
+      "isUpdate": false,
+      "isUpgrade": false,
+      "kubernetes_config": {
+        "cluster_cidr": "172.16.0.0/16",
+        "cluster_dns_ip": "172.17.0.10",
+        "service_cidr": "172.17.0.0/16"
+      },
+      "nfsProvisioner": "nfs.csi.k8s.io",
+      "nvidiaRuntimeClassName": "nvidia",
+      "operation": "INSTALL",
+      "smbProvisioner": "smb.csi.k8s.io",
+      "storageClassName": "ix-storage-class-wallos",
+      "upgradeMetadata": {}
+    },
+    "ixExternalInterfacesConfiguration": [],
+    "ixExternalInterfacesConfigurationNames": [],
+    "ixVolumes": [],
+    "networkPolicy": [],
+    "persistence": {
+      "database": {
+        "enabled": true,
+        "mountPath": "/var/www/html/db",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      },
+      "logos": {
+        "enabled": true,
+        "mountPath": "/var/www/html/images/uploads/logos",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      }
+    },
+    "persistenceList": [],
+    "podOptions": {
+      "expertPodOpts": false
+    },
+    "portal": {
+      "open": {
+        "enabled": true
+      }
+    },
+    "release_name": "wallos",
+    "resources": {
+      "limits": {
+        "amd.com/gpu": 0,
+        "cpu": "4000m",
+        "gpu.intel.com/i915": 0,
+        "memory": "8Gi",
+        "nvidia.com/gpu": 0
+      },
+      "requests": {
+        "cpu": "10m",
+        "memory": "50Mi"
+      }
+    },
+    "scaleExternalInterface": [],
+    "securityContext": {
+      "container": {
+        "PUID": 568,
+        "UMASK": "0022",
+        "advanced": false,
+        "readOnlyRootFilesystem": false,
+        "runAsGroup": 0,
+        "runAsNonRoot": false,
+        "runAsUser": 0
+      },
+      "pod": {
+        "fsGroup": 568,
+        "fsGroupChangePolicy": "OnRootMismatch",
+        "supplementalGroups": []
+      }
+    },
+    "service": {
+      "main": {
+        "enabled": true,
+        "loadBalancerIP": "",
+        "ports": {
+          "main": {
+            "port": 8282,
+            "protocol": "tcp",
+            "targetPort": 80
+          }
+        },
+        "type": "LoadBalancer"
+      }
+    },
+    "serviceList": [],
+    "workload": {
+      "main": {
+        "podSpec": {
+          "containers": {
+            "main": {
+              "advanced": false,
+              "envList": [],
+              "extraArgs": []
+            }
+          }
+        },
+        "replicas": 1,
+        "type": "Deployment"
+      }
+    }
+  },
+  "version": 2,
+  "namespace": "ix-wallos",
+  "chart_metadata": {
+    "name": "wallos",
+    "home": "https://truecharts.org/charts/stable/wallos",
+    "sources": [
+      "https://github.com/ellite/Wallos",
+      "https://github.com/truecharts/charts/tree/master/charts/stable/wallos",
+      "https://hub.docker.com/r/bellamy/wallos"
+    ],
+    "version": "4.8.17",
+    "description": "Wallos - Self Hosted Subscription tracker",
+    "keywords": [
+      "dashboard"
+    ],
+    "maintainers": [
+      {
+        "name": "TrueCharts",
+        "email": "info@truecharts.org",
+        "url": "https://truecharts.org"
+      }
+    ],
+    "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp",
+    "apiVersion": "v2",
+    "appVersion": "latest",
+    "annotations": {
+      "max_scale_version": "24.04.0",
+      "min_scale_version": "23.10.0",
+      "truecharts.org/SCALE-support": "true",
+      "truecharts.org/category": "media",
+      "truecharts.org/max_helm_version": "3.14",
+      "truecharts.org/min_helm_version": "3.11",
+      "truecharts.org/train": "stable"
+    },
+    "kubeVersion": ">=1.24.0-0",
+    "dependencies": [
+      {
+        "name": "common",
+        "version": "20.3.11",
+        "repository": "oci://tccr.io/truecharts",
+        "enabled": true
+      }
+    ],
+    "type": "application",
+    "latest_chart_version": "4.8.17"
+  },
+  "id": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable",
+  "path": "/mnt/tank long name/ix-applications/releases/wallos",
+  "dataset": "tank long name/ix-applications/releases/wallos",
+  "status": "ACTIVE",
+  "used_ports": [
+    {
+      "port": 8282,
+      "protocol": "TCP"
+    }
+  ],
+  "pod_status": {
+    "desired": 1,
+    "available": 1
+  },
+  "update_available": false,
+  "human_version": "latest_4.8.17",
+  "human_latest_version": "latest_4.8.17",
+  "container_images_update_available": false,
+  "portals": {
+    "open": [
+      "http://192.168.200.110:8282/"
+    ]
+  }
+}'
+++ echo '{
+  "name": "wallos",
+  "info": {
+    "first_deployed": "2024-04-24T19:01:24.785497121-07:00",
+    "last_deployed": "2024-04-24T19:01:35.604537754-07:00",
+    "deleted": "",
+    "description": "Upgrade complete",
+    "status": "deployed",
+    "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"
+  },
+  "config": {
+    "TZ": "America/Los_Angeles",
+    "addons": {
+      "codeserver": {
+        "enabled": false
+      },
+      "netshoot": {
+        "enabled": false
+      },
+      "vpn": {
+        "type": "disabled"
+      }
+    },
+    "deviceList": [],
+    "docs": {
+      "confirmDocs": true
+    },
+    "donateNag": {
+      "confirmDonate": true
+    },
+    "global": {
+      "ixChartContext": {
+        "addNvidiaRuntimeClass": false,
+        "hasNFSCSI": true,
+        "hasSMBCSI": true,
+        "isInstall": true,
+        "isStopped": false,
+        "isUpdate": false,
+        "isUpgrade": false,
+        "kubernetes_config": {
+          "cluster_cidr": "172.16.0.0/16",
+          "cluster_dns_ip": "172.17.0.10",
+          "service_cidr": "172.17.0.0/16"
+        },
+        "nfsProvisioner": "nfs.csi.k8s.io",
+        "nvidiaRuntimeClassName": "nvidia",
+        "operation": "INSTALL",
+        "smbProvisioner": "smb.csi.k8s.io",
+        "storageClassName": "ix-storage-class-wallos",
+        "upgradeMetadata": {}
+      },
+      "stopAll": false
+    },
+    "image": {
+      "pullPolicy": "IfNotPresent",
+      "repository": "docker.io/bellamy/wallos",
+      "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+    },
+    "imagePullSecretList": [],
+    "ingress": {
+      "main": {
+        "enabled": false
+      }
+    },
+    "ingressList": [],
+    "ixCertificateAuthorities": {},
+    "ixCertificates": {},
+    "ixChartContext": {
+      "addNvidiaRuntimeClass": false,
+      "hasNFSCSI": true,
+      "hasSMBCSI": true,
+      "isInstall": true,
+      "isStopped": false,
+      "isUpdate": false,
+      "isUpgrade": false,
+      "kubernetes_config": {
+        "cluster_cidr": "172.16.0.0/16",
+        "cluster_dns_ip": "172.17.0.10",
+        "service_cidr": "172.17.0.0/16"
+      },
+      "nfsProvisioner": "nfs.csi.k8s.io",
+      "nvidiaRuntimeClassName": "nvidia",
+      "operation": "INSTALL",
+      "smbProvisioner": "smb.csi.k8s.io",
+      "storageClassName": "ix-storage-class-wallos",
+      "upgradeMetadata": {}
+    },
+    "ixExternalInterfacesConfiguration": [],
+    "ixExternalInterfacesConfigurationNames": [],
+    "ixVolumes": [],
+    "networkPolicy": [],
+    "persistence": {
+      "database": {
+        "enabled": true,
+        "mountPath": "/var/www/html/db",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      },
+      "logos": {
+        "enabled": true,
+        "mountPath": "/var/www/html/images/uploads/logos",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      }
+    },
+    "persistenceList": [],
+    "podOptions": {
+      "expertPodOpts": false
+    },
+    "portal": {
+      "open": {
+        "enabled": true
+      }
+    },
+    "release_name": "wallos",
+    "resources": {
+      "limits": {
+        "amd.com/gpu": 0,
+        "cpu": "4000m",
+        "gpu.intel.com/i915": 0,
+        "memory": "8Gi",
+        "nvidia.com/gpu": 0
+      },
+      "requests": {
+        "cpu": "10m",
+        "memory": "50Mi"
+      }
+    },
+    "scaleExternalInterface": [],
+    "securityContext": {
+      "container": {
+        "PUID": 568,
+        "UMASK": "0022",
+        "advanced": false,
+        "readOnlyRootFilesystem": false,
+        "runAsGroup": 0,
+        "runAsNonRoot": false,
+        "runAsUser": 0
+      },
+      "pod": {
+        "fsGroup": 568,
+        "fsGroupChangePolicy": "OnRootMismatch",
+        "supplementalGroups": []
+      }
+    },
+    "service": {
+      "main": {
+        "enabled": true,
+        "loadBalancerIP": "",
+        "ports": {
+          "main": {
+            "port": 8282,
+            "protocol": "tcp",
+            "targetPort": 80
+          }
+        },
+        "type": "LoadBalancer"
+      }
+    },
+    "serviceList": [],
+    "workload": {
+      "main": {
+        "podSpec": {
+          "containers": {
+            "main": {
+              "advanced": false,
+              "envList": [],
+              "extraArgs": []
+            }
+          }
+        },
+        "replicas": 1,
+        "type": "Deployment"
+      }
+    }
+  },
+  "version": 2,
+  "namespace": "ix-wallos",
+  "chart_metadata": {
+    "name": "wallos",
+    "home": "https://truecharts.org/charts/stable/wallos",
+    "sources": [
+      "https://github.com/ellite/Wallos",
+      "https://github.com/truecharts/charts/tree/master/charts/stable/wallos",
+      "https://hub.docker.com/r/bellamy/wallos"
+    ],
+    "version": "4.8.17",
+    "description": "Wallos - Self Hosted Subscription tracker",
+    "keywords": [
+      "dashboard"
+    ],
+    "maintainers": [
+      {
+        "name": "TrueCharts",
+        "email": "info@truecharts.org",
+        "url": "https://truecharts.org"
+      }
+    ],
+    "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp",
+    "apiVersion": "v2",
+    "appVersion": "latest",
+    "annotations": {
+      "max_scale_version": "24.04.0",
+      "min_scale_version": "23.10.0",
+      "truecharts.org/SCALE-support": "true",
+      "truecharts.org/category": "media",
+      "truecharts.org/max_helm_version": "3.14",
+      "truecharts.org/min_helm_version": "3.11",
+      "truecharts.org/train": "stable"
+    },
+    "kubeVersion": ">=1.24.0-0",
+    "dependencies": [
+      {
+        "name": "common",
+        "version": "20.3.11",
+        "repository": "oci://tccr.io/truecharts",
+        "enabled": true
+      }
+    ],
+    "type": "application",
+    "latest_chart_version": "4.8.17"
+  },
+  "id": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable",
+  "path": "/mnt/tank long name/ix-applications/releases/wallos",
+  "dataset": "tank long name/ix-applications/releases/wallos",
+  "status": "ACTIVE",
+  "used_ports": [
+    {
+      "port": 8282,
+      "protocol": "TCP"
+    }
+  ],
+  "pod_status": {
+    "desired": 1,
+    "available": 1
+  },
+  "update_available": false,
+  "human_version": "latest_4.8.17",
+  "human_latest_version": "latest_4.8.17",
+  "container_images_updat++ jq -r '.catalog_train // empty'
+e_available": false,
+  "portals": {
+    "open": [
+      "http://192.168.200.110:8282/"
+    ]
+  }
+}'
++ catalog_train=stable
+++ echo '{
+  "name": "wallos",
+  "info": {
+    "first_deployed": "2024-04-24T19:01:24.785497121-07:00",
+    "last_deployed": "2024-04-24T19:01:35.604537754-07:00",
+    "deleted": "",
+    "description": "Upgrade complete",
+    "status": "deployed",
+    "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"
+  },
+  "config": {
+    "TZ": "America/Los_Angeles",
+    "addons": {
+      "codeserver": {
+        "enabled": false
+      },
+      "netshoot": {
+        "enabled": false
+      },
+      "vpn": {
+        "type": "disabled"
+      }
+    },
+    "deviceList": [],
+    "docs": {
+      "confirmDocs": true
+    },
+    "donateNag": {
+      "confirmDonate": true
+    },
+    "global": {
+      "ixChartContext": {
+        "addNvidiaRuntimeClass": false,
+        "hasNFSCSI": true,
+        "hasSMBCSI": true,
+        "isInstall": true,
+        "isStopped": false,
+        "isUpdate": false,
+        "isUpgrade": false,
+        "kubernetes_config": {
+          "cluster_cidr": "172.16.0.0/16",
+          "cluster_dns_ip": "172.17.0.10",
+          "service_cidr": "172.17.0.0/16"
+        },
+        "nfsProvisioner": "nfs.csi.k8s.io",
+        "nvidiaRuntimeClassName": "nvidia",
+        "operation": "INSTALL",
+        "smbProvisioner": "smb.csi.k8s.io",
+        "storageClassName": "ix-storage-class-wallos",
+        "upgradeMetadata": {}
+      },
+      "stopAll": false
+    },
+    "image": {
+      "pullPolicy": "IfNotPresent",
+      "repository": "docker.io/bellamy/wallos",
+      "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+    },
+    "imagePullSecretList": [],
+    "ingress": {
+      "main": {
+        "enabled": false
+      }
+    },
+    "ingressList": [],
+    "ixCertificateAuthorities": {},
+    "ixCertificates": {},
+    "ixChartContext": {
+      "addNvidiaRuntimeClass": false,
+      "hasNFSCSI": true,
+      "hasSMBCSI": true,
+      "isInstall": true,
+      "isStopped": false,
+      "isUpdate": false,
+      "isUpgrade": false,
+      "kubernetes_config": {
+        "cluster_cidr": "172.16.0.0/16",
+        "cluster_dns_ip": "172.17.0.10",
+        "service_cidr": "172.17.0.0/16"
+      },
+      "nfsProvisioner": "nfs.csi.k8s.io",
+      "nvidiaRuntimeClassName": "nvidia",
+      "operation": "INSTALL",
+      "smbProvisioner": "smb.csi.k8s.io",
+      "storageClassName": "ix-storage-class-wallos",
+      "upgradeMetadata": {}
+    },
+    "ixExternalInterfacesConfiguration": [],
+    "ixExternalInterfacesConfigurationNames": [],
+    "ixVolumes": [],
+    "networkPolicy": [],
+    "persistence": {
+      "database": {
+        "enabled": true,
+        "mountPath": "/var/www/html/db",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      },
+      "logos": {
+        "enabled": true,
+        "mountPath": "/var/www/html/images/uploads/logos",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      }
+    },
+    "persistenceList": [],
+    "podOptions": {
+      "expertPodOpts": false
+    },
+    "portal": {
+      "open": {
+        "enabled": true
+      }
+    },
+    "release_name": "wallos",
+    "resources": {
+      "limits": {
+        "amd.com/gpu": 0,
+        "cpu": "4000m",
+        "gpu.intel.com/i915": 0,
+        "memory": "8Gi",
+        "nvidia.com/gpu": 0
+      },
+      "requests": {
+        "cpu": "10m",
+        "memory": "50Mi"
+      }
+    },
+    "scaleExternalInterface": [],
+    "securityContext": {
+      "container": {
+        "PUID": 568,
+        "UMASK": "0022",
+        "advanced": false,
+        "readOnlyRootFilesystem": false,
+        "runAsGroup": 0,
+        "runAsNonRoot": false,
+        "runAsUser": 0
+      },
+      "pod": {
+        "fsGroup": 568,
+        "fsGroupChangePolicy": "OnRootMismatch",
+        "supplementalGroups": []
+      }
+    },
+    "service": {
+      "main": {
+        "enabled": true,
+        "loadBalancerIP": "",
+        "ports": {
+          "main": {
+            "port": 8282,
+            "protocol": "tcp",
+            "targetPort": 80
+          }
+        },
+        "type": "LoadBalancer"
+      }
+    },
+    "serviceList": [],
+    "workload": {
+      "main": {
+        "podSpec": {
+          "containers": {
+            "main": {
+              "advanced": false,
+              "envList": [],
+              "extraArgs": []
+            }
+          }
+        },
+        "replicas": 1,
+        "type": "Deployment"
+      }
+    }
+  },
+  "version": 2,
+  "namespace": "ix-wallos",
+  "chart_metadata": {
+    "name": "wallos",
+    "home": "https://truecharts.org/charts/stable/wallos",
+    "sources": [
+      "https://github.com/ellite/Wallos",
+      "https://github.com/truecharts/charts/tree/master/charts/stable/wallos",
+      "https://hub.docker.com/r/bellamy/wallos"
+    ],
+    "version": "4.8.17",
+    "description": "Wallos - Self Hosted Subscription tracker",
+    "keywords": [
+      "dashboard"
+    ],
+    "maintainers": [
+      {
+        "name": "TrueCharts",
+        "email": "info@truecharts.org",
+        "url": "https://truecharts.org"
+      }
+    ],
+    "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp",
+    "apiVersion": "v2",
+    "appVersion": "latest",
+    "annotations": {
+      "max_scale_version": "24.04.0",
+      "min_scale_version": "23.10.0",
+      "truecharts.org/SCALE-support": "true",
+      "truecharts.org/category": "media",
+      "truecharts.org/max_helm_version": "3.14",
+      "truecharts.org/min_helm_version": "3.11",
+      "truecharts.org/train": "stable"
+    },
+    "kubeVersion": ">=1.24.0-0",
+    "dependencies": [
+      {
+        "name": "common",
+        "version": "20.3.11",
+        "repository": "oci://tccr.io/truecharts",
+        "enabled": true
+      }
+    ],
+    "type": "application",
+    "latest_chart_version": "4.8.17"
+  },
+  "id": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable",
+  "path": "/mnt/tank long name/ix-applications/releases/wallos",
+  "dataset": "tank long name/ix-applications/releases/wallos",
+  "status": "ACTIVE",
+  "used_ports": [
+    {
+      "port": 8282,
+      "protocol": "TCP"
+    }
+  ],
+  "pod_status": {
+    "desired": 1,
+    "available": 1
+  },
+  "update_available": false,
+  "human_version": "latest_4.8.17",
+  "human_latest_version": "latest_4.8.17",
+  "container_images_updat++ jq -r '.catalog // empty'
+e_available": false,
+  "portals": {
+    "open": [
+      "http://192.168.200.110:8282/"
+    ]
+  }
+}'
++ catalog=TRUECHARTS
+++ echo '{
+  "name": "wallos",
+  "info": {
+    "first_deployed": "2024-04-24T19:01:24.785497121-07:00",
+    "last_deployed": "2024-04-24T19:01:35.604537754-07:00",
+    "deleted": "",
+    "description": "Upgrade complete",
+    "status": "deployed",
+    "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"
+  },
+  "config": {
+    "TZ": "America/Los_Angeles",
+    "addons": {
+      "codeserver": {
+        "enabled": false
+      },
+      "netshoot": {
+        "enabled": false
+      },
+      "vpn": {
+        "type": "disabled"
+      }
+    },
+    "deviceList": [],
+    "docs": {
+      "confirmDocs": true
+    },
+    "donateNag": {
+      "confirmDonate": true
+    },
+    "global": {
+      "ixChartContext": {
+        "addNvidiaRuntimeClass": false,
+        "hasNFSCSI": true,
+        "hasSMBCSI": true,
+        "isInstall": true,
+        "isStopped": false,
+        "isUpdate": false,
+        "isUpgrade": false,
+        "kubernetes_config": {
+          "cluster_cidr": "172.16.0.0/16",
+          "cluster_dns_ip": "172.17.0.10",
+          "service_cidr": "172.17.0.0/16"
+        },
+        "nfsProvisioner": "nfs.csi.k8s.io",
+        "nvidiaRuntimeClassName": "nvidia",
+        "operation": "INSTALL",
+        "smbProvisioner": "smb.csi.k8s.io",
+        "storageClassName": "ix-storage-class-wallos",
+        "upgradeMetadata": {}
+      },
+      "stopAll": false
+    },
+    "image": {
+      "pullPolicy": "IfNotPresent",
+      "repository": "docker.io/bellamy/wallos",
+      "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+    },
+    "imagePullSecretList": [],
+    "ingress": {
+      "main": {
+        "enabled": false
+      }
+    },
+    "ingressList": [],
+    "ixCertificateAuthorities": {},
+    "ixCertificates": {},
+    "ixChartContext": {
+      "addNvidiaRuntimeClass": false,
+      "hasNFSCSI": true,
+      "hasSMBCSI": true,
+      "isInstall": true,
+      "isStopped": false,
+      "isUpdate": false,
+      "isUpgrade": false,
+      "kubernetes_config": {
+        "cluster_cidr": "172.16.0.0/16",
+        "cluster_dns_ip": "172.17.0.10",
+        "service_cidr": "172.17.0.0/16"
+      },
+      "nfsProvisioner": "nfs.csi.k8s.io",
+      "nvidiaRuntimeClassName": "nvidia",
+      "operation": "INSTALL",
+      "smbProvisioner": "smb.csi.k8s.io",
+      "storageClassName": "ix-storage-class-wallos",
+      "upgradeMetadata": {}
+    },
+    "ixExternalInterfacesConfiguration": [],
+    "ixExternalInterfacesConfigurationNames": [],
+    "ixVolumes": [],
+    "networkPolicy": [],
+    "persistence": {
+      "database": {
+        "enabled": true,
+        "mountPath": "/var/www/html/db",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      },
+      "logos": {
+        "enabled": true,
+        "mountPath": "/var/www/html/images/uploads/logos",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      }
+    },
+    "persistenceList": [],
+    "podOptions": {
+      "expertPodOpts": false
+    },
+    "portal": {
+      "open": {
+        "enabled": true
+      }
+    },
+    "release_name": "wallos",
+    "resources": {
+      "limits": {
+        "amd.com/gpu": 0,
+        "cpu": "4000m",
+        "gpu.intel.com/i915": 0,
+        "memory": "8Gi",
+        "nvidia.com/gpu": 0
+      },
+      "requests": {
+        "cpu": "10m",
+        "memory": "50Mi"
+      }
+    },
+    "scaleExternalInterface": [],
+    "securityContext": {
+      "container": {
+        "PUID": 568,
+        "UMASK": "0022",
+        "advanced": false,
+        "readOnlyRootFilesystem": false,
+        "runAsGroup": 0,
+        "runAsNonRoot": false,
+        "runAsUser": 0
+      },
+      "pod": {
+        "fsGroup": 568,
+        "fsGroupChangePolicy": "OnRootMismatch",
+        "supplementalGroups": []
+      }
+    },
+    "service": {
+      "main": {
+        "enabled": true,
+        "loadBalancerIP": "",
+        "ports": {
+          "main": {
+            "port": 8282,
+            "protocol": "tcp",
+            "targetPort": 80
+          }
+        },
+        "type": "LoadBalancer"
+      }
+    },
+    "serviceList": [],
+    "workload": {
+      "main": {
+        "podSpec": {
+          "containers": {
+            "main": {
+              "advanced": false,
+              "envList": [],
+              "extraArgs": []
+            }
+          }
+        },
+        "replicas": 1,
+        "type": "Deployment"
+      }
+    }
+  },
+  "version": 2,
+  "namespace": "ix-wallos",
+  "chart_metadata": {
+    "name": "wallos",
+    "home": "https://truecharts.org/charts/stable/wallos",
+    "sources": [
+      "https://github.com/ellite/Wallos",
+      "https://github.com/truecharts/charts/tree/master/charts/stable/wallos",
+      "https://hub.docker.com/r/bellamy/wallos"
+    ],
+    "version": "4.8.17",
+    "description": "Wallos - Self Hosted Subscription tracker",
+    "keywords": [
+      "dashboard"
+    ],
+    "maintainers": [
+      {
+        "name": "TrueCharts",
+        "email": "info@truecharts.org",
+        "url": "https://truecharts.org"
+      }
+    ],
+    "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp",
+    "apiVersion": "v2",
+    "appVersion": "latest",
+    "annotations": {
+      "max_scale_version": "24.04.0",
+      "min_scale_version": "23.10.0",
+      "truecharts.org/SCALE-support": "true",
+      "truecharts.org/category": "media",
+      "truecharts.org/max_helm_version": "3.14",
+      "truecharts.org/min_helm_version": "3.11",
+      "truecharts.org/train": "stable"
+    },
+    "kubeVersion": ">=1.24.0-0",
+    "dependencies": [
+      {
+        "name": "common",
+        "version": "20.3.11",
+        "repository": "oci://tccr.io/truecharts",
+        "enabled": true
+      }
+    ],
+    "type": "application",
+    "latest_chart_version": "4.8.17"
+  },
+  "id": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable",
+  "path": "/mnt/tank long name/ix-applications/releases/wallos",
+  "dataset": "tank long name/ix-applications/releases/wallos",
+  "status": "ACTIVE",
+  "used_ports": [
+    {
+      "port": 8282,
+      "protocol": "TCP"
+    }
+  ],
+  "pod_status": {
+    "desired": 1,
+    "available": 1
+  },
+  "update_available": false,
+  "human_version": "latest_4.8.17",
+  "human_latest_version": "latest_4.8.17",
+  "container_images_updat++ jq -r '.chart_metadata.name // empty'
+e_available": false,
+  "portals": {
+    "open": [
+      "http://192.168.200.110:8282/"
+    ]
+  }
+}'
++ chart_name=wallos
++ [[ -z stable ]]
++ [[ -z TRUECHARTS ]]
++ [[ -z wallos ]]
+++ midclt call app.available '[["name", "=", "wallos"], ["catalog", "=", "TRUECHARTS"]]' '{}'
+++ jq -r '.[] | .train'
++ available_trains=stable
+++ echo stable
+++ grep -c '^stable$'
++ train_exists=1
++ [[ 1 -eq 0 ]]
++ echo -e '\033[0;32mValid train\033[0m'
+Valid train
++ [[ stable == \s\y\s\t\e\m ]]
++ echo -e '\033[0;32mNot system train\033[0m'
+Not system train
+++ cli -c 'app chart_release update chart_release="wallos" values={}'
++ output='[0%] ...
+[25%] Initial Validation complete...
+[90%] Syncing secrets for chart release...
+[100%] Update completed for chart release...'
++ echo -e '\033[0;32mPassed empty edit\033[0m'
+Passed empty edit
++ local openebs_pool
+++ k3s kubectl get storageclass -o=json
+++ jq -r '.items[] | select(.metadata.annotations."storageclass.kubernetes.io/is-default-class" == "true") | .parameters.poolname | split("/")[0]'
++ openebs_pool='tank long name'
++ [[ tank long name != \t\a\n\k\ \l\o\n\g\ \n\a\m\e ]]
++ echo -e '\033[0;32mCorrect pool\033[0m\n'
+Correct pool
+
++ return 0
++ check_for_db
++ echo -e '\033[1mChecking for databases...\033[0m'
+Checking for databases...
++ k3s kubectl get cluster -A --ignore-not-found
++ grep -E '^(ix-.*\s).*-cnpg-main-'
++ awk '{gsub(/^ix-/, "", $1); print $1}'
++ grep -q wallos
++ echo -e '\033[0;32mNo databases found.\033[0m\n'
+No databases found.
+
++ return 0
++ get_pvc_info original
++ local version=original
++ local pvc_backup_file=/pvcs_original.json
++ local pvc_data workloads_data pvc_name volume mount_path pvc_parent_path
++ mkdir -p ''
+mkdir: cannot create directory ‘’: No such file or directory
+++ k3s kubectl get pvc -n ix-wallos -o json
++ pvc_data='{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "annotations": {
+                    "meta.helm.sh/release-name": "wallos",
+                    "meta.helm.sh/release-namespace": "ix-wallos",
+                    "pv.kubernetes.io/bind-completed": "yes",
+                    "pv.kubernetes.io/bound-by-controller": "yes",
+                    "volume.beta.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io",
+                    "volume.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io"
+                },
+                "creationTimestamp": "2024-04-25T02:01:25Z",
+                "finalizers": [
+                    "kubernetes.io/pvc-protection"
+                ],
+                "labels": {
+                    "app": "wallos-4.8.17",
+                    "app.kubernetes.io/instance": "wallos",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "wallos",
+                    "app.kubernetes.io/version": "latest",
+                    "helm-revision": "3",
+                    "helm.sh/chart": "wallos-4.8.17",
+                    "release": "wallos"
+                },
+                "name": "wallos-database",
+                "namespace": "ix-wallos",
+                "resourceVersion": "220955",
+                "uid": "9dd61f55-97bd-4ca3-abba-135f239656ba"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "256Gi"
+                    }
+                },
+                "storageClassName": "openebs-zfs-main",
+                "volumeMode": "Filesystem",
+                "volumeName": "pvc-9dd61f55-97bd-4ca3-abba-135f239656ba"
+            },
+            "status": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "capacity": {
+                    "storage": "256Gi"
+                },
+                "phase": "Bound"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "annotations": {
+                    "meta.helm.sh/release-name": "wallos",
+                    "meta.helm.sh/release-namespace": "ix-wallos",
+                    "pv.kubernetes.io/bind-completed": "yes",
+                    "pv.kubernetes.io/bound-by-controller": "yes",
+                    "volume.beta.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io",
+                    "volume.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io"
+                },
+                "creationTimestamp": "2024-04-25T02:01:25Z",
+                "finalizers": [
+                    "kubernetes.io/pvc-protection"
+                ],
+                "labels": {
+                    "app": "wallos-4.8.17",
+                    "app.kubernetes.io/instance": "wallos",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "wallos",
+                    "app.kubernetes.io/version": "latest",
+                    "helm-revision": "3",
+                    "helm.sh/chart": "wallos-4.8.17",
+                    "release": "wallos"
+                },
+                "name": "wallos-logos",
+                "namespace": "ix-wallos",
+                "resourceVersion": "220956",
+                "uid": "5399f553-1dff-459b-b556-84d123b58806"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "256Gi"
+                    }
+                },
+                "storageClassName": "openebs-zfs-main",
+                "volumeMode": "Filesystem",
+                "volumeName": "pvc-5399f553-1dff-459b-b556-84d123b58806"
+            },
+            "status": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "capacity": {
+                    "storage": "256Gi"
+                },
+                "phase": "Bound"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}'
+++ k3s kubectl get deployments,statefulsets,daemonsets -n ix-wallos -o json
++ workloads_data='{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "annotations": {
+                    "deployment.kubernetes.io/revision": "2",
+                    "meta.helm.sh/release-name": "wallos",
+                    "meta.helm.sh/release-namespace": "ix-wallos"
+                },
+                "creationTimestamp": "2024-04-25T02:01:25Z",
+                "generation": 3,
+                "labels": {
+                    "app": "wallos-4.8.17",
+                    "app.kubernetes.io/instance": "wallos",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "wallos",
+                    "app.kubernetes.io/version": "latest",
+                    "helm-revision": "3",
+                    "helm.sh/chart": "wallos-4.8.17",
+                    "release": "wallos"
+                },
+                "name": "wallos",
+                "namespace": "ix-wallos",
+                "resourceVersion": "220973",
+                "uid": "ee5a2950-9455-4ad7-975b-fc465d3f3d8c"
+            },
+            "spec": {
+                "progressDeadlineSeconds": 600,
+                "replicas": 1,
+                "revisionHistoryLimit": 3,
+                "selector": {
+                    "matchLabels": {
+                        "app.kubernetes.io/instance": "wallos",
+                        "app.kubernetes.io/name": "wallos",
+                        "pod.name": "main"
+                    }
+                },
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "template": {
+                    "metadata": {
+                        "annotations": {
+                            "checksum/cnpg": "a75efb1ae0b12e0e9dc5b46ff4b7f091cc6a50e8a9f6d73734f01a0fd0d050e3",
+                            "checksum/configmaps": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+                            "checksum/mariadb": "09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52",
+                            "checksum/mongodb": "09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52",
+                            "checksum/persistence": "44c336e21c67e935950817fbb600190eb0bf5484e1fc09a29896de0f1599797e",
+                            "checksum/redis": "013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894",
+                            "checksum/secrets": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+                            "checksum/services": "6b09319e41b56d31f05f84ab79cc785bced7dee6ee53355a50ea15d5d70d97bb",
+                            "checksum/solr": "29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347"
+                        },
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "wallos-4.8.17",
+                            "app.kubernetes.io/instance": "wallos",
+                            "app.kubernetes.io/managed-by": "Helm",
+                            "app.kubernetes.io/name": "wallos",
+                            "app.kubernetes.io/version": "latest",
+                            "helm-revision": "3",
+                            "helm.sh/chart": "wallos-4.8.17",
+                            "pod.lifecycle": "permanent",
+                            "pod.name": "main",
+                            "release": "wallos"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "TZ",
+                                        "value": "America/Los_Angeles"
+                                    },
+                                    {
+                                        "name": "UMASK",
+                                        "value": "0022"
+                                    },
+                                    {
+                                        "name": "UMASK_SET",
+                                        "value": "0022"
+                                    },
+                                    {
+                                        "name": "NVIDIA_VISIBLE_DEVICES",
+                                        "value": "void"
+                                    },
+                                    {
+                                        "name": "PUID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "USER_ID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "UID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "PGID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "GROUP_ID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "GID",
+                                        "value": "568"
+                                    }
+                                ],
+                                "image": "docker.io/bellamy/wallos:latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "failureThreshold": 5,
+                                    "initialDelaySeconds": 12,
+                                    "periodSeconds": 15,
+                                    "successThreshold": 1,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 5
+                                },
+                                "name": "wallos",
+                                "ports": [
+                                    {
+                                        "containerPort": 80,
+                                        "name": "main",
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 4,
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 12,
+                                    "successThreshold": 2,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 5
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "4",
+                                        "memory": "8Gi"
+                                    },
+                                    "requests": {
+                                        "cpu": "10m",
+                                        "memory": "50Mi"
+                                    }
+                                },
+                                "securityContext": {
+                                    "allowPrivilegeEscalation": false,
+                                    "capabilities": {
+                                        "add": [
+                                            "NET_BIND_SERVICE",
+                                            "CHOWN",
+                                            "SETUID",
+                                            "SETGID",
+                                            "FOWNER",
+                                            "DAC_OVERRIDE"
+                                        ],
+                                        "drop": [
+                                            "ALL"
+                                        ]
+                                    },
+                                    "privileged": false,
+                                    "readOnlyRootFilesystem": false,
+                                    "runAsGroup": 0,
+                                    "runAsNonRoot": false,
+                                    "runAsUser": 0,
+                                    "seccompProfile": {
+                                        "type": "RuntimeDefault"
+                                    }
+                                },
+                                "startupProbe": {
+                                    "failureThreshold": 60,
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 3
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/www/html/db",
+                                        "name": "database"
+                                    },
+                                    {
+                                        "mountPath": "/dev/shm",
+                                        "name": "devshm"
+                                    },
+                                    {
+                                        "mountPath": "/var/www/html/images/uploads/logos",
+                                        "name": "logos"
+                                    },
+                                    {
+                                        "mountPath": "/shared",
+                                        "name": "shared"
+                                    },
+                                    {
+                                        "mountPath": "/tmp",
+                                        "name": "tmp"
+                                    },
+                                    {
+                                        "mountPath": "/var/logs",
+                                        "name": "varlogs"
+                                    },
+                                    {
+                                        "mountPath": "/var/run",
+                                        "name": "varrun"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsConfig": {
+                            "options": [
+                                {
+                                    "name": "ndots",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "dnsPolicy": "ClusterFirst",
+                        "enableServiceLinks": false,
+                        "nodeSelector": {
+                            "kubernetes.io/arch": "amd64"
+                        },
+                        "restartPolicy": "Always",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {
+                            "fsGroup": 568,
+                            "fsGroupChangePolicy": "OnRootMismatch",
+                            "supplementalGroups": [
+                                568
+                            ],
+                            "sysctls": [
+                                {
+                                    "name": "net.ipv4.ip_unprivileged_port_start",
+                                    "value": "80"
+                                }
+                            ]
+                        },
+                        "serviceAccount": "default",
+                        "serviceAccountName": "default",
+                        "shareProcessNamespace": false,
+                        "terminationGracePeriodSeconds": 60,
+                        "topologySpreadConstraints": [
+                            {
+                                "labelSelector": {
+                                    "matchLabels": {
+                                        "app.kubernetes.io/instance": "wallos",
+                                        "app.kubernetes.io/name": "wallos",
+                                        "pod.name": "main"
+                                    }
+                                },
+                                "maxSkew": 1,
+                                "nodeAffinityPolicy": "Honor",
+                                "nodeTaintsPolicy": "Honor",
+                                "topologyKey": "kubernetes.io/hostname",
+                                "whenUnsatisfiable": "ScheduleAnyway"
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "database",
+                                "persistentVolumeClaim": {
+                                    "claimName": "wallos-database"
+                                }
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "devshm"
+                            },
+                            {
+                                "name": "logos",
+                                "persistentVolumeClaim": {
+                                    "claimName": "wallos-logos"
+                                }
+                            },
+                            {
+                                "emptyDir": {},
+                                "name": "shared"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "tmp"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "varlogs"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "varrun"
+                            }
+                        ]
+                    }
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2024-04-25T02:01:25Z",
+                        "lastUpdateTime": "2024-04-25T02:02:00Z",
+                        "message": "ReplicaSet \"wallos-6f77cc8f66\" has successfully progressed.",
+                        "reason": "NewReplicaSetAvailable",
+                        "status": "True",
+                        "type": "Progressing"
+                    },
+                    {
+                        "lastTransitionTime": "2024-04-25T05:08:08Z",
+                        "lastUpdateTime": "2024-04-25T05:08:08Z",
+                        "message": "Deployment does not have minimum availability.",
+                        "reason": "MinimumReplicasUnavailable",
+                        "status": "False",
+                        "type": "Available"
+                    }
+                ],
+                "observedGeneration": 3
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}'
++ echo '['
+pvc/info.sh: line 15: /pvcs_original.json: Read-only file system
++ local first_entry=true
++ IFS=
++ read -r pvc
+++ echo '{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "annotations": {
+                    "meta.helm.sh/release-name": "wallos",
+                    "meta.helm.sh/release-namespace": "ix-wallos",
+                    "pv.kubernetes.io/bind-completed": "yes",
+                    "pv.kubernetes.io/bound-by-controller": "yes",
+                    "volume.beta.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io",
+                    "volume.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io"
+                },
+                "creationTimestamp": "2024-04-25T02:01:25Z",
+                "finalizers": [
+                    "kubernetes.io/pvc-protection"
+                ],
+                "labels": {
+                    "app": "wallos-4.8.17",
+                    "app.kubernetes.io/instance": "wallos",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "wallos",
+                    "app.kubernetes.io/version": "latest",
+                    "helm-revision": "3",
+                    "helm.sh/chart": "wallos-4.8.17",
+                    "release": "wallos"
+                },
+                "name": "wallos-database",
+                "namespace": "ix-wallos",
+                "resourceVersion": "220955",
+                "uid": "9dd61f55-97bd-4ca3-abba-135f239656ba"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "256Gi"
+                    }
+                },
+                "storageClassName": "openebs-zfs-main",
+                "volumeMode": "Filesystem",
+                "volumeName": "pvc-9dd61f55-97bd-4ca3-abba-135f239656ba"
+            },
+            "status": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "capacity": {
+                    "storage": "256Gi"
+                },
+                "phase": "Bound"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "annotations": {
+                    "meta.helm.sh/release-name": "wallos",
+                    "meta.helm.sh/release-namespace": "ix-wallos",
+                    "pv.kubernetes.io/bind-completed": "yes",
+                    "pv.kubernetes.io/bound-by-controller": "yes",
+                    "volume.beta.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io",
+                    "volume.kubernetes.io/storage-provisioner": "zfs.csi.openebs.io"
+                },
+                "creationTimestamp": "2024-04-25T02:01:25Z",
+                "finalizers": [
+                    "kubernetes.io/pvc-protection"
+                ],
+                "labels": {
+                    "app": "wallos-4.8.17",
+                    "app.kubernetes.io/instance": "wallos",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "wallos",
+                    "app.kubernetes.io/version": "latest",
+                    "helm-revision": "3",
+                    "helm.sh/chart": "wallos-4.8.17",
+                    "release": "wallos"
+                },
+                "name": "wallos-logos",
+                "namespace": "ix-wallos",
+                "resourceVersion": "220956",
+                "uid": "5399f553-1dff-459b-b556-84d123b58806"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "256Gi"
+                    }
+                },
+                "storageClassName": "openebs-zfs-main",
+                "volumeMode": "Filesystem",
+                "volumeName": "pvc-5399f553-1dff-459b-b556-84d123b58806"
+            },
+            "status": {
+                "++ jq -c '.items[]'
+accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "capacity": {
+                    "storage": "256Gi"
+                },
+                "phase": "Bound"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}'
+++ echo '{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"meta.helm.sh/release-name":"wallos","meta.helm.sh/release-namespace":"ix-wallos","pv.kubernetes.io/bind-completed":"yes","pv.kubernetes.io/bound-by-controller":"yes","volume.beta.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io","volume.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io"},"creationTimestamp":"2024-04-25T02:01:25Z","finalizers":["kubernetes.io/pvc-protection"],"labels":{"app":"wallos-4.8.17","app.kubernetes.io/instance":"wallos","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"wallos","app.kubernetes.io/version":"latest","helm-revision":"3","helm.sh/chart":"wallos-4.8.17","release":"wallos"},"name":"wallos-database","namespace":"ix-wallos","resourceVersion":"220955","uid":"9dd61f55-97bd-4ca3-abba-135f239656ba"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"256Gi"}},"storageClassName":"openebs-zfs-main","volumeMode":"Filesystem","volumeName":"pvc-9dd61f55-97bd-4ca3-abba-135f239656ba"},"status":{"accessModes":["ReadWriteOnce"],"capacity":{"storage":"256Gi"},"phase":"Bound"}}'
+++ jq -r .metadata.name
++ pvc_name=wallos-database
+++ echo '{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"meta.helm.sh/release-name":"wallos","meta.helm.sh/release-namespace":"ix-wallos","pv.kubernetes.io/bind-completed":"yes","pv.kubernetes.io/bound-by-controller":"yes","volume.beta.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io","volume.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io"},"creationTimestamp":"2024-04-25T02:01:25Z","finalizers":["kubernetes.io/pvc-protection"],"labels":{"app":"wallos-4.8.17","app.kubernetes.io/instance":"wallos","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"wallos","app.kubernetes.io/version":"latest","helm-revision":"3","helm.sh/chart":"wallos-4.8.17","release":"wallos"},"name":"wallos-database","namespace":"ix-wallos","resourceVersion":"220955","uid":"9dd61f55-97bd-4ca3-abba-135f239656ba"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"256Gi"}},"storageClassName":"openebs-zfs-main","volumeMode":"Filesystem","volumeName":"pvc-9dd61f55-97bd-4ca3-abba-135f239656ba"},"status":{"accessModes":["ReadWriteOnce"],"capacity":{"storage":"256Gi"},"phase":"Bound"}}'
+++ jq -r .spec.volumeName
++ volume=pvc-9dd61f55-97bd-4ca3-abba-135f239656ba
+++ jq --arg pvc_name wallos-database -r '.items[].spec.template.spec.volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name).containers[].volumeMounts[] | select(.name == $volume.name).mountPath'
+++ echo '{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "annotations": {
+                    "deployment.kubernetes.io/revision": "2",
+                    "meta.helm.sh/release-name": "wallos",
+                    "meta.helm.sh/release-namespace": "ix-wallos"
+                },
+                "creationTimestamp": "2024-04-25T02:01:25Z",
+                "generation": 3,
+                "labels": {
+                    "app": "wallos-4.8.17",
+                    "app.kubernetes.io/instance": "wallos",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "wallos",
+                    "app.kubernetes.io/version": "latest",
+                    "helm-revision": "3",
+                    "helm.sh/chart": "wallos-4.8.17",
+                    "release": "wallos"
+                },
+                "name": "wallos",
+                "namespace": "ix-wallos",
+                "resourceVersion": "220973",
+                "uid": "ee5a2950-9455-4ad7-975b-fc465d3f3d8c"
+            },
+            "spec": {
+                "progressDeadlineSeconds": 600,
+                "replicas": 1,
+                "revisionHistoryLimit": 3,
+                "selector": {
+                    "matchLabels": {
+                        "app.kubernetes.io/instance": "wallos",
+                        "app.kubernetes.io/name": "wallos",
+                        "pod.name": "main"
+                    }
+                },
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "template": {
+                    "metadata": {
+                        "annotations": {
+                            "checksum/cnpg": "a75efb1ae0b12e0e9dc5b46ff4b7f091cc6a50e8a9f6d73734f01a0fd0d050e3",
+                            "checksum/configmaps": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+                            "checksum/mariadb": "09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52",
+                            "checksum/mongodb": "09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52",
+                            "checksum/persistence": "44c336e21c67e935950817fbb600190eb0bf5484e1fc09a29896de0f1599797e",
+                            "checksum/redis": "013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894",
+                            "checksum/secrets": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+                            "checksum/services": "6b09319e41b56d31f05f84ab79cc785bced7dee6ee53355a50ea15d5d70d97bb",
+                            "checksum/solr": "29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347"
+                        },
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "wallos-4.8.17",
+                            "app.kubernetes.io/instance": "wallos",
+                            "app.kubernetes.io/managed-by": "Helm",
+                            "app.kubernetes.io/name": "wallos",
+                            "app.kubernetes.io/version": "latest",
+                            "helm-revision": "3",
+                            "helm.sh/chart": "wallos-4.8.17",
+                            "pod.lifecycle": "permanent",
+                            "pod.name": "main",
+                            "release": "wallos"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "TZ",
+                                        "value": "America/Los_Angeles"
+                                    },
+                                    {
+                                        "name": "UMASK",
+                                        "value": "0022"
+                                    },
+                                    {
+                                        "name": "UMASK_SET",
+                                        "value": "0022"
+                                    },
+                                    {
+                                        "name": "NVIDIA_VISIBLE_DEVICES",
+                                        "value": "void"
+                                    },
+                                    {
+                                        "name": "PUID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "USER_ID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "UID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "PGID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "GROUP_ID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "GID",
+                                        "value": "568"
+                                    }
+                                ],
+                                "image": "docker.io/bellamy/wallos:latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "failureThreshold": 5,
+                                    "initialDelaySeconds": 12,
+                                    "periodSeconds": 15,
+                                    "successThreshold": 1,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 5
+                                },
+                                "name": "wallos",
+                                "ports": [
+                                    {
+                                        "containerPort": 80,
+                                        "name": "main",
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 4,
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 12,
+                                    "successThreshold": 2,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 5
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "4",
+                                        "memory": "8Gi"
+                                    },
+                                    "requests": {
+                                        "cpu": "10m",
+                                        "memory": "50Mi"
+                                    }
+                                },
+                                "securityContext": {
+                                    "allowPrivilegeEscalation": false,
+                                    "capabilities": {
+                                        "add": [
+                                            "NET_BIND_SERVICE",
+                                            "CHOWN",
+                                            "SETUID",
+                                            "SETGID",
+                                            "FOWNER",
+                                            "DAC_OVERRIDE"
+                                        ],
+                                        "drop": [
+                                            "ALL"
+                                        ]
+                                    },
+                                    "privileged": false,
+                                    "readOnlyRootFilesystem": false,
+                                    "runAsGroup": 0,
+                                    "runAsNonRoot": false,
+                                    "runAsUser": 0,
+                                    "seccompProfile": {
+                                        "type": "RuntimeDefault"
+                                    }
+                                },
+                                "startupProbe": {
+                                    "failureThreshold": 60,
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 3
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/www/html/db",
+                                        "name": "database"
+                                    },
+                                    {
+                                        "mountPath": "/dev/shm",
+                                        "name": "devshm"
+                                    },
+                                    {
+                                        "mountPath": "/var/www/html/images/uploads/logos",
+                                        "name": "logos"
+                                    },
+                                    {
+                                        "mountPath": "/shared",
+                                        "name": "shared"
+                                    },
+                                    {
+                                        "mountPath": "/tmp",
+                                        "name": "tmp"
+                                    },
+                                    {
+                                        "mountPath": "/var/logs",
+                                        "name": "varlogs"
+                                    },
+                                    {
+                                        "mountPath": "/var/run",
+                                        "name": "varrun"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsConfig": {
+                            "options": [
+                                {
+                                    "name": "ndots",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "dnsPolicy": "ClusterFirst",
+                        "enableServiceLinks": false,
+                        "nodeSelector": {
+                            "kubernetes.io/arch": "amd64"
+                        },
+                        "restartPolicy": "Always",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {
+                            "fsGroup": 568,
+                            "fsGroupChangePolicy": "OnRootMismatch",
+                            "supplementalGroups": [
+                                568
+                            ],
+                            "sysctls": [
+                                {
+                                    "name": "net.ipv4.ip_unprivileged_port_start",
+                                    "value": "80"
+                                }
+                            ]
+                        },
+                        "serviceAccount": "default",
+                        "serviceAccountName": "default",
+                        "shareProcessNamespace": false,
+                        "terminationGracePeriodSeconds": 60,
+                        "topologySpreadConstraints": [
+                            {
+                                "labelSelector": {
+                                    "matchLabels": {
+                                        "app.kubernetes.io/instance": "wallos",
+                                        "app.kubernetes.io/name": "wallos",
+                                        "pod.name": "main"
+                                    }
+                                },
+                                "maxSkew": 1,
+                                "nodeAffinityPolicy": "Honor",
+                                "nodeTaintsPolicy": "Honor",
+                                "topologyKey": "kubernetes.io/hostname",
+                                "whenUnsatisfiable": "ScheduleAnyway"
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "database",
+                                "persistentVolumeClaim": {
+                                    "claimName": "wallos-database"
+                                }
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "devshm"
+                            },
+                            {
+                                "name": "logos",
+                                "persistentVolumeClaim": {
+                                    "claimName": "wallos-logos"
+                                }
+                            },
+                            {
+                                "emptyDir": {},
+                                "name": "shared"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "tmp"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "varlogs"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "varrun"
+                            }
+                        ]
+                    }
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2024-04-25T02:01:25Z",
+                        "lastUpdateTime": "2024-04-25T02:02:00Z",
+                        "message": "ReplicaSet \"wallos-6f77cc8f66\" has successfully progressed.",
+                        "reason": "NewReplicaSetAvailable",
+                        "status": "True",
+                        "type": "Progressing"
+                    },
+                    {
+                        "lastTransitionTime": "2024-04-25T05:08:08Z",
+                        "lastUpdateTime": "2024-04-25T05:08:08Z",
+                        "message": "Deployment does not have minimum availability.++ head -n 1
+",
+                        "reason": "MinimumReplicasUnavailable",
+                        "status": "False",
+                        "type": "Available"
+                    }
+                ],
+                "observedGeneration": 3
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}'
+jq: error (at <stdin>:349): Cannot iterate over null (null)
++ mount_path=
+++ k3s kubectl describe pv pvc-9dd61f55-97bd-4ca3-abba-135f239656ba
+++ grep poolname=
+++ awk -F = '{print $2}'
+++ tr -d '[:space:]'
++ pvc_parent_path=tanklongname/pvcs
++ '[' true = true ']'
++ first_entry=false
++ jq -n --arg pvc_name wallos-database --arg volume pvc-9dd61f55-97bd-4ca3-abba-135f239656ba --arg mount_path '' --arg pvc_parent_path tanklongname/pvcs --arg original_rename_complete false --arg matched false --arg destroyed false '{
+            pvc_name: $pvc_name,
+            pvc_volume_name: $volume,
+            mount_path: $mount_path,
+            pvc_parent_path: $pvc_parent_path,
+            original_rename_complete: $original_rename_complete
+            matched: $matched
+            destroyed: $destroyed
+        }'
+pvc/info.sh: line 31: /pvcs_original.json: Read-only file system
++ IFS=
++ read -r pvc
+++ echo '{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"meta.helm.sh/release-name":"wallos","meta.helm.sh/release-namespace":"ix-wallos","pv.kubernetes.io/bind-completed":"yes","pv.kubernetes.io/bound-by-controller":"yes","volume.beta.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io","volume.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io"},"creationTimestamp":"2024-04-25T02:01:25Z","finalizers":["kubernetes.io/pvc-protection"],"labels":{"app":"wallos-4.8.17","app.kubernetes.io/instance":"wallos","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"wallos","app.kubernetes.io/version":"latest","helm-revision":"3","helm.sh/chart":"wallos-4.8.17","release":"wallos"},"name":"wallos-logos","namespace":"ix-wallos","resourceVersion":"220956","uid":"5399f553-1dff-459b-b556-84d123b58806"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"256Gi"}},"storageClassName":"openebs-zfs-main","volumeMode":"Filesystem","volumeName":"pvc-5399f553-1dff-459b-b556-84d123b58806"},"status":{"accessModes":["ReadWriteOnce"],"capacity":{"storage":"256Gi"},"phase":"Bound"}}'
+++ jq -r .metadata.name
++ pvc_name=wallos-logos
+++ echo '{"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{"meta.helm.sh/release-name":"wallos","meta.helm.sh/release-namespace":"ix-wallos","pv.kubernetes.io/bind-completed":"yes","pv.kubernetes.io/bound-by-controller":"yes","volume.beta.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io","volume.kubernetes.io/storage-provisioner":"zfs.csi.openebs.io"},"creationTimestamp":"2024-04-25T02:01:25Z","finalizers":["kubernetes.io/pvc-protection"],"labels":{"app":"wallos-4.8.17","app.kubernetes.io/instance":"wallos","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"wallos","app.kubernetes.io/version":"latest","helm-revision":"3","helm.sh/chart":"wallos-4.8.17","release":"wallos"},"name":"wallos-logos","namespace":"ix-wallos","resourceVersion":"220956","uid":"5399f553-1dff-459b-b556-84d123b58806"},"spec":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"256Gi"}},"storageClassName":"openebs-zfs-main","volumeMode":"Filesystem","volumeName":"pvc-5399f553-1dff-459b-b556-84d123b58806"},"status":{"accessModes":["ReadWriteOnce"],"capacity":{"storage":"256Gi"},"phase":"Bound"}}'
+++ jq -r .spec.volumeName
++ volume=pvc-5399f553-1dff-459b-b556-84d123b58806
+++ echo '{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "apps/v1",
+            "kind": "Deployment",
+            "metadata": {
+                "annotations": {
+                    "deployment.kubernetes.io/revision": "2",
+                    "meta.helm.sh/release-name": "wallos",
+                    "meta.helm.sh/release-namespace": "ix-wallos"
+                },
+                "creationTimestamp": "2024-04-25T02:01:25Z",
+                "generation": 3,
+                "labels": {
+                    "app": "wallos-4.8.17",
+                    "app.kubernetes.io/instance": "wallos",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "wallos",
+                    "app.kubernetes.io/version": "latest",
+                    "helm-revision": "3",
+                    "helm.sh/chart": "wallos-4.8.17",
+                    "release": "wallos"
+                },
+                "name": "wallos",
+                "namespace": "ix-wallos",
+                "resourceVersion": "220973",
+                "uid": "ee5a2950-9455-4ad7-975b-fc465d3f3d8c"
+            },
+            "spec": {
+                "progressDeadlineSeconds": 600,
+                "replicas": 1,
+                "revisionHistoryLimit": 3,
+                "selector": {
+                    "matchLabels": {
+                        "app.kubernetes.io/instance": "wallos",
+                        "app.kubernetes.io/name": "wallos",
+                        "pod.name": "main"
+                    }
+                },
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "template": {
+                    "metadata": {
+                        "annotations": {
+                            "checksum/cnpg": "a75efb1ae0b12e0e9dc5b46ff4b7f091cc6a50e8a9f6d73734f01a0fd0d050e3",
+                            "checksum/configmaps": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+                            "checksum/mariadb": "09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52",
+                            "checksum/mongodb": "09c85576cb45b1eecd1467732b11ea8fa3363b0105c465f02a6ad64991521d52",
+                            "checksum/persistence": "44c336e21c67e935950817fbb600190eb0bf5484e1fc09a29896de0f1599797e",
+                            "checksum/redis": "013343a028cbb3f7e08f4ba7522702dd98e52632c688641074b0b1db3df29894",
+                            "checksum/secrets": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+                            "checksum/services": "6b09319e41b56d31f05f84ab79cc785bced7dee6ee53355a50ea15d5d70d97bb",
+                            "checksum/solr": "29c14feeaddbf7762052db593898d274941f539cee681ddc613957587686f347"
+                        },
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "wallos-4.8.17",
+                            "app.kubernetes.io/instance": "wallos",
+                            "app.kubernetes.io/managed-by": "Helm",
+                            "app.kubernetes.io/name": "wallos",
+                            "app.kubernetes.io/version": "latest",
+                            "helm-revision": "3",
+                            "helm.sh/chart": "wallos-4.8.17",
+                            "pod.lifecycle": "permanent",
+                            "pod.name": "main",
+                            "release": "wallos"
+                        }
+                    },
+                    "spec": {
+                        "automountServiceAccountToken": false,
+                        "containers": [
+                            {
+                                "env": [
+                                    {
+                                        "name": "TZ",
+                                        "value": "America/Los_Angeles"
+                                    },
+                                    {
+                                        "name": "UMASK",
+                                        "value": "0022"
+                                    },
+                                    {
+                                        "name": "UMASK_SET",
+                                        "value": "0022"
+                                    },
+                                    {
+                                        "name": "NVIDIA_VISIBLE_DEVICES",
+                                        "value": "void"
+                                    },
+                                    {
+                                        "name": "PUID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "USER_ID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "UID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "PGID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "GROUP_ID",
+                                        "value": "568"
+                                    },
+                                    {
+                                        "name": "GID",
+                                        "value": "568"
+                                    }
+                                ],
+                                "image": "docker.io/bellamy/wallos:latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3",
+                                "imagePullPolicy": "IfNotPresent",
+                                "livenessProbe": {
+                                    "failureThreshold": 5,
+                                    "initialDelaySeconds": 12,
+                                    "periodSeconds": 15,
+                                    "successThreshold": 1,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 5
+                                },
+                                "name": "wallos",
+                                "ports": [
+                                    {
+                                        "containerPort": 80,
+                                        "name": "main",
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "failureThreshold": 4,
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 12,
+                                    "successThreshold": 2,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 5
+                                },
+                                "resources": {
+                                    "limits": {
+                                        "cpu": "4",
+                                        "memory": "8Gi"
+                                    },
+                                    "requests": {
+                                        "cpu": "10m",
+                                        "memory": "50Mi"
+                                    }
+                                },
+                                "securityContext": {
+                                    "allowPrivilegeEscalation": false,
+                                    "capabilities": {
+                                        "add": [
+                                            "NET_BIND_SERVICE",
+                                            "CHOWN",
+                                            "SETUID",
+                                            "SETGID",
+                                            "FOWNER",
+                                            "DAC_OVERRIDE"
+                                        ],
+                                        "drop": [
+                                            "ALL"
+                                        ]
+                                    },
+                                    "privileged": false,
+                                    "readOnlyRootFilesystem": false,
+                                    "runAsGroup": 0,
+                                    "runAsNonRoot": false,
+                                    "runAsUser": 0,
+                                    "seccompProfile": {
+                                        "type": "RuntimeDefault"
+                                    }
+                                },
+                                "startupProbe": {
+                                    "failureThreshold": 60,
+                                    "initialDelaySeconds": 10,
+                                    "periodSeconds": 5,
+                                    "successThreshold": 1,
+                                    "tcpSocket": {
+                                        "port": 80
+                                    },
+                                    "timeoutSeconds": 3
+                                },
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/www/html/db",
+                                        "name": "database"
+                                    },
+                                    {
+                                        "mountPath": "/dev/shm",
+                                        "name": "devshm"
+                                    },
+                                    {
+                                        "mountPath": "/var/www/html/images/uploads/logos",
+                                        "name": "logos"
+                                    },
+                                    {
+                                        "mountPath": "/shared",
+                                        "name": "shared"
+                                    },
+                                    {
+                                        "mountPath": "/tmp",
+                                        "name": "tmp"
+                                    },
+                                    {
+                                        "mountPath": "/var/logs",
+                                        "name": "varlogs"
+                                    },
+                                    {
+                                        "mountPath": "/var/run",
+                                        "name": "varrun"
+                                    }
+                                ]
+                            }
+                        ],
+                        "dnsConfig": {
+                            "options": [
+                                {
+                                    "name": "ndots",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        "dnsPolicy": "ClusterFirst",
+                        "enableServiceLinks": false,
+                        "nodeSelector": {
+                            "kubernetes.io/arch": "amd64"
+                        },
+                        "restartPolicy": "Always",
+                        "schedulerName": "default-scheduler",
+                        "securityContext": {
+                            "fsGroup": 568,
+                            "fsGroupChangePolicy": "OnRootMismatch",
+                            "supplementalGroups": [
+                                568
+                            ],
+                            "sysctls": [
+                                {
+                                    "name": "net.ipv4.ip_unprivileged_port_start",
+                                    "value": "80"
+                                }
+                            ]
+                        },
+                        "serviceAccount": "default",
+                        "serviceAccountName": "default",
+                        "shareProcessNamespace": false,
+                        "terminationGracePeriodSeconds": 60,
+                        "topologySpreadConstraints": [
+                            {
+                                "labelSelector": {
+                                    "matchLabels": {
+                                        "app.kubernetes.io/instance": "wallos",
+                                        "app.kubernetes.io/name": "wallos",
+                                        "pod.name": "main"
+                                    }
+                                },
+                                "maxSkew": 1,
+                                "nodeAffinityPolicy": "Honor",
+                                "nodeTaintsPolicy": "Honor",
+                                "topologyKey": "kubernetes.io/hostname",
+                                "whenUnsatisfiable": "ScheduleAnyway"
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "database",
+                                "persistentVolumeClaim": {
+                                    "claimName": "wallos-database"
+                                }
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "devshm"
+                            },
+                            {
+                                "name": "logos",
+                                "persistentVolumeClaim": {
+                                    "claimName": "wallos-logos"
+                                }
+                            },
+                            {
+                                "emptyDir": {},
+                                "name": "shared"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "tmp"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "varlogs"
+                            },
+                            {
+                                "emptyDir": {
+                                    "medium": "Memory",
+                                    "sizeLimit": "8Gi"
+                                },
+                                "name": "varrun"
+                            }
+                        ]
+                    }
+                }
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastTransitionTime": "2024-04-25T02:01:25Z",
+                        "lastUpdateTime": "2024-04-25T02:02:00Z",
+                        "message": "ReplicaSet \"wallos-6f77cc8f66\" has successfully progressed.",
+                        "reason": "NewReplicaSetAvailable",
+                        "status": "True",
+                        "type": "Progressing"
+                    },
+                    {
+                        "lastTransitionTime": "2024-04-25T05:08:08Z",
+                        "lastUpdateTime": "2024-04-25T05:08:08Z",
+                        "message": "Deployment does not have minimum availability.++ jq --arg pvc_name wallos-logos -r '.items[].spec.template.spec.volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name).containers[].volumeMounts[] | select(.name == $volume.name).mountPath'
+",
+                        "reason": "MinimumReplicasUnavailable",
+                        "status": "False",
+                        "type": "Available"
+                    }
+                ],
+                "observedGeneration": 3
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}'
+++ head -n 1
+jq: error (at <stdin>:349): Cannot iterate over null (null)
++ mount_path=
+++ k3s kubectl describe pv pvc-5399f553-1dff-459b-b556-84d123b58806
+++ grep poolname=
+++ awk -F = '{print $2}'
+++ tr -d '[:space:]'
++ pvc_parent_path=tanklongname/pvcs
++ '[' false = true ']'
++ echo ,
+pvc/info.sh: line 28: /pvcs_original.json: Read-only file system
++ jq -n --arg pvc_name wallos-logos --arg volume pvc-5399f553-1dff-459b-b556-84d123b58806 --arg mount_path '' --arg pvc_parent_path tanklongname/pvcs --arg original_rename_complete false --arg matched false --arg destroyed false '{
+            pvc_name: $pvc_name,
+            pvc_volume_name: $volume,
+            mount_path: $mount_path,
+            pvc_parent_path: $pvc_parent_path,
+            original_rename_complete: $original_rename_complete
+            matched: $matched
+            destroyed: $destroyed
+        }'
+pvc/info.sh: line 31: /pvcs_original.json: Read-only file system
++ IFS=
++ read -r pvc
++ echo ']'
+pvc/info.sh: line 52: /pvcs_original.json: Read-only file system
++ update_pvc_migration_status
++ local pvc_backup_file=/pvcs_original.json
+++ jq '. | length' /pvcs_original.json
+jq: error: Could not open file /pvcs_original.json: No such file or directory
++ original_pvs_count=
++ '[' '' -eq 0 ']'
+pvc/info.sh: line 63: [: : integer expression expected
++ migrate_pvs=true
++ create_migration_dataset
++ local 'path=tank long name/migration'
++ zfs list 'tank long name/migration'
++ return 0
++ create_app_dataset
++ local 'path=tank long name/migration/wallos'
++ zfs list 'tank long name/migration/wallos'
++ echo -e '\033[1mCreating app dataset...\033[0m'
+Creating app dataset...
++ zfs create 'tank long name/migration/wallos'
++ echo -e '\033[0;32mDataset created: \033[0;34mtank long name/migration/wallos\033[0m'
+Dataset created: tank long name/migration/wallos
++ echo
+
++ migration_path='tank long name/migration/wallos'
++ backup_path='/mnt/tank long name/migration/wallos/backup'
++ return 0
++ update_or_append_variable appname wallos
++ local variable_name=appname
++ local value=wallos
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ wallos =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ echo appname=wallos
++ return
++ update_or_append_variable namespace ix-wallos
++ local variable_name=namespace
++ local value=ix-wallos
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ ix-wallos =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^namespace=' '/mnt/tank long name/migration/wallos/variables.txt'
++ echo namespace=ix-wallos
++ update_or_append_variable migrate_db false
++ local variable_name=migrate_db
++ local value=false
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ false =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^migrate_db=' '/mnt/tank long name/migration/wallos/variables.txt'
++ echo migrate_db=false
++ update_or_append_variable migrate_pvs true
++ local variable_name=migrate_pvs
++ local value=true
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ true =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^migrate_pvs=' '/mnt/tank long name/migration/wallos/variables.txt'
++ echo migrate_pvs=true
++ update_or_append_variable original_pvs_count ''
++ local variable_name=original_pvs_count
++ local value=
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ '' =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^original_pvs_count=' '/mnt/tank long name/migration/wallos/variables.txt'
++ echo original_pvs_count=
++ update_or_append_variable backup_path '/mnt/tank long name/migration/wallos/backup'
++ local variable_name=backup_path
++ local 'value=/mnt/tank long name/migration/wallos/backup'
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ /mnt/tank long name/migration/wallos/backup =~ [[:space:]] ]]
++ value='"/mnt/tank long name/migration/wallos/backup"'
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^backup_path=' '/mnt/tank long name/migration/wallos/variables.txt'
++ echo 'backup_path="/mnt/tank long name/migration/wallos/backup"'
++ update_or_append_variable script_progress backup_cnpg_databases
++ local variable_name=script_progress
++ local value=backup_cnpg_databases
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ backup_cnpg_databases =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^script_progress=' '/mnt/tank long name/migration/wallos/variables.txt'
++ echo script_progress=backup_cnpg_databases
++ [[ false == true ]]
++ update_or_append_variable script_progress create_config_backup
++ local variable_name=script_progress
++ local value=create_config_backup
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ create_config_backup =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^script_progress=' '/mnt/tank long name/migration/wallos/variables.txt'
++ sed -i 's|^script_progress=.*|script_progress=create_config_backup|' '/mnt/tank long name/migration/wallos/variables.txt'
++ create_config_backup
++ local backup_name=config-backup.json
+++ midclt call chart.release.get_instance wallos
+++ jq .
++ DATA='{
+  "name": "wallos",
+  "info": {
+    "first_deployed": "2024-04-24T19:01:24.785497121-07:00",
+    "last_deployed": "2024-04-24T22:08:08.082554657-07:00",
+    "deleted": "",
+    "description": "Upgrade complete",
+    "status": "deployed",
+    "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"
+  },
+  "config": {
+    "TZ": "America/Los_Angeles",
+    "addons": {
+      "codeserver": {
+        "enabled": false
+      },
+      "netshoot": {
+        "enabled": false
+      },
+      "vpn": {
+        "type": "disabled"
+      }
+    },
+    "deviceList": [],
+    "docs": {
+      "confirmDocs": true
+    },
+    "donateNag": {
+      "confirmDonate": true
+    },
+    "global": {
+      "ixChartContext": {
+        "addNvidiaRuntimeClass": false,
+        "hasNFSCSI": true,
+        "hasSMBCSI": true,
+        "isInstall": false,
+        "isStopped": false,
+        "isUpdate": true,
+        "isUpgrade": false,
+        "kubernetes_config": {
+          "cluster_cidr": "172.16.0.0/16",
+          "cluster_dns_ip": "172.17.0.10",
+          "service_cidr": "172.17.0.0/16"
+        },
+        "nfsProvisioner": "nfs.csi.k8s.io",
+        "nvidiaRuntimeClassName": "nvidia",
+        "operation": "UPDATE",
+        "smbProvisioner": "smb.csi.k8s.io",
+        "storageClassName": "ix-storage-class-wallos",
+        "upgradeMetadata": {}
+      },
+      "stopAll": false
+    },
+    "image": {
+      "pullPolicy": "IfNotPresent",
+      "repository": "docker.io/bellamy/wallos",
+      "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+    },
+    "imagePullSecretList": [],
+    "ingress": {
+      "main": {
+        "enabled": false
+      }
+    },
+    "ingressList": [],
+    "ixCertificateAuthorities": {},
+    "ixCertificates": {},
+    "ixChartContext": {
+      "addNvidiaRuntimeClass": false,
+      "hasNFSCSI": true,
+      "hasSMBCSI": true,
+      "isInstall": false,
+      "isStopped": false,
+      "isUpdate": true,
+      "isUpgrade": false,
+      "kubernetes_config": {
+        "cluster_cidr": "172.16.0.0/16",
+        "cluster_dns_ip": "172.17.0.10",
+        "service_cidr": "172.17.0.0/16"
+      },
+      "nfsProvisioner": "nfs.csi.k8s.io",
+      "nvidiaRuntimeClassName": "nvidia",
+      "operation": "UPDATE",
+      "smbProvisioner": "smb.csi.k8s.io",
+      "storageClassName": "ix-storage-class-wallos",
+      "upgradeMetadata": {}
+    },
+    "ixExternalInterfacesConfiguration": [],
+    "ixExternalInterfacesConfigurationNames": [],
+    "ixVolumes": [],
+    "networkPolicy": [],
+    "persistence": {
+      "database": {
+        "enabled": true,
+        "mountPath": "/var/www/html/db",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      },
+      "logos": {
+        "enabled": true,
+        "mountPath": "/var/www/html/images/uploads/logos",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      }
+    },
+    "persistenceList": [],
+    "podOptions": {
+      "expertPodOpts": false
+    },
+    "portal": {
+      "open": {
+        "enabled": true
+      }
+    },
+    "release_name": "wallos",
+    "resources": {
+      "limits": {
+        "amd.com/gpu": 0,
+        "cpu": "4000m",
+        "gpu.intel.com/i915": 0,
+        "memory": "8Gi",
+        "nvidia.com/gpu": 0
+      },
+      "requests": {
+        "cpu": "10m",
+        "memory": "50Mi"
+      }
+    },
+    "scaleExternalInterface": [],
+    "securityContext": {
+      "container": {
+        "PUID": 568,
+        "UMASK": "0022",
+        "advanced": false,
+        "readOnlyRootFilesystem": false,
+        "runAsGroup": 0,
+        "runAsNonRoot": false,
+        "runAsUser": 0
+      },
+      "pod": {
+        "fsGroup": 568,
+        "fsGroupChangePolicy": "OnRootMismatch",
+        "supplementalGroups": []
+      }
+    },
+    "service": {
+      "main": {
+        "enabled": true,
+        "loadBalancerIP": "",
+        "ports": {
+          "main": {
+            "port": 8282,
+            "protocol": "tcp",
+            "targetPort": 80
+          }
+        },
+        "type": "LoadBalancer"
+      }
+    },
+    "serviceList": [],
+    "workload": {
+      "main": {
+        "podSpec": {
+          "containers": {
+            "main": {
+              "advanced": false,
+              "envList": [],
+              "extraArgs": []
+            }
+          }
+        },
+        "replicas": 1,
+        "type": "Deployment"
+      }
+    }
+  },
+  "version": 3,
+  "namespace": "ix-wallos",
+  "chart_metadata": {
+    "name": "wallos",
+    "home": "https://truecharts.org/charts/stable/wallos",
+    "sources": [
+      "https://github.com/ellite/Wallos",
+      "https://github.com/truecharts/charts/tree/master/charts/stable/wallos",
+      "https://hub.docker.com/r/bellamy/wallos"
+    ],
+    "version": "4.8.17",
+    "description": "Wallos - Self Hosted Subscription tracker",
+    "keywords": [
+      "dashboard"
+    ],
+    "maintainers": [
+      {
+        "name": "TrueCharts",
+        "email": "info@truecharts.org",
+        "url": "https://truecharts.org"
+      }
+    ],
+    "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp",
+    "apiVersion": "v2",
+    "appVersion": "latest",
+    "annotations": {
+      "max_scale_version": "24.04.0",
+      "min_scale_version": "23.10.0",
+      "truecharts.org/SCALE-support": "true",
+      "truecharts.org/category": "media",
+      "truecharts.org/max_helm_version": "3.14",
+      "truecharts.org/min_helm_version": "3.11",
+      "truecharts.org/train": "stable"
+    },
+    "kubeVersion": ">=1.24.0-0",
+    "dependencies": [
+      {
+        "name": "common",
+        "version": "20.3.11",
+        "repository": "oci://tccr.io/truecharts",
+        "enabled": true
+      }
+    ],
+    "type": "application",
+    "latest_chart_version": "4.8.17"
+  },
+  "id": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable",
+  "path": "/mnt/tank long name/ix-applications/releases/wallos",
+  "dataset": "tank long name/ix-applications/releases/wallos",
+  "status": "STOPPED",
+  "used_ports": [
+    {
+      "port": 8282,
+      "protocol": "TCP"
+    }
+  ],
+  "pod_status": {
+    "desired": 0,
+    "available": 0
+  },
+  "update_available": false,
+  "human_version": "latest_4.8.17",
+  "human_latest_version": "latest_4.8.17",
+  "container_images_update_available": false,
+  "portals": {
+    "open": [
+      "http://192.168.200.110:8282/"
+    ]
+  }
+}'
++ jq -e '.chart_metadata.name == "traefik" and .config.ingress.main.integrations.traefik.enabled == true'
++ echo '{
+  "name": "wallos",
+  "info": {
+    "first_deployed": "2024-04-24T19:01:24.785497121-07:00",
+    "last_deployed": "2024-04-24T22:08:08.082554657-07:00",
+    "deleted": "",
+    "description": "Upgrade complete",
+    "status": "deployed",
+    "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"
+  },
+  "config": {
+    "TZ": "America/Los_Angeles",
+    "addons": {
+      "codeserver": {
+        "enabled": false
+      },
+      "netshoot": {
+        "enabled": false
+      },
+      "vpn": {
+        "type": "disabled"
+      }
+    },
+    "deviceList": [],
+    "docs": {
+      "confirmDocs": true
+    },
+    "donateNag": {
+      "confirmDonate": true
+    },
+    "global": {
+      "ixChartContext": {
+        "addNvidiaRuntimeClass": false,
+        "hasNFSCSI": true,
+        "hasSMBCSI": true,
+        "isInstall": false,
+        "isStopped": false,
+        "isUpdate": true,
+        "isUpgrade": false,
+        "kubernetes_config": {
+          "cluster_cidr": "172.16.0.0/16",
+          "cluster_dns_ip": "172.17.0.10",
+          "service_cidr": "172.17.0.0/16"
+        },
+        "nfsProvisioner": "nfs.csi.k8s.io",
+        "nvidiaRuntimeClassName": "nvidia",
+        "operation": "UPDATE",
+        "smbProvisioner": "smb.csi.k8s.io",
+        "storageClassName": "ix-storage-class-wallos",
+        "upgradeMetadata": {}
+      },
+      "stopAll": false
+    },
+    "image": {
+      "pullPolicy": "IfNotPresent",
+      "repository": "docker.io/bellamy/wallos",
+      "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+    },
+    "imagePullSecretList": [],
+    "ingress": {
+      "main": {
+        "enabled": false
+      }
+    },
+    "ingressList": [],
+    "ixCertificateAuthorities": {},
+    "ixCertificates": {},
+    "ixChartContext": {
+      "addNvidiaRuntimeClass": false,
+      "hasNFSCSI": true,
+      "hasSMBCSI": true,
+      "isInstall": false,
+      "isStopped": false,
+      "isUpdate": true,
+      "isUpgrade": false,
+      "kubernetes_config": {
+        "cluster_cidr": "172.16.0.0/16",
+        "cluster_dns_ip": "172.17.0.10",
+        "service_cidr": "172.17.0.0/16"
+      },
+      "nfsProvisioner": "nfs.csi.k8s.io",
+      "nvidiaRuntimeClassName": "nvidia",
+      "operation": "UPDATE",
+      "smbProvisioner": "smb.csi.k8s.io",
+      "storageClassName": "ix-storage-class-wallos",
+      "upgradeMetadata": {}
+    },
+    "ixExternalInterfacesConfiguration": [],
+    "ixExternalInterfacesConfigurationNames": [],
+    "ixVolumes": [],
+    "networkPolicy": [],
+    "persistence": {
+      "database": {
+        "enabled": true,
+        "mountPath": "/var/www/html/db",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      },
+      "logos": {
+        "enabled": true,
+        "mountPath": "/var/www/html/images/uploads/logos",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      }
+    },
+    "persistenceList": [],
+    "podOptions": {
+      "expertPodOpts": false
+    },
+    "portal": {
+      "open": {
+        "enabled": true
+      }
+    },
+    "release_name": "wallos",
+    "resources": {
+      "limits": {
+        "amd.com/gpu": 0,
+        "cpu": "4000m",
+        "gpu.intel.com/i915": 0,
+        "memory": "8Gi",
+        "nvidia.com/gpu": 0
+      },
+      "requests": {
+        "cpu": "10m",
+        "memory": "50Mi"
+      }
+    },
+    "scaleExternalInterface": [],
+    "securityContext": {
+      "container": {
+        "PUID": 568,
+        "UMASK": "0022",
+        "advanced": false,
+        "readOnlyRootFilesystem": false,
+        "runAsGroup": 0,
+        "runAsNonRoot": false,
+        "runAsUser": 0
+      },
+      "pod": {
+        "fsGroup": 568,
+        "fsGroupChangePolicy": "OnRootMismatch",
+        "supplementalGroups": []
+      }
+    },
+    "service": {
+      "main": {
+        "enabled": true,
+        "loadBalancerIP": "",
+        "ports": {
+          "main": {
+            "port": 8282,
+            "protocol": "tcp",
+            "targetPort": 80
+          }
+        },
+        "type": "LoadBalancer"
+      }
+    },
+    "serviceList": [],
+    "workload": {
+      "main": {
+        "podSpec": {
+          "containers": {
+            "main": {
+              "advanced": false,
+              "envList": [],
+              "extraArgs": []
+            }
+          }
+        },
+        "replicas": 1,
+        "type": "Deployment"
+      }
+    }
+  },
+  "version": 3,
+  "namespace": "ix-wallos",
+  "chart_metadata": {
+    "name": "wallos",
+    "home": "https://truecharts.org/charts/stable/wallos",
+    "sources": [
+      "https://github.com/ellite/Wallos",
+      "https://github.com/truecharts/charts/tree/master/charts/stable/wallos",
+      "https://hub.docker.com/r/bellamy/wallos"
+    ],
+    "version": "4.8.17",
+    "description": "Wallos - Self Hosted Subscription tracker",
+    "keywords": [
+      "dashboard"
+    ],
+    "maintainers": [
+      {
+        "name": "TrueCharts",
+        "email": "info@truecharts.org",
+        "url": "https://truecharts.org"
+      }
+    ],
+    "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp",
+    "apiVersion": "v2",
+    "appVersion": "latest",
+    "annotations": {
+      "max_scale_version": "24.04.0",
+      "min_scale_version": "23.10.0",
+      "truecharts.org/SCALE-support": "true",
+      "truecharts.org/category": "media",
+      "truecharts.org/max_helm_version": "3.14",
+      "truecharts.org/min_helm_version": "3.11",
+      "truecharts.org/train": "stable"
+    },
+    "kubeVersion": ">=1.24.0-0",
+    "dependencies": [
+      {
+        "name": "common",
+        "version": "20.3.11",
+        "repository": "oci://tccr.io/truecharts",
+        "enabled": true
+      }
+    ],
+    "type": "application",
+    "latest_chart_version": "4.8.17"
+  },
+  "id": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable",
+  "path": "/mnt/tank long name/ix-applications/releases/wallos",
+  "dataset": "tank long name/ix-applications/releases/wallos",
+  "status": "STOPPED",
+  "used_ports": [
+    {
+      "port": 8282,
+      "protocol": "TCP"
+    }
+  ],
+  "pod_status": {
+    "desired": 0,
+    "available": 0
+  },
+  "update_available": false,
+  "human_version": "latest_4.8.17",
+  "human_latest_version": "latest_4.8.17",
+  "container_images_update_available": false,
+  "portals": {
+    "open": [
+      "http://192.168.200.110:8282/"
+    ]
+  }
+}'
+++ echo '{
+  "name": "wallos",
+  "info": {
+    "first_deployed": "2024-04-24T19:01:24.785497121-07:00",
+    "last_deployed": "2024-04-24T22:08:08.082554657-07:00",
+    "deleted": "",
+    "description": "Upgrade complete",
+    "status": "deployed",
+    "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"
+  },
+  "config": {
+    "TZ": "America/Los_Angeles",
+    "addons": {
+      "codeserver": {
+        "enabled": false
+      },
+      "netshoot": {
+        "enabled": false
+      },
+      "vpn": {
+        "type": "disabled"
+      }
+    },
+    "deviceList": [],
+    "docs": {
+      "confirmDocs": true
+    },
+    "donateNag": {
+      "confirmDonate": true
+    },
+    "global": {
+      "ixChartContext": {
+        "addNvidiaRuntimeClass": false,
+        "hasNFSCSI": true,
+        "hasSMBCSI": true,
+        "isInstall": false,
+        "isStopped": false,
+        "isUpdate": true,
+        "isUpgrade": false,
+        "kubernetes_config": {
+          "cluster_cidr": "172.16.0.0/16",
+          "cluster_dns_ip": "172.17.0.10",
+          "service_cidr": "172.17.0.0/16"
+        },
+        "nfsProvisioner": "nfs.csi.k8s.io",
+        "nvidiaRuntimeClassName": "nvidia",
+        "operation": "UPDATE",
+        "smbProvisioner": "smb.csi.k8s.io",
+        "storageClassName": "ix-storage-class-wallos",
+        "upgradeMetadata": {}
+      },
+      "stopAll": false
+    },
+    "image": {
+      "pullPolicy": "IfNotPresent",
+      "repository": "docker.io/bellamy/wallos",
+      "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+    },
+    "imagePullSecretList": [],
+    "ingress": {
+      "main": {
+        "enabled": false
+      }
+    },
+    "ingressList": [],
+    "ixCertificateAuthorities": {},
+    "ixCertificates": {},
+    "ixChartContext": {
+      "addNvidiaRuntimeClass": false,
+      "hasNFSCSI": true,
+      "hasSMBCSI": true,
+      "isInstall": false,
+      "isStopped": false,
+      "isUpdate": true,
+      "isUpgrade": false,
+      "kubernetes_config": {
+        "cluster_cidr": "172.16.0.0/16",
+        "cluster_dns_ip": "172.17.0.10",
+        "service_cidr": "172.17.0.0/16"
+      },
+      "nfsProvisioner": "nfs.csi.k8s.io",
+      "nvidiaRuntimeClassName": "nvidia",
+      "operation": "UPDATE",
+      "smbProvisioner": "smb.csi.k8s.io",
+      "storageClassName": "ix-storage-class-wallos",
+      "upgradeMetadata": {}
+    },
+    "ixExternalInterfacesConfiguration": [],
+    "ixExternalInterfacesConfigurationNames": [],
+    "ixVolumes": [],
+    "networkPolicy": [],
+    "persistence": {
+      "database": {
+        "enabled": true,
+        "mountPath": "/var/www/html/db",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      },
+      "logos": {
+        "enabled": true,
+        "mountPath": "/var/www/html/images/uploads/logos",
+        "readOnly": false,
+        "size": "256Gi",
+        "static": {
+          "mode": "disabled"
+        },
+        "storageClass": "",
+        "type": "pvc",
+        "volumeSnapshots": []
+      }
+    },
+    "persistenceList": [],
+    "podOptions": {
+      "expertPodOpts": false
+    },
+    "portal": {
+      "open": {
+        "enabled": true
+      }
+    },
+    "release_name": "wallos",
+    "resources": {
+      "limits": {
+        "amd.com/gpu": 0,
+        "cpu": "4000m",
+        "gpu.intel.com/i915": 0,
+        "memory": "8Gi",
+        "nvidia.com/gpu": 0
+      },
+      "requests": {
+        "cpu": "10m",
+        "memory": "50Mi"
+      }
+    },
+    "scaleExternalInterface": [],
+    "securityContext": {
+      "container": {
+        "PUID": 568,
+        "UMASK": "0022",
+        "advanced": false,
+        "readOnlyRootFilesystem": false,
+        "runAsGroup": 0,
+        "runAsNonRoot": false,
+        "runAsUser": 0
+      },
+      "pod": {
+        "fsGroup": 568,
+        "fsGroupChangePolicy": "OnRootMismatch",
+        "supplementalGroups": []
+      }
+    },
+    "service": {
+      "main": {
+        "enabled": true,
+        "loadBalancerIP": "",
+        "ports": {
+          "main": {
+            "port": 8282,
+            "protocol": "tcp",
+            "targetPort": 80
+          }
+        },
+        "type": "LoadBalancer"
+      }
+    },
+    "serviceList": [],
+    "workload": {
+      "main": {
+        "podSpec": {
+          "containers": {
+            "main": {
+              "advanced": false,
+              "envList": [],
+              "extraArgs": []
+            }
+          }
+        },
+        "replicas": 1,
+        "type": "Deployment"
+      }
+    }
+  },
+  "version": 3,
+  "namespace": "ix-wallos",
+  "chart_metadata": {
+    "name": "wallos",
+    "home": "https://truecharts.org/charts/stable/wallos",
+    "sources": [
+      "https://github.com/ellite/Wallos",
+      "https://github.com/truecharts/charts/tree/master/charts/stable/wallos",
+      "https://hub.docker.com/r/bellamy/wallos"
+    ],
+    "version": "4.8.17",
+    "description": "Wallos - Self Hosted Subscription tracker",
+    "keywords": [
+      "dashboard"
+    ],
+    "maintainers": [
+      {
+        "name": "TrueCharts",
+        "email": "info@truecharts.org",
+        "url": "https://truecharts.org"
+      }
+    ],
+    "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp",
+    "apiVersion": "v2",
+    "appVersion": "latest",
+    "annotations": {
+      "max_scale_version": "24.04.0",
+      "min_scale_version": "23.10.0",
+      "truecharts.org/SCALE-support": "true",
+      "truecharts.org/category": "media",
+      "truecharts.org/max_helm_version": "3.14",
+      "truecharts.org/min_helm_version": "3.11",
+      "truecharts.org/train": "stable"
+    },
+    "kubeVersion": ">=1.24.0-0",
+    "dependencies": [
+      {
+        "name": "common",
+        "version": "20.3.11",
+        "repository": "oci://tccr.io/truecharts",
+        "enabled": true
+      }
+    ],
+    "type": "application",
+    "latest_chart_version": "4.8.17"
+  },
+  "id": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable",
+  "path": "/mnt/tank long name/ix-applications/releases/wallos",
+  "dataset": "tank long name/ix-applications/releases/wallos",
+  "status": "STOPPED",
+  "used_ports": [
+    {
+      "port": 8282,
+      "protocol": "TCP"
+    }
+  ],
+  "pod_status": {
+    "desired": 0,
+    "available": 0
+  },
+  "update_available": false,
+  "human_version": "latest_4.8.17",
+  "human_latest_version": "latest_4.8.17",
+  "container_images_update++ jq '
+        .config |
+        walk(
+            if type == "object" then
+                with_entries(select(.key | startswith("ix") | not))
+            else
+                .
+            end
+        ) |
+        walk(
+            if type == "object" and has("storageClass") and .storageClass == "SCALE-ZFS" then
+                .storageClass = ""
+            else
+                .
+            end
+        ) |
+        .global.ixChartContext.isStopped = true |
+        .global.stopAll = true
+_available": false,
+    '
+  "portals": {
+    "open": [
+      "http://192.168.200.110:8282/"
+    ]
+  }
+}'
++ DATA='{
+  "TZ": "America/Los_Angeles",
+  "addons": {
+    "codeserver": {
+      "enabled": false
+    },
+    "netshoot": {
+      "enabled": false
+    },
+    "vpn": {
+      "type": "disabled"
+    }
+  },
+  "deviceList": [],
+  "docs": {
+    "confirmDocs": true
+  },
+  "donateNag": {
+    "confirmDonate": true
+  },
+  "global": {
+    "stopAll": true,
+    "ixChartContext": {
+      "isStopped": true
+    }
+  },
+  "image": {
+    "pullPolicy": "IfNotPresent",
+    "repository": "docker.io/bellamy/wallos",
+    "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+  },
+  "imagePullSecretList": [],
+  "ingress": {
+    "main": {
+      "enabled": false
+    }
+  },
+  "ingressList": [],
+  "networkPolicy": [],
+  "persistence": {
+    "database": {
+      "enabled": true,
+      "mountPath": "/var/www/html/db",
+      "readOnly": false,
+      "size": "256Gi",
+      "static": {
+        "mode": "disabled"
+      },
+      "storageClass": "",
+      "type": "pvc",
+      "volumeSnapshots": []
+    },
+    "logos": {
+      "enabled": true,
+      "mountPath": "/var/www/html/images/uploads/logos",
+      "readOnly": false,
+      "size": "256Gi",
+      "static": {
+        "mode": "disabled"
+      },
+      "storageClass": "",
+      "type": "pvc",
+      "volumeSnapshots": []
+    }
+  },
+  "persistenceList": [],
+  "podOptions": {
+    "expertPodOpts": false
+  },
+  "portal": {
+    "open": {
+      "enabled": true
+    }
+  },
+  "release_name": "wallos",
+  "resources": {
+    "limits": {
+      "amd.com/gpu": 0,
+      "cpu": "4000m",
+      "gpu.intel.com/i915": 0,
+      "memory": "8Gi",
+      "nvidia.com/gpu": 0
+    },
+    "requests": {
+      "cpu": "10m",
+      "memory": "50Mi"
+    }
+  },
+  "scaleExternalInterface": [],
+  "securityContext": {
+    "container": {
+      "PUID": 568,
+      "UMASK": "0022",
+      "advanced": false,
+      "readOnlyRootFilesystem": false,
+      "runAsGroup": 0,
+      "runAsNonRoot": false,
+      "runAsUser": 0
+    },
+    "pod": {
+      "fsGroup": 568,
+      "fsGroupChangePolicy": "OnRootMismatch",
+      "supplementalGroups": []
+    }
+  },
+  "service": {
+    "main": {
+      "enabled": true,
+      "loadBalancerIP": "",
+      "ports": {
+        "main": {
+          "port": 8282,
+          "protocol": "tcp",
+          "targetPort": 80
+        }
+      },
+      "type": "LoadBalancer"
+    }
+  },
+  "serviceList": [],
+  "workload": {
+    "main": {
+      "podSpec": {
+        "containers": {
+          "main": {
+            "advanced": false,
+            "envList": [],
+            "extraArgs": []
+          }
+        }
+      },
+      "replicas": 1,
+      "type": "Deployment"
+    }
+  }
+}'
++ [[ -z {
+  "TZ": "America/Los_Angeles",
+  "addons": {
+    "codeserver": {
+      "enabled": false
+    },
+    "netshoot": {
+      "enabled": false
+    },
+    "vpn": {
+      "type": "disabled"
+    }
+  },
+  "deviceList": [],
+  "docs": {
+    "confirmDocs": true
+  },
+  "donateNag": {
+    "confirmDonate": true
+  },
+  "global": {
+    "stopAll": true,
+    "ixChartContext": {
+      "isStopped": true
+    }
+  },
+  "image": {
+    "pullPolicy": "IfNotPresent",
+    "repository": "docker.io/bellamy/wallos",
+    "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+  },
+  "imagePullSecretList": [],
+  "ingress": {
+    "main": {
+      "enabled": false
+    }
+  },
+  "ingressList": [],
+  "networkPolicy": [],
+  "persistence": {
+    "database": {
+      "enabled": true,
+      "mountPath": "/var/www/html/db",
+      "readOnly": false,
+      "size": "256Gi",
+      "static": {
+        "mode": "disabled"
+      },
+      "storageClass": "",
+      "type": "pvc",
+      "volumeSnapshots": []
+    },
+    "logos": {
+      "enabled": true,
+      "mountPath": "/var/www/html/images/uploads/logos",
+      "readOnly": false,
+      "size": "256Gi",
+      "static": {
+        "mode": "disabled"
+      },
+      "storageClass": "",
+      "type": "pvc",
+      "volumeSnapshots": []
+    }
+  },
+  "persistenceList": [],
+  "podOptions": {
+    "expertPodOpts": false
+  },
+  "portal": {
+    "open": {
+      "enabled": true
+    }
+  },
+  "release_name": "wallos",
+  "resources": {
+    "limits": {
+      "amd.com/gpu": 0,
+      "cpu": "4000m",
+      "gpu.intel.com/i915": 0,
+      "memory": "8Gi",
+      "nvidia.com/gpu": 0
+    },
+    "requests": {
+      "cpu": "10m",
+      "memory": "50Mi"
+    }
+  },
+  "scaleExternalInterface": [],
+  "securityContext": {
+    "container": {
+      "PUID": 568,
+      "UMASK": "0022",
+      "advanced": false,
+      "readOnlyRootFilesystem": false,
+      "runAsGroup": 0,
+      "runAsNonRoot": false,
+      "runAsUser": 0
+    },
+    "pod": {
+      "fsGroup": 568,
+      "fsGroupChangePolicy": "OnRootMismatch",
+      "supplementalGroups": []
+    }
+  },
+  "service": {
+    "main": {
+      "enabled": true,
+      "loadBalancerIP": "",
+      "ports": {
+        "main": {
+          "port": 8282,
+          "protocol": "tcp",
+          "targetPort": 80
+        }
+      },
+      "type": "LoadBalancer"
+    }
+  },
+  "serviceList": [],
+  "workload": {
+    "main": {
+      "podSpec": {
+        "containers": {
+          "main": {
+            "advanced": false,
+            "envList": [],
+            "extraArgs": []
+          }
+        }
+      },
+      "replicas": 1,
+      "type": "Deployment"
+    }
+  }
+} ]]
++ mkdir -p '/mnt/tank long name/migration/wallos/backup'
++ [[ false == true ]]
++ echo '{
+  "TZ": "America/Los_Angeles",
+  "addons": {
+    "codeserver": {
+      "enabled": false
+    },
+    "netshoot": {
+      "enabled": false
+    },
+    "vpn": {
+      "type": "disabled"
+    }
+  },
+  "deviceList": [],
+  "docs": {
+    "confirmDocs": true
+  },
+  "donateNag": {
+    "confirmDonate": true
+  },
+  "global": {
+    "stopAll": true,
+    "ixChartContext": {
+      "isStopped": true
+    }
+  },
+  "image": {
+    "pullPolicy": "IfNotPresent",
+    "repository": "docker.io/bellamy/wallos",
+    "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"
+  },
+  "imagePullSecretList": [],
+  "ingress": {
+    "main": {
+      "enabled": false
+    }
+  },
+  "ingressList": [],
+  "networkPolicy": [],
+  "persistence": {
+    "database": {
+      "enabled": true,
+      "mountPath": "/var/www/html/db",
+      "readOnly": false,
+      "size": "256Gi",
+      "static": {
+        "mode": "disabled"
+      },
+      "storageClass": "",
+      "type": "pvc",
+      "volumeSnapshots": []
+    },
+    "logos": {
+      "enabled": true,
+      "mountPath": "/var/www/html/images/uploads/logos",
+      "readOnly": false,
+      "size": "256Gi",
+      "static": {
+        "mode": "disabled"
+      },
+      "storageClass": "",
+      "type": "pvc",
+      "volumeSnapshots": []
+    }
+  },
+  "persistenceList": [],
+  "podOptions": {
+    "expertPodOpts": false
+  },
+  "portal": {
+    "open": {
+      "enabled": true
+    }
+  },
+  "release_name": "wallos",
+  "resources": {
+    "limits": {
+      "amd.com/gpu": 0,
+      "cpu": "4000m",
+      "gpu.intel.com/i915": 0,
+      "memory": "8Gi",
+      "nvidia.com/gpu": 0
+    },
+    "requests": {
+      "cpu": "10m",
+      "memory": "50Mi"
+    }
+  },
+  "scaleExternalInterface": [],
+  "securityContext": {
+    "container": {
+      "PUID": 568,
+      "UMASK": "0022",
+      "advanced": false,
+      "readOnlyRootFilesystem": false,
+      "runAsGroup": 0,
+      "runAsNonRoot": false,
+      "runAsUser": 0
+    },
+    "pod": {
+      "fsGroup": 568,
+      "fsGroupChangePolicy": "OnRootMismatch",
+      "supplementalGroups": []
+    }
+  },
+  "service": {
+    "main": {
+      "enabled": true,
+      "loadBalancerIP": "",
+      "ports": {
+        "main": {
+          "port": 8282,
+          "protocol": "tcp",
+          "targetPort": 80
+        }
+      },
+      "type": "LoadBalancer"
+    }
+  },
+  "serviceList": [],
+  "workload": {
+    "main": {
+      "podSpec": {
+        "containers": {
+          "main": {
+            "advanced": false,
+            "envList": [],
+            "extraArgs": []
+          }
+        }
+      },
+      "replicas": 1,
+      "type": "Deployment"
+    }
+  }
+}'
++ return 0
++ update_or_append_variable script_progress create_backup_metadata
++ local variable_name=script_progress
++ local value=create_backup_metadata
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ create_backup_metadata =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^script_progress=' '/mnt/tank long name/migration/wallos/variables.txt'
++ sed -i 's|^script_progress=.*|script_progress=create_backup_metadata|' '/mnt/tank long name/migration/wallos/variables.txt'
++ create_backup_metadata
++ local metadata_name=metadata-backup.json
++ local chart_name catalog_train metadata_json
+++ midclt call chart.release.get_instance wallos
++ app_details='{"name": "wallos", "info": {"first_deployed": "2024-04-24T19:01:24.785497121-07:00", "last_deployed": "2024-04-24T22:08:08.082554657-07:00", "deleted": "", "description": "Upgrade complete", "status": "deployed", "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"}, "config": {"TZ": "America/Los_Angeles", "addons": {"codeserver": {"enabled": false}, "netshoot": {"enabled": false}, "vpn": {"type": "disabled"}}, "deviceList": [], "docs": {"confirmDocs": true}, "donateNag": {"confirmDonate": true}, "global": {"ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "stopAll": false}, "image": {"pullPolicy": "IfNotPresent", "repository": "docker.io/bellamy/wallos", "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"}, "imagePullSecretList": [], "ingress": {"main": {"enabled": false}}, "ingressList": [], "ixCertificateAuthorities": {}, "ixCertificates": {}, "ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "ixExternalInterfacesConfiguration": [], "ixExternalInterfacesConfigurationNames": [], "ixVolumes": [], "networkPolicy": [], "persistence": {"database": {"enabled": true, "mountPath": "/var/www/html/db", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}, "logos": {"enabled": true, "mountPath": "/var/www/html/images/uploads/logos", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}}, "persistenceList": [], "podOptions": {"expertPodOpts": false}, "portal": {"open": {"enabled": true}}, "release_name": "wallos", "resources": {"limits": {"amd.com/gpu": 0, "cpu": "4000m", "gpu.intel.com/i915": 0, "memory": "8Gi", "nvidia.com/gpu": 0}, "requests": {"cpu": "10m", "memory": "50Mi"}}, "scaleExternalInterface": [], "securityContext": {"container": {"PUID": 568, "UMASK": "0022", "advanced": false, "readOnlyRootFilesystem": false, "runAsGroup": 0, "runAsNonRoot": false, "runAsUser": 0}, "pod": {"fsGroup": 568, "fsGroupChangePolicy": "OnRootMismatch", "supplementalGroups": []}}, "service": {"main": {"enabled": true, "loadBalancerIP": "", "ports": {"main": {"port": 8282, "protocol": "tcp", "targetPort": 80}}, "type": "LoadBalancer"}}, "serviceList": [], "workload": {"main": {"podSpec": {"containers": {"main": {"advanced": false, "envList": [], "extraArgs": []}}}, "replicas": 1, "type": "Deployment"}}}, "version": 3, "namespace": "ix-wallos", "chart_metadata": {"name": "wallos", "home": "https://truecharts.org/charts/stable/wallos", "sources": ["https://github.com/ellite/Wallos", "https://github.com/truecharts/charts/tree/master/charts/stable/wallos", "https://hub.docker.com/r/bellamy/wallos"], "version": "4.8.17", "description": "Wallos - Self Hosted Subscription tracker", "keywords": ["dashboard"], "maintainers": [{"name": "TrueCharts", "email": "info@truecharts.org", "url": "https://truecharts.org"}], "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp", "apiVersion": "v2", "appVersion": "latest", "annotations": {"max_scale_version": "24.04.0", "min_scale_version": "23.10.0", "truecharts.org/SCALE-support": "true", "truecharts.org/category": "media", "truecharts.org/max_helm_version": "3.14", "truecharts.org/min_helm_version": "3.11", "truecharts.org/train": "stable"}, "kubeVersion": ">=1.24.0-0", "dependencies": [{"name": "common", "version": "20.3.11", "repository": "oci://tccr.io/truecharts", "enabled": true}], "type": "application", "latest_chart_version": "4.8.17"}, "id": "wallos", "catalog": "TRUECHARTS", "catalog_train": "stable", "path": "/mnt/tank long name/ix-applications/releases/wallos", "dataset": "tank long name/ix-applications/releases/wallos", "status": "STOPPED", "used_ports": [{"port": 8282, "protocol": "TCP"}], "pod_status": {"desired": 0, "available": 0}, "update_available": false, "human_version": "latest_4.8.17", "human_latest_version": "latest_4.8.17", "container_images_update_available": false, "portals": {"open": ["http://192.168.200.110:8282/"]}}'
+++ echo '{"name": "wallos", "info": {"first_deployed": "2024-04-24T19:01:24.785497121-07:00", "last_deployed": "2024-04-24T22:08:08.082554657-07:00", "deleted": "", "description": "Upgrade complete", "status": "deployed", "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"}, "config": {"TZ": "America/Los_Angeles", "addons": {"codeserver": {"enabled": false}, "netshoot": {"enabled": false}, "vpn": {"type": "disabled"}}, "deviceList": [], "docs": {"confirmDocs": true}, "donateNag": {"confirmDonate": true}, "global": {"ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "stopAll": false}, "image": {"pullPolicy": "IfNotPresent", "repository": "docker.io/bellamy/wallos", "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"}, "imagePullSecretList": [], "ingress": {"main": {"enabled": false}}, "ingressList": [], "ixCertificateAuthorities": {}, "ixCertificates": {}, "ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "ixExternalInterfacesConfiguration": [], "ixExternalInterfacesConfigurationNames": [], "ixVolumes": [], "networkPolicy": [], "persistence": {"database": {"enabled": true, "mountPath": "/var/www/html/db", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}, "logos": {"enabled": true, "mountPath": "/var/www/html/images/uploads/logos", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}}, "persistenceList": [], "podOptions": {"expertPodOpts": false}, "portal": {"open": {"enabled": true}}, "release_name": "wallos", "resources": {"limits": {"amd.com/gpu": 0, "cpu": "4000m", "gpu.intel.com/i915": 0, "memory": "8Gi", "nvidia.com/gpu": 0}, "requests": {"cpu": "10m", "memory": "50Mi"}}, "scaleExternalInterface": [], "securityContext": {"container": {"PUID": 568, "UMASK": "0022", "advanced": false, "readOnlyRootFilesystem": false, "runAsGroup": 0, "runAsNonRoot": false, "runAsUser": 0}, "pod": {"fsGroup": 568, "fsGroupChangePolicy": "OnRootMismatch", "supplementalGroups": []}}, "service": {"main": {"enabled": true, "loadBalancerIP": "", "ports": {"main": {"port": 8282, "protocol": "tcp", "targetPort": 80}}, "type": "LoadBalancer"}}, "serviceList": [], "workload": {"main": {"podSpec": {"containers": {"main": {"advanced": false, "envList": [], "extraArgs": []}}}, "replicas": 1, "type": "Deployment"}}}, "version": 3, "namespace": "ix-wallos", "chart_metadata": {"name": "wallos", "home": "https://truecharts.org/charts/stable/wallos", "sources": ["https://github.com/ellite/Wallos", "https://github.com/truecharts/charts/tree/master/charts/stable/wallos", "https://hub.docker.com/r/bellamy/wallos"], "version": "4.8.17", "description": "Wallos - Self Hosted Subscription tracker", "keywords": ["dashboard"], "maintainers": [{"name": "TrueCharts", "email": "info@truecharts.org", "url": "https://truecharts.org"}], "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp", "apiVersion": "v2", "appVersion": "latest", "annotations": {"max_scale_version": "24.04.0", "min_scale_version": "23.10.0", "truecharts.org/SCALE-support": "true", "truecharts.org/category": "media", "truecharts.org/max_helm_version": "3.14", "truecharts.org/min_helm_version": "3.11", "truecharts.org/train": "stable"}, "kubeVersion": ">=1.24.0-0", "dependencies": [{"name": "common", "version": "20.3.11", "repository": "oci://tccr.io/truecharts", "enabled": true}], "type": "application", "latest_chart_version": "4.8.17"}, "id": "wallos", "catalog": "TRUECHARTS", "catalog_train": "stable", "path": "/mnt/tank long name/ix-applications/releases/wallos", "dataset": "tank long name/ix-applications/releases/wallos", "status": "STOPPED", "used_ports": [{"port": 8282, "protocol": "TCP"}], "pod_status": {"desired": 0, "available": 0}, "update_available": false, "human_version": "latest_4.8.17", "human_latest_version": "latest_4.8.17", "container_images_update_available": false, "portals": {"open": ["http://192.168.200.110:8282/"]}}'
+++ jq -r '.chart_metadata.name // empty'
++ chart_name=wallos
+++ echo '{"name": "wallos", "info": {"first_deployed": "2024-04-24T19:01:24.785497121-07:00", "last_deployed": "2024-04-24T22:08:08.082554657-07:00", "deleted": "", "description": "Upgrade complete", "status": "deployed", "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"}, "config": {"TZ": "America/Los_Angeles", "addons": {"codeserver": {"enabled": false}, "netshoot": {"enabled": false}, "vpn": {"type": "disabled"}}, "deviceList": [], "docs": {"confirmDocs": true}, "donateNag": {"confirmDonate": true}, "global": {"ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "stopAll": false}, "image": {"pullPolicy": "IfNotPresent", "repository": "docker.io/bellamy/wallos", "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"}, "imagePullSecretList": [], "ingress": {"main": {"enabled": false}}, "ingressList": [], "ixCertificateAuthorities": {}, "ixCertificates": {}, "ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "ixExternalInterfacesConfiguration": [], "ixExternalInterfacesConfigurationNames": [], "ixVolumes": [], "networkPolicy": [], "persistence": {"database": {"enabled": true, "mountPath": "/var/www/html/db", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}, "logos": {"enabled": true, "mountPath": "/var/www/html/images/uploads/logos", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}}, "persistenceList": [], "podOptions": {"expertPodOpts": false}, "portal": {"open": {"enabled": true}}, "release_name": "wallos", "resources": {"limits": {"amd.com/gpu": 0, "cpu": "4000m", "gpu.intel.com/i915": 0, "memory": "8Gi", "nvidia.com/gpu": 0}, "requests": {"cpu": "10m", "memory": "50Mi"}}, "scaleExternalInterface": [], "securityContext": {"container": {"PUID": 568, "UMASK": "0022", "advanced": false, "readOnlyRootFilesystem": false, "runAsGroup": 0, "runAsNonRoot": false, "runAsUser": 0}, "pod": {"fsGroup": 568, "fsGroupChangePolicy": "OnRootMismatch", "supplementalGroups": []}}, "service": {"main": {"enabled": true, "loadBalancerIP": "", "ports": {"main": {"port": 8282, "protocol": "tcp", "targetPort": 80}}, "type": "LoadBalancer"}}, "serviceList": [], "workload": {"main": {"podSpec": {"containers": {"main": {"advanced": false, "envList": [], "extraArgs": []}}}, "replicas": 1, "type": "Deployment"}}}, "version": 3, "namespace": "ix-wallos", "chart_metadata": {"name": "wallos", "home": "https://truecharts.org/charts/stable/wallos", "sources": ["https://github.com/ellite/Wallos", "https://github.com/truecharts/charts/tree/master/charts/stable/wallos", "https://hub.docker.com/r/bellamy/wallos"], "version": "4.8.17", "description": "Wallos - Self Hosted Subscription tracker", "keywords": ["dashboard"], "maintainers": [{"name": "TrueCharts", "email": "info@truecharts.org", "url": "https://truecharts.org"}], "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp", "apiVersion": "v2", "appVersion": "latest", "annotations": {"max_scale_version": "24.04.0", "min_scale_version": "23.10.0", "truecharts.org/SCALE-support": "true", "truecharts.org/category": "media", "truecharts.org/max_helm_version": "3.14", "truecharts.org/min_helm_version": "3.11", "truecharts.org/train": "stable"}, "kubeVersion": ">=1.24.0-0", "dependencies": [{"name": "common", "version": "20.3.11", "repository": "oci://tccr.io/truecharts", "enabled": true}], "type": "application", "latest_chart_version": "4.8.17"}, "id": "wallos", "catalog": "TRUECHARTS", "catalog_train": "stable", "path": "/mnt/tank long name/ix-applications/releases/wallos", "dataset": "tank long name/ix-applications/releases/wallos", "status": "STOPPED", "used_ports": [{"port": 8282, "protocol": "TCP"}], "pod_status": {"desired": 0, "available": 0}, "update_available": false, "human_version": "latest_4.8.17", "human_latest_version": "latest_4.8.17", "container_images_update_available": false, "portals": {"open": ["http://192.168.200.110:8282/"]}}'
+++ jq -r '.catalog // empty'
++ catalog=TRUECHARTS
+++ echo '{"name": "wallos", "info": {"first_deployed": "2024-04-24T19:01:24.785497121-07:00", "last_deployed": "2024-04-24T22:08:08.082554657-07:00", "deleted": "", "description": "Upgrade complete", "status": "deployed", "notes": "\n# Thank you for installing wallos by TrueCharts.\n\n\n## Connecting externally\nYou can use this Chart by opening one of the following links in your browser:\n- host: $node_ip\npath: /\nport: \"8282\"\nportalName: open\nprotocol: http\nurl: http://$node_ip:8282/\nuseNodeIP: true\n## Sources for wallos\n- https://github.com/ellite/Wallos\n- https://github.com/truecharts/charts/tree/master/charts/stable/wallos\n- https://hub.docker.com/r/bellamy/wallos\n\nSee more for **wallos** at (https://truecharts.org/charts/stable/wallos)\n\n## Documentation\nPlease check out the TrueCharts documentation on:\nhttps://truecharts.org\n\nOpenSource can only exist with your help, please consider supporting TrueCharts:\nhttps://truecharts.org/sponsor\n"}, "config": {"TZ": "America/Los_Angeles", "addons": {"codeserver": {"enabled": false}, "netshoot": {"enabled": false}, "vpn": {"type": "disabled"}}, "deviceList": [], "docs": {"confirmDocs": true}, "donateNag": {"confirmDonate": true}, "global": {"ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "stopAll": false}, "image": {"pullPolicy": "IfNotPresent", "repository": "docker.io/bellamy/wallos", "tag": "latest@sha256:58c8de918a66225ad984800d18092c67b93ffe3e7d7c8065cab5ca6f995ea1e3"}, "imagePullSecretList": [], "ingress": {"main": {"enabled": false}}, "ingressList": [], "ixCertificateAuthorities": {}, "ixCertificates": {}, "ixChartContext": {"addNvidiaRuntimeClass": false, "hasNFSCSI": true, "hasSMBCSI": true, "isInstall": false, "isStopped": false, "isUpdate": true, "isUpgrade": false, "kubernetes_config": {"cluster_cidr": "172.16.0.0/16", "cluster_dns_ip": "172.17.0.10", "service_cidr": "172.17.0.0/16"}, "nfsProvisioner": "nfs.csi.k8s.io", "nvidiaRuntimeClassName": "nvidia", "operation": "UPDATE", "smbProvisioner": "smb.csi.k8s.io", "storageClassName": "ix-storage-class-wallos", "upgradeMetadata": {}}, "ixExternalInterfacesConfiguration": [], "ixExternalInterfacesConfigurationNames": [], "ixVolumes": [], "networkPolicy": [], "persistence": {"database": {"enabled": true, "mountPath": "/var/www/html/db", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}, "logos": {"enabled": true, "mountPath": "/var/www/html/images/uploads/logos", "readOnly": false, "size": "256Gi", "static": {"mode": "disabled"}, "storageClass": "", "type": "pvc", "volumeSnapshots": []}}, "persistenceList": [], "podOptions": {"expertPodOpts": false}, "portal": {"open": {"enabled": true}}, "release_name": "wallos", "resources": {"limits": {"amd.com/gpu": 0, "cpu": "4000m", "gpu.intel.com/i915": 0, "memory": "8Gi", "nvidia.com/gpu": 0}, "requests": {"cpu": "10m", "memory": "50Mi"}}, "scaleExternalInterface": [], "securityContext": {"container": {"PUID": 568, "UMASK": "0022", "advanced": false, "readOnlyRootFilesystem": false, "runAsGroup": 0, "runAsNonRoot": false, "runAsUser": 0}, "pod": {"fsGroup": 568, "fsGroupChangePolicy": "OnRootMismatch", "supplementalGroups": []}}, "service": {"main": {"enabled": true, "loadBalancerIP": "", "ports": {"main": {"port": 8282, "protocol": "tcp", "targetPort": 80}}, "type": "LoadBalancer"}}, "serviceList": [], "workload": {"main": {"podSpec": {"containers": {"main": {"advanced": false, "envList": [], "extraArgs": []}}}, "replicas": 1, "type": "Deployment"}}}, "version": 3, "namespace": "ix-wallos", "chart_metadata": {"name": "wallos", "home": "https://truecharts.org/charts/stable/wallos", "sources": ["https://github.com/ellite/Wallos", "https://github.com/truecharts/charts/tree/master/charts/stable/wallos", "https://hub.docker.com/r/bellamy/wallos"], "version": "4.8.17", "description": "Wallos - Self Hosted Subscription tracker", "keywords": ["dashboard"], "maintainers": [{"name": "TrueCharts", "email": "info@truecharts.org", "url": "https://truecharts.org"}], "icon": "https://truecharts.org/img/hotlink-ok/chart-icons/wallos.webp", "apiVersion": "v2", "appVersion": "latest", "annotations": {"max_scale_version": "24.04.0", "min_scale_version": "23.10.0", "truecharts.org/SCALE-support": "true", "truecharts.org/category": "media", "truecharts.org/max_helm_version": "3.14", "truecharts.org/min_helm_version": "3.11", "truecharts.org/train": "stable"}, "kubeVersion": ">=1.24.0-0", "dependencies": [{"name": "common", "version": "20.3.11", "repository": "oci://tccr.io/truecharts", "enabled": true}], "type": "application", "latest_chart_version": "4.8.17"}, "id": "wallos", "catalog": "TRUECHARTS", "catalog_train": "stable", "path": "/mnt/tank long name/ix-applications/releases/wallos", "dataset": "tank long name/ix-applications/releases/wallos", "status": "STOPPED", "used_ports": [{"port": 8282, "protocol": "TCP"}], "pod_status": {"desired": 0, "available": 0}, "update_available": false, "human_version": "latest_4.8.17", "human_latest_version": "latest_4.8.17", "container_images_update_available": false, "portals": {"open": ["http://192.168.200.110:8282/"]}}'
+++ jq -r '.catalog_train // empty'
++ catalog_train=stable
++ [[ -z wallos ]]
++ [[ -z TRUECHARTS ]]
++ [[ -z stable ]]
+++ jq -n --arg chart_name wallos --arg catalog TRUECHARTS --arg catalog_train stable '{chart_name: $chart_name, catalog: $catalog, catalog_train: $catalog_train}'
++ metadata_json='{
+  "chart_name": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable"
+}'
++ mkdir -p '/mnt/tank long name/migration/wallos/backup'
++ echo '{
+  "chart_name": "wallos",
+  "catalog": "TRUECHARTS",
+  "catalog_train": "stable"
+}'
++ return 0
++ update_or_append_variable script_progress rename_original_pvcs
++ local variable_name=script_progress
++ local value=rename_original_pvcs
++ local 'file=/mnt/tank long name/migration/wallos/variables.txt'
++ [[ rename_original_pvcs =~ [[:space:]] ]]
++ '[' '!' -f '/mnt/tank long name/migration/wallos/variables.txt' ']'
++ grep -q '^script_progress=' '/mnt/tank long name/migration/wallos/variables.txt'
++ sed -i 's|^script_progress=.*|script_progress=rename_original_pvcs|' '/mnt/tank long name/migration/wallos/variables.txt'
++ [[ true == true ]]
++ stop_app_if_needed
+++ cli -m csv -c 'app chart_release query name,status'
+++ grep '^wallos,'
+++ awk -F , '{print $2}'
+++ sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
++ status=STOPPED
++ [[ STOPPED != \S\T\O\P\P\E\D ]]
++ echo
+
++ return 0
++ rename_original_pvcs
++ local 'pvc_backup_file=/mnt/tank long name/migration/wallos/backup/pvcs_new.json'
++ '[' '!' -f '/mnt/tank long name/migration/wallos/backup/pvcs_new.json' ']'
++ echo -e '\033[0;31mError: Backup file does not exist at /mnt/tank long name/migration/wallos/backup/pvcs_new.json\033[0m'
+Error: Backup file does not exist at /mnt/tank long name/migration/wallos/backup/pvcs_new.json
++ return 1
++ exit 1
