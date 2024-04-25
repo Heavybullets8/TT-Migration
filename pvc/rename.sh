@@ -49,14 +49,14 @@ swap_pvcs() {
     echo -e "${bold}Renaming the migration PVCs to the new app's PVC names...${reset}"
 
     # Check if there are any PVCs left to process in the original app info
-    original_pvc_count=$(jq '. | length' "$original_app_pvc_info")
+    original_pvc_count=$(jq '[.[] | select(.ignored == false)] | length' "$original_app_pvc_info")
     if [ "$original_pvc_count" -eq 0 ]; then
-        echo -e "${red}Error: There are no PVCs left to process in the original app info.${reset}"
+        echo -e "${yellow}Warning: There are no PVCs left to process in the original app info.${reset}"
         return 0
     fi
 
     # Check if the number of original PVCs matches the number of new PVCs
-    new_pvc_count=$(jq '. | length' "$new_app_pvc_info")
+    new_pvc_count=$(jq '[.[] | select(.ignored == false)] | length' "$new_app_pvc_info")
     if [ "$original_pvc_count" -ne "$new_pvc_count" ]; then
         echo -e "${red}Error: The number of original PVCs does not match the number of new PVCs.${reset}"
         return 1

@@ -54,7 +54,7 @@ update_pvc_migration_status() {
     local pvc_backup_file="${backup_path}/pvcs_original.json"
 
     # Calculate the number of original PVCs
-    original_pvs_count=$(jq '. | length' "$pvc_backup_file")
+    original_pvs_count=$(jq '[.[] | select(.ignored == false)] | length' "$pvc_backup_file")
     
     # Determine if migration should occur based on count
     if [ "$original_pvs_count" -eq 0 ]; then

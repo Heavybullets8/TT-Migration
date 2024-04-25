@@ -136,7 +136,6 @@ main() {
                         exit 1 
                     fi
                 fi
-                [[ "${migrate_pvs}" == true && $skip == true ]] && get_pvc_info
             fi
             update_or_append_variable "script_progress" "create_config_backup"
             ;&
