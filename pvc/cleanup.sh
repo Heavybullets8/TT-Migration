@@ -2,25 +2,21 @@
 
 
 destroy_new_apps_pvcs() {
+    local new_app_pvc_info="${backup_path}/pvcs_new.json"
+
+
     echo -e "${bold}Destroying the new app's PVCs...${reset}"
 
-    # Create an array to store the new PVCs
-    new_pvcs=()
-    
-    # Read the PVC info from the pvc_info array and store the new PVCs in the new_pvcs array
-    for line in "${pvc_info[@]}"; do
-        pvc_and_volume=$(echo "${line}" | awk '{print $1 "," $2}')
-        new_pvcs+=("${pvc_and_volume}")
-    done
-
-    if [ ${#new_pvcs[@]} -eq 0 ]; then
+    if $(jq '. | length' "$new_app_pvc_info") -eq 0; then
         echo -e "${red}Error: No new PVCs found.${reset}"
         return 1
     fi
 
-    for new_pvc in "${new_pvcs[@]}"; do
-        IFS=',' read -ra pvc_and_volume_arr <<< "$new_pvc"
-        volume_name="${pvc_and_volume_arr[1]}"
+    while read -r pvc_entry; do
+        local pvc_parent_path volume_name
+        volume_name=$(echo "$pvc_entry" | jq -r '.pvc_volume_name')
+        pvc_parent_path=$(echo "$pvc_entry" | jq -r '.pvc_parent_path')
+
         to_delete="$pvc_parent_path/${volume_name}"
 
         success=false
@@ -30,6 +26,9 @@ destroy_new_apps_pvcs() {
         while ! $success && [ $attempt_count -lt $max_attempts ]; do
             if output=$(zfs destroy "${to_delete}" 2>&1); then
                 echo -e "${green}Destroyed ${blue}${to_delete}${reset}"
+                update_json_file "$pvc_backup_file" \
+                                ".[] | select(.volume_name == \"$volume_name\")" \
+                                ".destroyed = true"
                 success=true
             else
                 if echo "$output" | grep -q "dataset is busy" && [ $attempt_count -eq 0 ]; then
@@ -46,7 +45,7 @@ destroy_new_apps_pvcs() {
             fi
             attempt_count=$((attempt_count + 1))
         done
-    done
+    done < <(jq -c '.[] | select(.destroyed | not)' "$new_app_pvc_info")
     echo
     return 0
 }

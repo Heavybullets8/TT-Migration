@@ -1,63 +1,69 @@
 #!/bin/bash
 
-
 get_pvc_info() {
-    local pvc_data workloads_data pvc
+    local version=$1
+    local pvc_backup_file="${backup_path}/pvcs_${version}.json"
+    local pvc_data workloads_data pvc_name volume mount_path pvc_parent_path
+
+    # Ensure backup directory exists
+    mkdir -p "$backup_path"
+
+    # Fetch all PVCs and workload data in JSON format
     pvc_data=$(k3s kubectl get pvc -n "$namespace" -o json)
     workloads_data=$(k3s kubectl get deployments,statefulsets,daemonsets -n "$namespace" -o json)
 
+    echo '[' > "$pvc_backup_file"
+
+    local first_entry=true
     while IFS= read -r pvc; do
-        # Check for CNPG related annotations or labels
-        if echo "$pvc" | jq -e '.metadata.labels | to_entries[] | select(.key | startswith("cnpg.io/"))' >/dev/null; then
-            # This is a CNPG PVC, skip it
-            continue
-        fi
-
-        # Skip any PVCs that have names ending with "-redis-0"
-        if echo "$pvc" | jq -r '.metadata.name' | grep -q -- '-redis-0$'; then
-            # This is a Redis PVC, skip it
-            continue
-        fi
-
-        local pvc_name volume mount_path
         pvc_name=$(echo "$pvc" | jq -r '.metadata.name')
         volume=$(echo "$pvc" | jq -r '.spec.volumeName')
-        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath' | head -n 1)
+        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec.volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name).containers[].volumeMounts[] | select(.name == $volume.name).mountPath' | head -n 1)
+        pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}' | tr -d '[:space:]')
 
-        if [ "$mount_path" == "null" ]; then
-            mount_path=""
+        # Format entry as JSON object and append to file, handling commas for valid JSON
+        if [ "$first_entry" = true ]; then
+            first_entry=false
+        else
+            echo ',' >> "$pvc_backup_file"
         fi
 
-        pvc_info+=("$pvc_name $volume $mount_path")
+        jq -n \
+        --arg pvc_name "$pvc_name" \
+        --arg volume "$volume" \
+        --arg mount_path "$mount_path" \
+        --arg pvc_parent_path "$pvc_parent_path" \
+        --arg original_rename_complete "false" \
+        --arg matched "false" \
+        --arg destroyed "false" \
+        '{ 
+            pvc_name: $pvc_name, 
+            pvc_volume_name: $volume, 
+            mount_path: $mount_path, 
+            pvc_parent_path: $pvc_parent_path, 
+            original_rename_complete: $original_rename_complete 
+            matched: $matched
+            destroyed: $destroyed
+        }' >> "$pvc_backup_file"
+
+
     done < <(echo "$pvc_data" | jq -c '.items[]')
+
+    echo ']' >> "$pvc_backup_file"
 }
 
-get_original_pvs_count() {
-    original_pvs_count=$(k3s kubectl get pvc -n "$namespace" --no-headers -o custom-columns=NAME:.metadata.name,STATUS:.status.phase | grep -vE '(-cnpg-|-redis-0)' | grep -c 'Bound')
-    update_or_append_variable original_pvs_count "$original_pvs_count"
-}
 
-check_pvc_info_empty() {
-    if [ ${#pvc_info[@]} -eq 0 ]; then
+update_pvc_migration_status() {
+    local pvc_backup_file="${backup_path}/pvcs_original.json"
+
+    # Calculate the number of original PVCs
+    original_pvs_count=$(jq '. | length' "$pvc_backup_file")
+    
+    # Determine if migration should occur based on count
+    if [ "$original_pvs_count" -eq 0 ]; then
         migrate_pvs=false
     else
         migrate_pvs=true
     fi
 }
 
-get_pvc_parent_path() {
-    local volume_name
-    volume_name=$(echo "$pvc_info" | awk '{print $2}' | head -n 1)
-
-    pvc_path=$(k3s kubectl describe pv "$volume_name" | grep "poolname=" | awk -F '=' '{print $2}')
-
-
-    if [ -z "${pvc_path}" ]; then
-        echo -e "${red}PVC not found${reset}"
-        return 1
-    fi
-
-    pvc_parent_path="$pvc_path"
-    update_or_append_variable pvc_parent_path "$pvc_parent_path"
-    return 0
-}

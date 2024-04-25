@@ -32,13 +32,12 @@ create_app_dataset() {
         fi
     fi
     migration_path=$path
+    backup_path="/mnt/${migration_path}/backup"
     return 0
 }
 
 restore_traefik_ingress() {
     echo -e "\n${bold}Restoring Traefik ingress...${reset}"
-
-    local backup_path="/mnt/${migration_path}/backup"
     local ingress_backup_file="${backup_path}/ingress_backup.json"
 
     if [[ ! -f "$ingress_backup_file" ]]; then
@@ -76,8 +75,7 @@ restore_traefik_ingress() {
 
 
 
-create_backup_pvc() {
-    local backup_path=/mnt/${migration_path}/backup
+create_config_backup() {
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
     
     # Fetch the application configuration
@@ -136,7 +134,6 @@ create_backup_pvc() {
 }
 
 create_backup_metadata() {
-    local metadata_path=/mnt/${migration_path}/backup
     local metadata_name="metadata-backup.json"
     local chart_name catalog_train metadata_json
 
@@ -165,13 +162,12 @@ create_backup_metadata() {
                           '{chart_name: $chart_name, catalog: $catalog, catalog_train: $catalog_train}')
     
 
-    mkdir -p "$metadata_path"
-    echo "$metadata_json" > "${metadata_path}/${metadata_name}"
+    mkdir -p "$backup_path"
+    echo "$metadata_json" > "${backup_path}/${metadata_name}"
     return 0
 }
 
 create_application() {
-    local backup_path="/mnt/${migration_path}/backup"
     local metadata_name="$backup_path/metadata-backup.json"
     local backup_name="$backup_path/config-backup.json"
     local max_retries=5
