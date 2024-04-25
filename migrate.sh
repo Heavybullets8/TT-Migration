@@ -103,10 +103,10 @@ main() {
         # import_variables
         source "/mnt/$migration_path/variables.txt" 
 
-        if [[ -f "${backup_path}/pvcs_old.json" ]]; then
-            jq -c '.[] | select(((.pvc_name | test("-cnpg-"; "i")) or (.pvc_name | endswith("-redis-0"))) and .ignored == false)' "${backup_path}/pvcs_old.json" | while read -r pvc; do
+        if [[ -f "${backup_path}/pvcs_original.json" ]]; then
+            jq -c '.[] | select(((.pvc_name | test("-cnpg-"; "i")) or (.pvc_name | endswith("-redis-0"))) and .ignored == false)' "${backup_path}/pvcs_original.json" | while read -r pvc; do
                 pvc_name=$(echo "$pvc" | jq -r '.pvc_name')
-                update_json_file "${backup_path}/pvcs_old.json" \
+                update_json_file "${backup_path}/pvcs_original.json" \
                                 ".pvc_name == \"$pvc_name\"" \
                                 ".ignored = true"
             done
