@@ -64,7 +64,5 @@ update_json_file() {
         echo -e "${red}Failed to move updated JSON file back to original location: $file_path${reset}"
         return 1
     fi
-
-    echo -e "${green}Successfully updated JSON file at $file_path${reset}"
     return 0
 }
