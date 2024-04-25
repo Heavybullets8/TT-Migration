@@ -180,7 +180,7 @@ main() {
             if [[ "${migrate_pvs}" == true ]]; then
                 stop_app_if_needed || exit 1
                 get_pvc_info "new"
-                verify_matching_num_pvcs
+                verify_matching_num_pvcs || exit 1
             fi
             update_or_append_variable "script_progress" "destroy_new_apps_pvcs"
             ;&
