@@ -80,6 +80,19 @@ check_health() {
 
 
     #############################################
+    ################ Check Immich ###############
+    #############################################
+
+    if [[ "$chart_name" == "immich" ]]; then
+        echo -e "${red}App is Immich${reset}"
+        echo -e "Immich cannot be migrated right now due to its need for special database handling."
+        echo -e "Check back later and I might implement the special handling if I have time."
+        echo -e "Relevent github issue on their repo: ${blue}https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570${reset}"
+        return 1
+    fi
+
+
+    #############################################
     ############ Check system train #############
     #############################################
 
