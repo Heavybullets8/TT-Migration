@@ -181,19 +181,21 @@ main() {
             if [[ "${migrate_pvs}" == true ]]; then
                 stop_app_if_needed || exit 1
                 get_pvc_info "new"
-                check_pvc_info_empty
+                verify_matching_num_pvcs
             fi
-            update_or_append_variable "script_progress" "swap_pvc"
+            update_or_append_variable "script_progress" "destroy_new_apps_pvcs"
             ;&
-        swap_pvc)
+        destroy_new_apps_pvcs)
             if [[ "${migrate_pvs}" == true ]]; then
+                stop_app_if_needed || exit 1
                 destroy_new_apps_pvcs || exit 1
             fi
-            update_or_append_variable "script_progress" "rename_migration_pvcs"
+            update_or_append_variable "script_progress" "swap_pvcs"
             ;&
-        rename_migration_pvcs)
+        swap_pvcs)
             if [[ "${migrate_pvs}" == true ]]; then
-                rename_migration_pvcs || exit 1
+                stop_app_if_needed || exit 1
+                swap_pvcs || exit 1
             fi
             update_or_append_variable "script_progress" "restore_database"
             ;&

@@ -31,7 +31,7 @@ rename_original_pvcs() {
             echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"
             ((failures++))
         fi
-    done < <(jq -c '.[] | select(.original_rename_complete == false)' "$pvc_backup_file")
+    done < <(jq -c '.[] | select(.original_rename_complete == false and .ignored == false)' "$pvc_backup_file")
 
     if [[ $failures -gt 0 ]]; then
         echo -e "${red}Some PVCs failed to rename. Check logs for details.${reset}"
@@ -41,7 +41,7 @@ rename_original_pvcs() {
 }
 
 
-rename_migration_pvcs() {
+swap_pvcs() {
     local original_app_pvc_info="${backup_path}/pvcs_original.json"
     local new_app_pvc_info="${backup_path}/pvcs_new.json"
     local original_pvc_count new_pvc_count
@@ -64,8 +64,8 @@ rename_migration_pvcs() {
 
 
     match_pvcs_with_mountpoints "$original_app_pvc_info" "$new_app_pvc_info" || return 1
-    original_pvc_count=$(jq '[.[] | select(.matched == false)] | length' "$original_app_pvc_info")
-    new_pvc_count=$(jq '[.[] | select(.matched == false)] | length' "$new_app_pvc_info")
+    original_pvc_count=$(jq '[.[] | select(.matched == false and .ignored == false)] | length' "$original_app_pvc_info")
+    new_pvc_count=$(jq '[.[] | select(.matched == false and .ignored == false)] | length' "$new_app_pvc_info")
 
     if [ "$original_pvc_count" -eq 0 ]; then
         echo -e "${green}All original PVCs have been successfully renamed or matched.${reset}"
@@ -82,13 +82,11 @@ rename_migration_pvcs() {
     # Match the remaining single PVC pair
     if [ "$original_pvc_count" -eq 1 ]; then
         match_remaining_single_pvc_pair "$original_app_pvc_info" "$new_app_pvc_info" || return 1
-        echo -e "${green}All PVCs have been successfully renamed.${reset}"
         return 0
     fi
 
     # Match the remaining PVCs based on their names
     match_remaining_pvcs_by_name "$original_app_pvc_info" "$new_app_pvc_info" || return 1
 
-    echo -e "${green}All PVCs have been successfully renamed.${reset}"
     return 0
 }

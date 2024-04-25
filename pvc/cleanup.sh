@@ -7,7 +7,7 @@ destroy_new_apps_pvcs() {
 
     echo -e "${bold}Destroying the new app's PVCs...${reset}"
 
-    length=$(jq '. | length' "$new_app_pvc_info")
+    length=$(jq '[.[] | select(.ignored == false)] | length' "$new_app_pvc_info")
 
     if [ "$length" -eq 0 ]; then
         echo -e "${red}Error: No new PVCs found.${reset}"
@@ -47,7 +47,7 @@ destroy_new_apps_pvcs() {
             fi
             attempt_count=$((attempt_count + 1))
         done
-    done < <(jq -c '.[] | select(.destroyed == false)' "$new_app_pvc_info")
+    done < <(jq -c '.[] | select(.destroyed == false and .ignored == false)' "$new_app_pvc_info")
     echo
     return 0
 }

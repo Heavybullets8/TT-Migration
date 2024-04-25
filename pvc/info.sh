@@ -40,7 +40,8 @@ get_pvc_info() {
             pvc_parent_path: $pvc_parent_path, 
             original_rename_complete: false, 
             matched: false,
-            destroyed: false
+            destroyed: false,
+            ignored: false
         }' >> "$pvc_backup_file"
 
     done < <(echo "$pvc_data" | jq -c '.items[]')
@@ -63,3 +64,33 @@ update_pvc_migration_status() {
     fi
 }
 
+
+verify_matching_num_pvcs() {    
+    local original_app_pvc_info="${backup_path}/pvcs_original.json"
+    local new_app_pvc_info="${backup_path}/pvcs_new.json"
+    local original_pvc_count new_pvc_count
+
+    original_pvc_count=$(jq '[.[] | select(.ignored == false)] | length' "$original_app_pvc_info")
+    new_pvc_count=$(jq '[.[] | select(.ignored == false)] | length' "$new_app_pvc_info")
+
+    if [[ "$original_pvc_count" -gt "$new_pvc_count" ]]; then
+        echo -e "${red}Error: The number of original PVCs is greater than the number of new PVCs.${reset}"
+        echo -e "${red}Original PVC Count: ${original_pvc_count}${reset}"
+        echo -e "${red}New PVC Count: ${new_pvc_count}${reset}"
+        echo -e "Restoring now would result in possible data loss, depending on what PV's are unabled to be matched."
+        echo -e "Here are the two json files which include the data for the original and new PVCs respectively:"
+        echo -e "\n${blue}ORIGINAL PVC INFO${reset}"
+        echo -e "$original_app_pvc_info"
+        echo -e "\n${blue}NEW PVC INFO${reset}"
+        echo -e "$new_app_pvc_info"
+
+        echo -e "There is a difference of ${red}(( $original_pvc_count - $new_pvc_count ))${reset} PVCs between the two json files"
+        echo -e "Meaning you need to set the ${blue}ignored${reset} field to ${blue}true${reset} for ${red}(( $original_pvc_count - $new_pvc_count ))${reset} PVCs in the original PVC info file"
+        echo -e "Take a look at the mount paths and names for each of the PVCs, and whichever one you cannot find a match for, set the ${blue}ignored${reset} field to true for that PVC in the original PVC info file."
+        echo -e "Original PVC File Path: ${blue}$original_app_pvc_info${reset}"
+        echo -e "Once you have done that, run the script again with ${blue}--skip${reset}"
+        return 1
+    fi
+
+    return 0
+}
