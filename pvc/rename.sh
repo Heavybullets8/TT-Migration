@@ -55,14 +55,6 @@ swap_pvcs() {
         return 0
     fi
 
-    # Check if the number of original PVCs matches the number of new PVCs
-    new_pvc_count=$(jq '[.[] | select(.ignored == false)] | length' "$new_app_pvc_info")
-    if [ "$original_pvc_count" -ne "$new_pvc_count" ]; then
-        echo -e "${red}Error: The number of original PVCs does not match the number of new PVCs.${reset}"
-        return 1
-    fi
-
-
     match_pvcs_with_mountpoints "$original_app_pvc_info" "$new_app_pvc_info" || return 1
     original_pvc_count=$(jq '[.[] | select(.matched == false and .ignored == false)] | length' "$original_app_pvc_info")
     new_pvc_count=$(jq '[.[] | select(.matched == false and .ignored == false)] | length' "$new_app_pvc_info")
@@ -72,7 +64,7 @@ swap_pvcs() {
     fi
 
     # Match the remaining single PVC pair
-    if [ "$original_pvc_count" -eq 1 ]; then
+    if [[ "$original_pvc_count" -eq 1 ]] && [[ "$new_pvc_count" -eq 1 ]]; then
         match_remaining_single_pvc_pair "$original_app_pvc_info" "$new_app_pvc_info" || return 1
         return 0
     fi
