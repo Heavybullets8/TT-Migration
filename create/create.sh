@@ -137,7 +137,7 @@ create_backup_metadata() {
     local chart_name catalog_train metadata_json
 
     # Fetch metadata
-    if app_details=$(midclt call chart.release.get_instance "$appname"); then
+    if ! app_details=$(midclt call chart.release.get_instance "$appname"); then
         echo -e "${red}Failed to fetch application details.${reset}"
         exit 1
     fi
