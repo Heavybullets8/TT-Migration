@@ -78,7 +78,10 @@ create_backup_pvc() {
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
     
     # Fetch the application configuration
-    DATA=$(midclt call chart.release.get_instance "$appname" | jq '.')
+    if DATA=$(midclt call chart.release.get_instance "$appname" | jq '.'); then
+        echo -e "${red}Failed to get app config.${reset}"
+        exit 1
+    fi
     
     # Check if the application is Traefik and if the Traefik ingress integration is enabled
     if echo "$DATA" | jq -e '.chart_metadata.name == "traefik" and .config.ingress.main.integrations.traefik.enabled == true' >/dev/null; then
@@ -134,10 +137,21 @@ create_backup_metadata() {
     local chart_name catalog_train metadata_json
 
     # Fetch metadata
-    chart_name=$(midclt call chart.release.get_instance "$appname" | jq -r '.chart_metadata.name')
-    catalog=$(midclt call chart.release.get_instance "$appname" | jq -r '.catalog')
-    catalog_train=$(midclt call chart.release.get_instance "$appname" | jq -r '.catalog_train')
+    if app_details=$(midclt call chart.release.get_instance "$appname"); then
+        echo -e "${red}Failed to fetch application details.${reset}"
+        exit 1
+    fi
 
+    # Extract the required fields from the JSON output using jq
+    chart_name=$(echo "$app_details" | jq -r '.chart_metadata.name // empty')
+    catalog=$(echo "$app_details" | jq -r '.catalog // empty')
+    catalog_train=$(echo "$app_details" | jq -r '.catalog_train // empty')
+
+    # Check if necessary details are available
+    if [[ -z "$chart_name" || -z "$catalog" || -z "$catalog_train" ]]; then
+        echo -e "${red}Failed to get either the chart name, catalog, or catalog train.${reset}"
+        exit 1
+    fi
 
     # Construct JSON object with the metadata
     metadata_json=$(jq -n \

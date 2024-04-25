@@ -31,14 +31,17 @@ check_health() {
     echo -e "${bold}Checking app health...${reset}"
 
 
-
     #############################################
     ########### Check train #####################
     #############################################
 
 
     # Check the current train label and catalog of the namespace
-    output=$(midclt call chart.release.get_instance "$appname" | jq '.')
+    if ! output=$(midclt call chart.release.get_instance "$appname" | jq '.'); then
+        echo -e "${red}Failed to get the app details.${reset}"
+        echo "$output"
+        exit 1
+    fi
 
     # Extract values with jq, outputting raw strings
     catalog_train=$(echo "$output" | jq -r '.catalog_train // empty')
@@ -52,7 +55,11 @@ check_health() {
     fi
 
     # Fetch available trains for the app within the catalog
-    available_trains=$(midclt call app.available '[["name", "=", "'"$chart_name"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq -r '.[] | .train')
+    if ! available_trains=$(midclt call app.available '[["name", "=", "'"$chart_name"'"], ["catalog", "=", "'"$catalog"'"]]' '{}' | jq -r '.[] | .train'); then
+        echo -e "${red}Failed to fetch available trains${reset}"
+        echo "$available_trains"
+        exit 1
+    fi
 
     # Check for the existence of the app in the current train
     train_exists=$(echo "$available_trains" | grep -c "^$catalog_train$")
@@ -68,9 +75,27 @@ check_health() {
         echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         exit 1
     else
-        echo -e "${green}Correct train${reset}"
+        echo -e "${green}Valid train${reset}"
     fi
 
+
+    #############################################
+    ############ Check system train #############
+    #############################################
+
+    if [[ "$catalog_train" == "system" ]]; then
+    echo -e "${red}App is in the system train.${reset}"\
+        "\nSystem train applications are rarely deleted,"\
+        "\nlet alone migrated. Unless you are absolutely"\
+        "\nsure, it is recommended to skip this application."\
+        "\nDoing so can result in permanent loss of data and"\
+        "\nconfiguration for various services and applications."\
+        "\nIf you are 100% sure you want to migrate this application,"\
+        "\nyou can do so by running the script with the ${blue}--force${reset} flag."
+    exit 1
+    else
+        echo -e "${green}Not system train${reset}\n"
+    fi
 
 
     #############################################
@@ -107,23 +132,6 @@ check_health() {
         exit 1
     else
         echo -e "${green}Correct pool${reset}"
-    fi
-}
-
-check_if_system_train() {
-    echo -e "${bold}Checking if app is in the system train...${reset}"
-    if midclt call chart.release.get_instance "$appname" | jq -r '.catalog_train' | grep -qE "^system$";then
-        echo -e "${red}App is in the system train.${reset}"\
-        "\nSystem train applications are rarely deleted,"\
-        "\nlet alone migrated. Unless you are absolutely"\
-        "\nsure, it is recommended to skip this application."\
-        "\nDoing so can result in permanent loss of data and"\
-        "\nconfiguration for various services and applications."\
-        "\nIf you are 100% sure you want to migrate this application,"\
-        "\nyou can do so by running the script with the ${blue}--force${reset} flag."
-        exit 1
-    else
-        echo -e "${green}Passed${reset}\n"
     fi
 }
 

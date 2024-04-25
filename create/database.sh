@@ -30,7 +30,10 @@ restore_database() {
     fi
 
     # Retrieve the database name from the app's configuration
-    db_name=$(midclt call chart.release.get_instance "$app" | jq -r .config.cnpg.main.database)
+    if ! db_name=$(midclt call chart.release.get_instance "$app" | jq -r '.config.cnpg.main.database // empty'); then
+        echo -e "${red}Failed to get database name for $app.${reset}"
+        return 1
+    fi
 
     if [[ -z $db_name ]]; then
         echo -e "${red}Failed to get database name for $app.${reset}"
@@ -60,7 +63,10 @@ dump_database() {
     fi
 
     # Grab the database name from the app's configmap
-    db_name=$(midclt call chart.release.get_instance "$app" | jq .config.cnpg.main.database)
+    if ! db_name=$(midclt call chart.release.get_instance "$app" | jq -r '.config.cnpg.main.database // empty'); then
+        echo -e "${red}Failed to get database name for $app.${reset}"
+        return 1
+    fi
 
     if [[ -z $db_name ]]; then
         echo -e "${red}Failed to get database name for $app.${reset}"

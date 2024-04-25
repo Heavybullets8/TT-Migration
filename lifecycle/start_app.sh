@@ -5,10 +5,12 @@ pull_replicas() {
     app_name="$1"
 
     # First Check
-    replica_info=$(midclt call chart.release.get_instance "$app_name" | jq '.config.workload.main.replicas // .config.controller.replicas')
+    if ! replica_info=$(midclt call chart.release.get_instance "$app_name" | jq '.config.workload.main.replicas // .config.controller.replicas // empty'); then
+        return 1
+    fi
 
     # Second Check if First Check returns null or 0
-    if [[ "$replica_info" == "null" || "$replica_info" == "0" ]]; then
+    if [[ -z "$replica_info"  || "$replica_info" == "0" ]]; then
         replica_info=$(k3s kubectl get deployments -n "ix-$app_name" --selector=app.kubernetes.io/instance="$app_name" -o=jsonpath='{.items[*].spec.replicas}{"\n"}')
         # Replace 0 with 1
         replica_info=$(echo "$replica_info" | awk '{if ($1 == 0) $1 = 1; print $1}')
@@ -31,7 +33,10 @@ start_app(){
 
     if [[ $output == *"${app_name},stopAll-"* ]]; then
 
-        latest_version=$(midclt call chart.release.get_instance "$app_name" | jq -r ".chart_metadata.version")
+        if ! latest_version=$(midclt call chart.release.get_instance "$app_name" | jq -r ".chart_metadata.version // empty"); then
+            return 1
+        fi
+
         if [[ -z "$latest_version" ]]; then
             return 1
         fi

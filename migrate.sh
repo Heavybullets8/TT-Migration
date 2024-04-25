@@ -107,7 +107,6 @@ main() {
         start)
             prompt_app_name
             if [[ "${force}" == false ]]; then
-                check_if_system_train
                 check_health
             fi
             check_for_db
