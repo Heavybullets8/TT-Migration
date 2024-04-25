@@ -94,7 +94,7 @@ check_health() {
         "\nyou can do so by running the script with the ${blue}--force${reset} flag."
         return 1
     else
-        echo -e "${green}Not system train${reset}\n"
+        echo -e "${green}Not system train${reset}"
     fi
 
 
@@ -105,7 +105,7 @@ check_health() {
     # Perform the empty edit to check the application health
     if output=$(cli -c "app chart_release update chart_release=\"$appname\" values={}" 2>&1); then
         # If the command succeeded, print nothing
-        echo -e "${green}Passed empty edit${reset}\n"
+        echo -e "${green}Passed empty edit${reset}"
     else
         # If the command failed, print the error output and advice
         echo -e "${red}Failed${reset}"
@@ -131,7 +131,7 @@ check_health() {
         echo -e "${red}You need to change the dataset of the ${blue}$openebs_pool${red} to a dataset in the ${blue}$ix_apps_pool${red}.${reset}"
         return 1
     else
-        echo -e "${green}Correct pool${reset}"
+        echo -e "${green}Correct pool${reset}\n"
     fi
     return 0
 }

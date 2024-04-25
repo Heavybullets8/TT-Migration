@@ -71,7 +71,7 @@ delete_original_app() {
         echo -e "Prior to doing either of those, please check with a support member to see if it is necessary."
         return 1
     else
-        echo -e "${green}Success${reset}"
+        echo -e "${green}Success${reset}\n"
     fi
     return 0
 }
