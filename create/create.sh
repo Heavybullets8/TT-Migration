@@ -78,7 +78,7 @@ create_backup_pvc() {
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
     
     # Fetch the application configuration
-    if DATA=$(midclt call chart.release.get_instance "$appname" | jq '.'); then
+    if ! DATA=$(midclt call chart.release.get_instance "$appname" | jq '.'); then
         echo -e "${red}Failed to get app config.${reset}"
         exit 1
     fi
