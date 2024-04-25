@@ -7,6 +7,7 @@ get_pvc_info() {
 
     # Ensure backup directory exists
     mkdir -p "$backup_path"
+    touch "$pvc_backup_file"
 
     # Fetch all PVCs and workload data in JSON format
     if ! pvc_data=$(k3s kubectl get pvc -n "$namespace" -o json); then
