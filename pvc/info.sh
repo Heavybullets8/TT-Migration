@@ -9,8 +9,15 @@ get_pvc_info() {
     mkdir -p "$backup_path"
 
     # Fetch all PVCs and workload data in JSON format
-    pvc_data=$(k3s kubectl get pvc -n "$namespace" -o json)
-    workloads_data=$(k3s kubectl get deployments,statefulsets,daemonsets -n "$namespace" -o json)
+    if ! pvc_data=$(k3s kubectl get pvc -n "$namespace" -o json); then
+        echo -e "${red}Error: Failed to fetch PVCs.${reset}"
+        return 1
+    fi
+
+    if ! workloads_data=$(k3s kubectl get deployments,statefulsets,daemonsets -n "$namespace" -o json); then
+        echo -e "${red}Error: Failed to fetch workloads.${reset}"
+        return 1
+    fi
 
     echo '[' > "$pvc_backup_file"
 

@@ -113,7 +113,7 @@ main() {
             check_for_db
             create_migration_dataset || exit 1
             create_app_dataset || exit 1
-            get_pvc_info "original"
+            get_pvc_info "original" || exit 1
             update_pvc_migration_status
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
@@ -179,7 +179,7 @@ main() {
         new_apps_pvcs)
             if [[ "${migrate_pvs}" == true ]]; then
                 stop_app_if_needed || exit 1
-                get_pvc_info "new"
+                get_pvc_info "new" || exit 1
                 verify_matching_num_pvcs || exit 1
             fi
             update_or_append_variable "script_progress" "destroy_new_apps_pvcs"
