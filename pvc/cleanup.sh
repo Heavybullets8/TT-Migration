@@ -26,7 +26,7 @@ destroy_new_apps_pvcs() {
         while ! $success && [ $attempt_count -lt $max_attempts ]; do
             if output=$(zfs destroy "${to_delete}" 2>&1); then
                 echo -e "${green}Destroyed ${blue}${to_delete}${reset}"
-                update_json_file "$pvc_backup_file" \
+                update_json_file "$new_app_pvc_info" \
                                 ".volume_name == \"$volume_name\"" \
                                 ".destroyed = true"
                 success=true
