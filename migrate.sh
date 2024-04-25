@@ -111,10 +111,10 @@ main() {
                 check_health || exit 1
             fi
             check_for_db
-            get_pvc_info "original"
-            update_pvc_migration_status
             create_migration_dataset || exit 1
             create_app_dataset || exit 1
+            get_pvc_info "original"
+            update_pvc_migration_status
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
             update_or_append_variable "migrate_db" "${migrate_db}"
