@@ -3,11 +3,13 @@
 
 destroy_new_apps_pvcs() {
     local new_app_pvc_info="${backup_path}/pvcs_new.json"
-
+    local length
 
     echo -e "${bold}Destroying the new app's PVCs...${reset}"
 
-    if $(jq '. | length' "$new_app_pvc_info") -eq 0; then
+    length=$(jq '. | length' "$new_app_pvc_info")
+
+    if [ "$length" -eq 0 ]; then
         echo -e "${red}Error: No new PVCs found.${reset}"
         return 1
     fi
