@@ -18,7 +18,7 @@ get_pvc_info() {
     while IFS= read -r pvc; do
         pvc_name=$(echo "$pvc" | jq -r '.metadata.name')
         volume=$(echo "$pvc" | jq -r '.spec.volumeName')
-        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec.volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name).containers[].volumeMounts[] | select(.name == $volume.name).mountPath' | head -n 1)
+        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath' | head -n 1)
         pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}')
 
         # Format entry as JSON object and append to file, handling commas for valid JSON
