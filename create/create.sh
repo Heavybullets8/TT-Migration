@@ -226,17 +226,33 @@ wait_for_pvcs() {
 
     echo -e "${bold}Waiting for PVCs to be ready...${reset}"
     while [[ $elapsed_time -lt $max_wait ]]; do
-        local bound_pvcs
-        bound_pvcs=$(k3s kubectl get pvc -n "$namespace" --no-headers | grep -c 'Bound')
+        local pvc_output
+        local bound_pvcs non_bound_pvcs
         
-        if [[ $bound_pvcs -ge $original_pvs_count ]]; then
+        # Get PVC status and count bound and non-bound PVCs
+        pvc_output=$(k3s kubectl get pvc -n "$namespace" --no-headers)
+        
+        # Check if there are no resources found
+        if [[ $pvc_output == "No resources found"* ]]; then
+            echo -e "${yellow}Notice: No PVCs found in namespace ${namespace}.${reset}"
+            sleep 5
+            continue
+        fi
+
+        bound_pvcs=$(echo "$pvc_output" | grep -c 'Bound')
+        non_bound_pvcs=$(echo "$pvc_output" | grep -v 'Bound' | grep -c '\bpvc-')
+
+        if [[ $bound_pvcs -ge 1 && $non_bound_pvcs -eq 0 ]]; then
             echo -e "${green}Success${reset}"
             return 0
+        elif [[ $non_bound_pvcs -gt 0 ]]; then
+            echo -e "${yellow}Notice: There are still $non_bound_pvcs PVC(s) not bound. Waiting...${reset}"
         else
-            sleep $interval
-            elapsed_time=$((elapsed_time + interval))
-            echo "Waiting... ${elapsed_time}s elapsed."
+            echo "Waiting... ${elapsed_time}s elapsed. Bound PVCs: $bound_pvcs"
         fi
+
+        sleep $interval
+        elapsed_time=$((elapsed_time + interval))
     done
 
     echo -e "${red}Error:${reset} Not all PVCs for $appname are bound after ${max_wait} seconds."
