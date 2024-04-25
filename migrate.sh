@@ -120,11 +120,6 @@ main() {
                                 ".ignored = true"
             done
         fi
-
-        update_json_file "$new_app_pvc_info" \
-                         ".pvc_name == \"$new_pvc_name\"" \
-                         ".matched = true"
-
     fi
 
     case $script_progress in
