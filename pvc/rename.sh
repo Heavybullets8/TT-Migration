@@ -68,16 +68,8 @@ swap_pvcs() {
     new_pvc_count=$(jq '[.[] | select(.matched == false and .ignored == false)] | length' "$new_app_pvc_info")
 
     if [ "$original_pvc_count" -eq 0 ]; then
-        echo -e "${green}All original PVCs have been successfully renamed or matched.${reset}"
-        if [ "$new_pvc_count" -eq 0 ]; then
-            echo -e "${green}All new PVCs have been successfully matched.${reset}"
-            return 0
-        else
-            echo -e "${red}There are unmatched new PVCs remaining.${reset}"
-            return 1
-        fi
+        return 0
     fi
-
 
     # Match the remaining single PVC pair
     if [ "$original_pvc_count" -eq 1 ]; then
