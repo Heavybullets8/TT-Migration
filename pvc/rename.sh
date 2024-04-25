@@ -63,7 +63,7 @@ rename_migration_pvcs() {
     fi
 
 
-#    match_pvcs_with_mountpoints "$original_app_pvc_info" "$new_app_pvc_info" || return 1
+    match_pvcs_with_mountpoints "$original_app_pvc_info" "$new_app_pvc_info" || return 1
     original_pvc_count=$(jq '[.[] | select(.matched == false)] | length' "$original_app_pvc_info")
     new_pvc_count=$(jq '[.[] | select(.matched == false)] | length' "$new_app_pvc_info")
 
@@ -80,11 +80,11 @@ rename_migration_pvcs() {
 
 
     # Match the remaining single PVC pair
-#     if [ "$original_pvc_count" -eq 1 ]; then
-#         match_remaining_single_pvc_pair "$original_app_pvc_info" "$new_app_pvc_info" || return 1
-#         echo -e "${green}All PVCs have been successfully renamed.${reset}"
-#         return 0
-#     fi
+    if [ "$original_pvc_count" -eq 1 ]; then
+        match_remaining_single_pvc_pair "$original_app_pvc_info" "$new_app_pvc_info" || return 1
+        echo -e "${green}All PVCs have been successfully renamed.${reset}"
+        return 0
+    fi
 
     # Match the remaining PVCs based on their names
     match_remaining_pvcs_by_name "$original_app_pvc_info" "$new_app_pvc_info" || return 1
