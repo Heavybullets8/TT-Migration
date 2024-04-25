@@ -29,6 +29,18 @@ get_pvc_info() {
         mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath' | head -n 1)
         pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}')
 
+        # Check for CNPG related annotations or labels
+        if echo "$pvc" | jq -e '.metadata.labels | to_entries[] | select(.key | startswith("cnpg.io/"))' >/dev/null; then
+            # This is a CNPG PVC, skip it
+            continue
+        fi
+
+        # Skip any PVCs that have names ending with "-redis-0"
+        if echo "$pvc" | jq -r '.metadata.name' | grep -q -- '-redis-0$'; then
+            # This is a Redis PVC, skip it
+            continue
+        fi
+
         # Format entry as JSON object and append to file, handling commas for valid JSON
         if [ "$first_entry" = true ]; then
             first_entry=false
