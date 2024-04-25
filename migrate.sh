@@ -175,14 +175,24 @@ main() {
             if [[ "${migrate_pvs}" == true ]]; then
                 wait_for_pvcs || exit 1
             fi
+            update_or_append_variable "script_progress" "new_apps_pvcs"
+            ;&
+        new_apps_pvcs)
+            if [[ "${migrate_pvs}" == true ]]; then
+                stop_app_if_needed || exit 1
+                get_pvc_info "new"
+                check_pvc_info_empty
+            fi
             update_or_append_variable "script_progress" "swap_pvc"
             ;&
         swap_pvc)
             if [[ "${migrate_pvs}" == true ]]; then
-                stop_app_if_needed || exit 1
-                get_pvc_info "new"
-                check_pvc_info_empty # Fix this later
                 destroy_new_apps_pvcs || exit 1
+            fi
+            update_or_append_variable "script_progress" "rename_migration_pvcs"
+            ;&
+        rename_migration_pvcs)
+            if [[ "${migrate_pvs}" == true ]]; then
                 rename_migration_pvcs || exit 1
             fi
             update_or_append_variable "script_progress" "restore_database"
