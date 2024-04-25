@@ -95,6 +95,9 @@ main() {
         auto_update_script
     fi
 
+    echo -e "\n${yellow}You are on the legacy branch, don't forget to switch back to the main branch once you are done finishing your in-progress legacy migrations!:${reset}"
+    echo -e "${blue}git checkout main${reset}\n"
+
     find_apps_pool || exit 1
 
     if [[ "${skip}" == true ]]; then
