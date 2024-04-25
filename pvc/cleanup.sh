@@ -56,9 +56,14 @@ cleanup_datasets() {
     local base_path="${ix_apps_pool}/migration"
     local app_dataset="${migration_path}"
 
+    if [ -z "$app_dataset" ]; then
+        echo -e "${red}Error: No app dataset provided.${reset}"
+        return 1
+    fi
+
     # Remove the app dataset
     echo -e "${bold}Cleaning up app dataset...${reset}"
-    if zfs destroy "${app_dataset}"; then
+    if zfs destroy -r "${app_dataset}"; then
         echo -e "${green}Removed app dataset: ${blue}${app_dataset}${reset}"
     else
         echo -e "${red}Error: Failed to remove app dataset: ${blue}${app_dataset}${reset}"
