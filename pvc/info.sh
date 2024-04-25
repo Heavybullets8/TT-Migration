@@ -33,20 +33,15 @@ get_pvc_info() {
         --arg volume "$volume" \
         --arg mount_path "$mount_path" \
         --arg pvc_parent_path "$pvc_parent_path" \
-        --arg original_rename_complete "false" \
-        --arg matched "false" \
-        --arg destroyed "false" \
         '{ 
             pvc_name: $pvc_name, 
             pvc_volume_name: $volume, 
             mount_path: $mount_path, 
             pvc_parent_path: $pvc_parent_path, 
-            original_rename_complete: $original_rename_complete, 
-            matched: $matched,
-            destroyed: $destroyed
+            original_rename_complete: false, 
+            matched: false,
+            destroyed: false
         }' >> "$pvc_backup_file"
-
-
 
     done < <(echo "$pvc_data" | jq -c '.items[]')
 

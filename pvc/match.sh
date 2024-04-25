@@ -9,8 +9,8 @@ match_pvcs_with_mountpoints() {
     local failed=0
 
     # Fetch all PVCs from both files that have not been renamed yet
-    original_pvcs=$(jq -c '.[] | select(.matched == "false")' "$original_pvc_info_file")
-    new_pvcs=$(jq -c '.[] | select(.matched == "false")' "$new_pvc_info_file")
+    original_pvcs=$(jq -c '.[] | select(.matched == false)' "$original_pvc_info_file")
+    new_pvcs=$(jq -c '.[] | select(.matched == false)' "$new_pvc_info_file")
 
     # Iterate over each original PVC and attempt to match with new PVCs based on mount points
     while read -r original_pvc; do
@@ -65,8 +65,8 @@ match_remaining_single_pvc_pair() {
     local new_app_pvc_info="$2"
 
     # Fetch the remaining unmatched PVC from each file
-    local original_pvc=$(jq -c '.[] | select(.matched == "false")' "$original_app_pvc_info")
-    local new_pvc=$(jq -c '.[] | select(.matched == "false")' "$new_app_pvc_info")
+    local original_pvc=$(jq -c '.[] | select(.matched == false)' "$original_app_pvc_info")
+    local new_pvc=$(jq -c '.[] | select(.matched == false)' "$new_app_pvc_info")
 
     local original_pvc_name=$(echo "$original_pvc" | jq -r '.pvc_name')
     local new_pvc_name=$(echo "$new_pvc" | jq -r '.pvc_name')
@@ -133,8 +133,8 @@ match_remaining_pvcs_by_name() {
     local new_app_pvc_info="$2"
 
     # Fetch the remaining unmatched PVCs from each file
-    local original_pvcs=$(jq -c '.[] | select(.matched == "false")' "$original_app_pvc_info")
-    local new_pvcs=$(jq -c '.[] | select(.matched == "false")' "$new_app_pvc_info")
+    local original_pvcs=$(jq -c '.[] | select(.matched == false)' "$original_app_pvc_info")
+    local new_pvcs=$(jq -c '.[] | select(.matched == false)' "$new_app_pvc_info")
 
     echo "$original_pvcs" | while IFS= read -r original_pvc; do
         local original_pvc_name=$(echo "$original_pvc" | jq -r '.pvc_name')

@@ -31,7 +31,7 @@ rename_original_pvcs() {
             echo -e "${red}Error: Failed to rename ${old_pvc_name} to ${new_pvc_name}${reset}"
             ((failures++))
         fi
-    done < <(jq -c '.[] | select(.original_rename_complete == "false")' "$pvc_backup_file")
+    done < <(jq -c '.[] | select(.original_rename_complete == false)' "$pvc_backup_file")
 
     if [[ $failures -gt 0 ]]; then
         echo -e "${red}Some PVCs failed to rename. Check logs for details.${reset}"
@@ -64,8 +64,8 @@ rename_migration_pvcs() {
 
 
     match_pvcs_with_mountpoints "$original_app_pvc_info" "$new_app_pvc_info" || return 1
-    original_pvc_count=$(jq '[.[] | select(.matched == "false")] | length' "$original_app_pvc_info")
-    new_pvc_count=$(jq '[.[] | select(.matched == "false")] | length' "$new_app_pvc_info")
+    original_pvc_count=$(jq '[.[] | select(.matched == false)] | length' "$original_app_pvc_info")
+    new_pvc_count=$(jq '[.[] | select(.matched == false)] | length' "$new_app_pvc_info")
 
     if [ "$original_pvc_count" -eq 0 ]; then
         echo -e "${green}All original PVCs have been successfully renamed or matched.${reset}"
