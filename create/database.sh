@@ -41,7 +41,7 @@ restore_database() {
     fi
 
     # get database role
-    if ! db_role=$(k3s kubectl get secret "$app-cnpg-main-user" -n "ix-$app" -o json | jq -r '.data.username // empty' | base64 --decode); then
+    if ! db_role=$(k3s kubectl get secrets -n "ix-${app}" -o json | jq -r '.items[] | select(.metadata.name | endswith("-cnpg-main-user")) | select(.data.username and .data.password) | .data.username // empty' | base64 --decode); then
         db_role=$db_name
     fi
 
