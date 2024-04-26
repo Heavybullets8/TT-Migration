@@ -40,8 +40,13 @@ restore_database() {
         return 1
     fi
 
+    # get database role
+    if ! db_role=$(k3s kubectl get secret "$app-cnpg-main-user" -n "ix-$app" -o json | jq -r '.data.username // empty' | base64 --decode); then
+        db_role=$db_name
+    fi
+
     # Restore the database from the dump file
-    if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- pg_restore --role="$db_name" -d "$db_name" --clean --if-exists --no-owner --no-privileges -1 < "$dump_file"; then
+    if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- pg_restore --role="$db_role" -d "$db_name" --clean --if-exists --no-owner --no-privileges -1 < "$dump_file"; then
         echo -e "${green}Success\n${reset}"
         return 0
     else
