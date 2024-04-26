@@ -26,6 +26,31 @@ check_if_app_exists() {
     cli -m csv -c 'app chart_release query name' | tr -d " \t\r" | grep -qE "^${appname}$" 
 }
 
+check_sql_dump_exists() {
+    local heavy_path=$(find_latest_heavy_script_dir)
+    echo -e "${bold}Checking if SQL dump exists...${reset}"
+
+    if [[ $heavy_path ]]; then
+        local dump_path="$heavy_path/database_dumps/$appname"
+        if [[ -d $dump_path && $(ls -A $dump_path) ]]; then
+            echo -e "${green}SQL dumps found for ${appname} at ${dump_path}\n"${reset}
+            echo -e "${yellow}Please review the backup you would like to restore."${reset}
+            echo -e "${yellow}Replace the file name with the backup of your choice and copy using the command below:\n"${reset}
+            echo -e "${blue}cp ${dump_path}/${appname}_YYYY_MM_DD_HH_mm_ss.sql.gz ${backup_path}/backup/ \n"${reset}
+            echo -e "${yellow}After copying the database file re-run the script with the ${blue}--skip${yellow} flag, then select the manual option again."${reset}
+            return 0
+        else
+            echo -e "${red}No SQL dumps found for ${appname}\n"${reset}
+            echo -e "${yellow}If you have a database file that we did not find, provide the database file in the backup folder ${blue}$backup_path${yellow} and re-run the script with the ${blue}--skip${yellow} flag, then select the manual option again."${reset}
+            return 1
+        fi  
+    else
+        echo -e "${red}No SQL dumps found for ${appname}\n"${reset}
+        echo -e "${yellow}If you have a database file that we did not find, provide the database file in the backup folder ${blue}$backup_path${yellow} and re-run the script with the ${blue}--skip${yellow} flag, then select the manual option again."${reset}
+        return 1
+    fi
+}
+
 check_health() {
     local chart_name catalog catalog_train output train_exists
     echo -e "${bold}Checking app health...${reset}"
