@@ -150,7 +150,7 @@ main() {
                     if search_for_database_file "$backup_path" "${appname}.sql"; then
                         echo -e "${green}Database file found. ${reset}" 
                     else
-                        echo -e "${yellow}Database file not found. Please provide the database file in the backup folder ${blue}$backup_path${yellow} and re-run the script with the ${blue}--skip${yellow} flag, then select the manual option again.${reset}"
+                        check_sql_dump_exists
                         exit 1 
                     fi
                 fi
