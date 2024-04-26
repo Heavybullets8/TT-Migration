@@ -36,7 +36,7 @@ check_sql_dump_exists() {
             echo -e "${green}SQL dumps found for ${appname} at ${dump_path}\n"${reset}
             echo -e "${yellow}Please review the backup you would like to restore."${reset}
             echo -e "${yellow}Replace the file name with the backup of your choice and copy using the command below:\n"${reset}
-            echo -e "${blue}cp ${dump_path}/${appname}_YYYY_MM_DD_HH_mm_ss.sql.gz ${backup_path}/backup/ \n"${reset}
+            echo -e "${blue}cp ${dump_path}/${appname}_YYYY_MM_DD_HH_mm_ss.sql.gz ${backup_path}/ \n"${reset}
             echo -e "${yellow}After copying the database file re-run the script with the ${blue}--skip${yellow} flag, then select the manual option again."${reset}
             return 0
         else
