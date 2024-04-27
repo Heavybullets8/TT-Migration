@@ -170,11 +170,11 @@ create_backup_metadata() {
 create_application() {
     local metadata_name="$backup_path/metadata-backup.json"
     local backup_name="$backup_path/config-backup.json"
-    local max_retries=5
+    local max_retries=3 
     local retry_count=0
     local job_state
     local job_id
-    
+
     echo -e "${bold}Creating the application...${reset}"
 
     metadata=$(cat "${metadata_path}/${metadata_name}")
@@ -194,14 +194,14 @@ create_application() {
     
     while [[ $retry_count -lt $max_retries ]]; do
         job_id=$(midclt call chart.release.create "$command" | jq -r '.')
-        
+
         while true; do
             job_state=$(midclt call core.get_jobs '[["id", "=", '"$job_id"']]' | jq -r '.[0].state')
             if [[ $job_state == "SUCCESS" ]]; then
                 echo -e "${green}Success${reset}\n"
                 return 0
             elif [[ $job_state == "FAILED" ]]; then
-                echo -e "${yellow}Retrying...${reset}"
+                echo -e "${yellow}Retrying Attempt ($((retry_count+1))/$max_retries)...${reset}"
                 break
             else
                 sleep 10  # Check again in 10 seconds
@@ -217,6 +217,7 @@ create_application() {
     echo -e "$(midclt call core.get_jobs '[["id", "=", '"$job_id"']]' | jq -r '.')"
     return 1
 }
+
 
 wait_for_pvcs() {
     local namespace="ix-$appname"
