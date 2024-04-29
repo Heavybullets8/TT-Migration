@@ -20,6 +20,7 @@ export cnpgpvc=false
 export script_progress="start"
 export traefik_ingress_integration_enabled=false
 export backup_path
+export chart_name
 
 # flags
 export force=false
@@ -124,7 +125,7 @@ main() {
 
     case $script_progress in
         start)
-            prompt_app_name
+            prompt_app_name || exit 1
             if [[ "${force}" == false ]]; then
                 check_health || exit 1
             fi
@@ -139,6 +140,7 @@ main() {
             update_or_append_variable "migrate_pvs" "${migrate_pvs}"
             update_or_append_variable original_pvs_count "$original_pvs_count"
             update_or_append_variable "backup_path" "${backup_path}"
+            update_or_append_variable "chart_name" "${chart_name}"
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
         backup_cnpg_databases)

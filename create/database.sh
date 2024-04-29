@@ -45,13 +45,24 @@ restore_database() {
         db_role=$db_name
     fi
 
-    # Restore the database from the dump file
-    if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- pg_restore --role="$db_role" -d "$db_name" --clean --if-exists --no-owner --no-privileges -1 < "$dump_file"; then
-        echo -e "${green}Success\n${reset}"
-        return 0
-    else
-        echo -e "${red}Failed to restore database.\n${reset}"
-        return 1
+    # Restore
+    if [[ $chart_name == "immich" ]]; then
+        sed -i "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" "$dump_file"
+        if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- psql < "$dump_file"; then
+            echo -e "${green}Success\n${reset}"
+            return 0
+        else
+            echo -e "${red}Failed to restore database.\n${reset}"
+            return 1
+        fi
+    else 
+        if k3s kubectl exec -n "ix-$app" -i -c postgres "$cnpg_pod" -- pg_restore --role="$db_role" -d "$db_name" --clean --if-exists --no-owner --no-privileges -1 < "$dump_file"; then
+            echo -e "${green}Success\n${reset}"
+            return 0
+        else
+            echo -e "${red}Failed to restore database.\n${reset}"
+            return 1
+        fi
     fi
 }
 
@@ -81,11 +92,24 @@ dump_database() {
     # Create the output directory if it doesn't exist
     mkdir -p "${output_dir}"
 
-    # Perform pg_dump and save output to a file
-    if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- bash -c "pg_dump -Fc -d $db_name" > "$output_file"; then
-        return 0
+
+    # Backup
+    if [[ $chart_name == "immich" ]]; then
+        if k3s kubectl exec -n "ix-$app" -c "postgres" "$cnpg_pod" -- pg_dumpall --clean --if-exists > "$output_file"; then
+            sed -i "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" "$output_file"
+            return 0
+        else
+            rm -f "$output_file" &> /dev/null
+            return 1
+        fi
     else
-        return 1
+        # Perform pg_dump and save output to a file
+        if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- bash -c "pg_dump -Fc -d $db_name" > "$output_file"; then
+            return 0
+        else
+            rm -f "$output_file" &> /dev/null
+            return 1
+        fi
     fi
 }
 

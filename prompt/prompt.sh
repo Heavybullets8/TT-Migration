@@ -36,6 +36,7 @@ prompt_app_name() {
             echo -e "${yellow}\"${appname}\" is not valid. Please enter a valid name.${reset}"
         fi
     done
+    return 0
 }
 
 prompt_rename() {
