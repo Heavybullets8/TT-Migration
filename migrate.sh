@@ -125,7 +125,7 @@ main() {
 
     case $script_progress in
         start)
-            prompt_app_name
+            prompt_app_name || exit 1
             if [[ "${force}" == false ]]; then
                 check_health || exit 1
             fi
