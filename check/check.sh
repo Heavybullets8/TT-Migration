@@ -150,8 +150,11 @@ check_health() {
     ############# Empty edit ####################
     #############################################
 
+    local values  
+    values=$(midclt call chart.release.get_instance "$appname" | jq -c '.config')
+
     # Perform the empty edit to check the application health
-    if output=$(cli -c "app chart_release update chart_release=\"$appname\" values={}" 2>&1); then
+    if output=$(cli -c "app chart_release update chart_release=\"$appname\" values=$values" 2>&1); then
         # If the command succeeded, print nothing
         echo -e "${green}Passed empty edit${reset}"
     else
