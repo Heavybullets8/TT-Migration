@@ -47,7 +47,7 @@ restore_database() {
 
     # Restore
     if [[ $chart_name == "immich" ]]; then
-        if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- psql --username="$db_role" < "$output_file"; then
+        if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- psql --username="$db_role" < "$dump_file"; then
             echo -e "${green}Success\n${reset}"
             return 0
         else
@@ -95,11 +95,11 @@ dump_database() {
 
     # Backup
     if [[ $chart_name == "immich" ]]; then
-        if k3s kubectl exec -n "ix-$app" -c "postgres" "$cnpg_pod" -- pg_dumpall --clean --if-exists > "$dump_file"; then
+        if k3s kubectl exec -n "ix-$app" -c "postgres" "$cnpg_pod" -- pg_dumpall --clean --if-exists > "$output_file"; then
             sed -i "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" "$dump_file"
             return 0
         else
-            rm -f "$dump_file" &> /dev/null
+            rm -f "$output_file" &> /dev/null
             return 1
         fi
     fi
