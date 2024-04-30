@@ -115,19 +115,6 @@ check_health() {
 
 
     #############################################
-    ################ Check Immich ###############
-    #############################################
-
-    # if [[ "$chart_name" == "immich" ]]; then
-    #     echo -e "${red}App is Immich${reset}"
-    #     echo -e "Immich cannot be migrated right now due to its need for special database handling."
-    #     echo -e "Check back later and I might implement the special handling if I have time."
-    #     echo -e "Relevent github issue on their repo: ${blue}https://github.com/immich-app/immich/issues/5630#issuecomment-1866581570${reset}"
-    #     return 1
-    # fi
-
-
-    #############################################
     ############ Check system train #############
     #############################################
 
@@ -151,7 +138,11 @@ check_health() {
     #############################################
 
     local values  
-    values=$(midclt call chart.release.get_instance "$appname" | jq -c '.config')
+    if ! values=$(midclt call chart.release.get_instance "$appname" | jq -c '.config'); then
+        echo -e "${red}Failed to get the app config.${reset}"
+        echo "$output"
+        return 1
+    fi
 
     # Perform the empty edit to check the application health
     if output=$(cli -c "app chart_release update chart_release=\"$appname\" values=$values" 2>&1); then
