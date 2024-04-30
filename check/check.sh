@@ -171,16 +171,37 @@ check_health() {
     #############################################
     ############# Check same pool ###############
     #############################################
-    local openebs_pool
-    openebs_pool=$(k3s kubectl get storageclass -o=json | jq -r '.items[] | select(.metadata.annotations."storageclass.kubernetes.io/is-default-class" == "true") | .parameters.poolname | split("/")[0]')
+    local openebs_pool output_lines
 
+    if ! output=$(k3s kubectl get storageclass -o=json | jq -r '.items[] | select(.metadata.annotations."storageclass.kubernetes.io/is-default-class" == "true") | .parameters.poolname'); then
+        echo -e "${red}Error: Failed to get default storage class location${reset}"
+        return 1
+    fi
+
+    if [[ -z "$output" ]]; then
+        echo -e "${red}Error: No default storage class found or poolname is empty${reset}"
+        return 1
+    fi
+
+    output_lines=$(echo "$output" | wc -l)
+    if [[ "$output_lines" -gt 1 ]]; then
+        echo -e "${red}Error: Multiple default pools found, expecting only one${reset}"
+        echo -e "Output:"
+        echo -e "$output"
+        return 1
+    fi
+
+    openebs_pool=$(echo "$output" | awk -F '/' '{print $1}')
+
+    # Compare pools
     if [[ "$ix_apps_pool" != "$openebs_pool" ]]; then
-        echo -e "${red}OpenEBS dataset location: ${blue}$openebs_pool${red} does not match the location of the ix-applications pool: ${red}$ix_apps_pool${reset}"
+        echo -e "${red}OpenEBS dataset location: ${blue}$openebs_pool${red} does not match the location of the ix-applications pool: ${blue}$ix_apps_pool${red}.${reset}"
         echo -e "${red}You need to change the dataset of the ${blue}$openebs_pool${red} to a dataset in the ${blue}$ix_apps_pool${red}.${reset}"
         return 1
     else
         echo -e "${green}Correct pool${reset}\n"
     fi
+
     return 0
 }
 
