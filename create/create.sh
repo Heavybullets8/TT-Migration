@@ -184,7 +184,7 @@ create_application() {
     DATA=$(cat "${metadata_path}/${backup_name}")
 
     # Construct and execute the reinstallation command, capturing the job ID
-    if [[ "$latest_version" == false ]]; then
+    if [[ "$latest_version" == false && -n "$version" ]]; then
         # install the current chart version
         command=$(jq -n \
                     --arg release_name "$appname" \

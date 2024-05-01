@@ -68,6 +68,8 @@ script_help() {
     echo -e "${bold}Options:${reset}"
     echo -e "  ${blue}-s${reset}, ${blue}--skip${reset}       Continue with a previously started migration"
     echo -e "  ${blue}-n${reset}, ${blue}--no-update${reset}  Do not check for script updates"
+    echo -e "\n  ${red}Any use of the flags below results in you not being supported.${reset}"
+    echo -e "  ${blue}-l${reset}, ${blue}--latest-version${reset}  Migrate to the latest version"
     echo -e "  ${blue}--force${reset}               Force migration without checking for db pods"
 }
 

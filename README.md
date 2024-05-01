@@ -13,11 +13,17 @@ bash migration.sh
 
 ### Options
 
-| Option        | Short Form | Description                                                  |
-|---------------|------------|--------------------------------------------------------------|
-| --skip        | -s         | Continue with a previously started migration                 |
-| --no-update   | -n         | Do not check for script updates                              |
-| --force       |            | Force migration without checking for db pods                 |
+
+| Option            | Short Form | Description                                                  |
+|-------------------|------------|--------------------------------------------------------------|
+| `--skip`          | `-s`       | Continue with a previously started migration.                |
+| `--no-update`     | `-n`       | Do not check for script updates.                             |
+| `--force`         |            | Force migration without checking for the presence of database pods. |
+| `--latest-version`| `-l`       | Migrate to the latest version of the software. Note: using this option means you will not be supported. |
+
+#### Important Notes
+
+- Usage of `--latest-version` or `--force` flags might impact your eligibility for support. Any use of these flags will result in you not being supported. Please use these options with caution.
 
 ---
 
