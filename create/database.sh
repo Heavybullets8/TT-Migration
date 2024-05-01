@@ -29,9 +29,8 @@ restore_database() {
         return 1
     fi
 
-    if [[ $chart_name == "shiori" ]]; then
-        db_name="app"
-    elif ! db_name=$(midclt call chart.release.get_instance "$app" | jq -r '.config.cnpg.main.database // empty'); then
+
+    if ! db_name=$(k3s kubectl get secrets -n "ix-${app}" -o json | jq -r '.items[] | select(.metadata.name | endswith("-cnpg-main-urls")) | select(.data.host and .data.std) | .data.std // empty' | base64 --decode | awk -F '/' '{print $NF}'); then
         echo -e "${red}Failed to get database name for $app.${reset}"
         return 1
     fi
@@ -80,9 +79,7 @@ dump_database() {
     fi
 
     # Grab the database name from the app's configmap
-    if [[ $chart_name == "shiori" ]]; then
-        db_name="app"
-    elif ! db_name=$(midclt call chart.release.get_instance "$app" | jq -r '.config.cnpg.main.database // empty'); then
+    if ! db_name=$(k3s kubectl get secrets -n "ix-${app}" -o json | jq -r '.items[] | select(.metadata.name | endswith("-cnpg-main-urls")) | select(.data.host and .data.std) | .data.std // empty' | base64 --decode | awk -F '/' '{print $NF}'); then
         echo -e "${red}Failed to get database name for $app.${reset}"
         return 1
     fi
