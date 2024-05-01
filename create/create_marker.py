@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 def create_marker(username, app_name, namespace, backup_path, chart_name, **kwargs):
-    timestamp = datetime.now(datetime.timezone.utc).isoformat()
+    timestamp = datetime.utcnow().isoformat() 
     states = json.dumps(kwargs)  
     chart_name = chart_name if chart_name else "EMPTY"
     encoded_backup_path = base64.urlsafe_b64encode(backup_path.encode()).decode().rstrip('=')
