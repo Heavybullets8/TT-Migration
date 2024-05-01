@@ -143,7 +143,7 @@ main() {
             update_or_append_variable original_pvs_count "$original_pvs_count"
             update_or_append_variable "backup_path" "${backup_path}"
             update_or_append_variable "chart_name" "${chart_name}"
-            python3 create_marker.py "$USER" "$backup_path" $force $outdated $deploying
+            python3 create/create_marker.py "$USER" "$backup_path" $force $outdated $deploying || exit 1
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
         backup_cnpg_databases)
