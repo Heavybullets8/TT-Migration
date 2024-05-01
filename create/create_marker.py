@@ -2,22 +2,18 @@ import os
 import secrets
 import base64
 import hashlib
-import time
 import json
 from datetime import datetime
 
 def create_marker(username, app_name, namespace, backup_path, chart_name, **kwargs):
-    timestamp = datetime.utcnow().isoformat() 
+    timestamp = datetime.now(datetime.UTC).isoformat() 
     states = json.dumps(kwargs)  
-    
-    encoded_backup_path = base64.urlsafe_b64encode(backup_path.encode()).decode()
-    secret_component = secrets.token_urlsafe(16)  # A secret component to add complexity
-    components = f"{timestamp}:{username}:{app_name}:{namespace}:{encoded_backup_path}:{chart_name}:{secret_component}"
-    
-    combined_hash = hashlib.sha256(components.encode()).hexdigest()
-    
-    marker_content = f"{combined_hash}:{timestamp}:{username}:{app_name}:{namespace}:{encoded_backup_path}:{chart_name}:{states}"
-    
+    chart_name = chart_name if chart_name else "EMPTY"
+    encoded_backup_path = base64.urlsafe_b64encode(backup_path.encode()).decode().rstrip('=')
+    secret_component = secrets.token_urlsafe(16)  
+    components = f"{timestamp}:{username}:{app_name}:{namespace}:{encoded_backup_path}:{chart_name}:{states}"
+    combined_hash = hashlib.sha256(components.encode()).hexdigest() 
+    marker_content = f"{combined_hash}:{components}:{secret_component}" 
     marker_filename = f".marker_{hashlib.sha256(marker_content.encode()).hexdigest()[:8]}"
     marker_path = os.path.join(backup_path, marker_filename)
 
