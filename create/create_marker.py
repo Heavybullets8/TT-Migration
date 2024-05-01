@@ -38,8 +38,7 @@ def check_integrity(file_path, log_path):
         last_hash = last_entry['hash']
         if last_hash != current_hash:
             tampered_detected = True
-            for entry in logs:
-                entry['status'] = "Tampered"
+            last_entry['status'] = "Tampered"
             write_log(log_file_path, logs)
 
     return tampered_detected
@@ -53,7 +52,6 @@ def log_update(file_path, log_path, variable_name, value):
     new_entry = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
         "file": file_path,
-        "log_path": log_path,
         "variable_name": variable_name,
         "value": value,
         "hash": new_hash,
