@@ -27,7 +27,7 @@ def write_log(log_file_path, data):
     with open(log_file_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def check_and_update_log(file_path, log_path, variable_name, value):
+def check_and_update_log(file_path, log_path, variable_name, value, action):
     log_file_path = os.path.join(log_path, ".variables.log")
     logs = read_log(log_file_path)
     current_hash = calculate_hash(file_path)
