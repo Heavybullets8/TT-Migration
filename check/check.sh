@@ -106,8 +106,6 @@ check_health() {
         echo -e "${red}You need to migrate this chart to a new train. Suggested new train: ${blue}$new_train${reset}"
         echo -e "Please visit ${blue}https://truecharts.org/news/train-renames/${reset} for information on how to migrate to a new train."
         echo -e "After updating the train, you can attempt the migration again."
-        echo -e "If you want to force the migration, you can run the script with the ${blue}--force${reset} flag."
-        echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         return 1
     else
         echo -e "${green}Valid train${reset}"
@@ -124,14 +122,29 @@ check_health() {
         "\nlet alone migrated. Unless you are absolutely"\
         "\nsure, it is recommended to skip this application."\
         "\nDoing so can result in permanent loss of data and"\
-        "\nconfiguration for various services and applications."\
-        "\nIf you are 100% sure you want to migrate this application,"\
-        "\nyou can do so by running the script with the ${blue}--force${reset} flag."
+        "\nconfiguration for various services and applications."
         return 1
     else
         echo -e "${green}Not system train${reset}"
     fi
 
+    #############################################
+    ############## Check app update #############
+    #############################################
+    local update_info
+    if ! update_info=$(cli -m csv -c 'app chart_release query name,update_available,status' | tr -d " \t\r" | grep -E "^${appname},"); then
+        echo -e "${red}Failed to get the app update status.${reset}"
+        echo "$output"
+        return 1
+    fi
+
+    if echo "$update_info" | grep -q ",true$"; then
+        outdated=true
+    fi
+
+    if echo "$update_info" | grep -q ",DEPLOYING,"; then
+        deploying=true
+    fi
 
     #############################################
     ############# Empty edit ####################
@@ -156,8 +169,6 @@ check_health() {
         echo -e "${red}This was the result of performing an empty edit, you probably need to make changes in the chart edit configuration in the GUI.${reset}"
         echo -e "${red}Please resolve the issues above prior to running the migration.${reset}"
         echo -e "${red}Make sure to check Truecharts #announcements for migrations you may have missed.${reset}"
-        echo -e "${red}If you want to force the migration, you can run the script with the ${blue}--force${reset} flag.${reset}"
-        echo -e "${red}Do not open a support ticket if you force the migration.${reset}"
         return 1
     fi
 
