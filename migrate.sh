@@ -21,8 +21,10 @@ export script_progress="start"
 export traefik_ingress_integration_enabled=false
 export backup_path
 export chart_name
+export version
 export outdated=false
 export deploying=false
+export latest_version=false
 
 # flags
 export force=false
@@ -80,6 +82,9 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --force)
             force=true
+            ;;
+        -l|--latest_version)
+            latest_version=true
             ;;
         -h|--help)
             script_help

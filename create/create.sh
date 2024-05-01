@@ -185,13 +185,21 @@ create_application() {
 
     # Construct and execute the reinstallation command, capturing the job ID
     command=$(jq -n \
-                    --arg release_name "$appname" \
-                    --arg chart_name "$chart_name" \
-                    --arg catalog "$catalog" \
-                    --arg catalog_train "$catalog_train" \
-                    --argjson values "$DATA" \
-                    '{release_name: $release_name, catalog: $catalog, item: $chart_name, train: $catalog_train, values: $values}')
-    
+                --arg release_name "$appname" \
+                --arg chart_name "$chart_name" \
+                --arg catalog "$catalog" \
+                --arg catalog_train "$catalog_train" \
+                --argjson values "$DATA" \
+                --arg version "$version" \
+                '{
+                    release_name: $release_name, 
+                    catalog: $catalog, 
+                    item: $chart_name, 
+                    train: $catalog_train, 
+                    values: $values,
+                    version: (if $version | length > 0 then $version else empty end)
+                }')
+                
     while [[ $retry_count -lt $max_retries ]]; do
         job_id=$(midclt call chart.release.create "$command" | jq -r '.')
 

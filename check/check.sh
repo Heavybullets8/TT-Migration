@@ -72,6 +72,7 @@ check_health() {
     catalog_train=$(echo "$output" | jq -r '.catalog_train // empty')
     catalog=$(echo "$output" | jq -r '.catalog // empty')
     chart_name=$(echo "$output" | jq -r '.chart_metadata.name // empty')
+    version=$(echo "$output" | jq -r '.chart_metadata.version // empty')
 
     # Check if necessary details are available
     if [[ -z "$catalog_train" || -z "$catalog" || -z "$chart_name" ]]; then
@@ -139,8 +140,29 @@ check_health() {
     fi
 
     if echo "$update_info" | grep -q ",true$"; then
-        outdated=true
+        # Get the list of versions
+        local versions
+        if ! versions=$(midclt call catalog.get_item_details "\"$chart_name\"" "{\"catalog\": \"$catalog\", \"train\": \"$catalog_train\"}" | jq -r '.versions | keys[]'); then
+            echo -e "${red}Failed to get app versions from the catalog.${reset}"
+            return 1
+        fi
+
+        # Check if the provided version exists in the list
+        if ! printf '%s\n' "$versions" | grep -q "^$version$" && [[ "${latest_version}" != true ]]; then
+            echo -e "${red}The version: ${blue}$version${red} of the chart: ${blue}$chart_name${red} is not available in the catalog: ${blue}$catalog${reset}."
+            echo -e "${red}You need to update your application to a new version prior to attempting the migration.${reset}"
+            echo -e "${red}The script by default reinstalls the chart to the same version, if you would like to install the latest version, please use the ${blue}--latest-version,-l${red} flag.${reset}"
+            echo -e "Note: Enabling the ${blue}--latest-version,-l${reset} flag will install the latest version of the chart from the catalog."
+            echo -e "However, this will VOID any support for this migration since its impossible to know if your current configuration is compatible with the new version."
+            return 1
+        fi
     fi
+
+
+
+    #############################################
+    ############## Check app status #############
+    #############################################
 
     if echo "$update_info" | grep -q ",DEPLOYING,"; then
         deploying=true
