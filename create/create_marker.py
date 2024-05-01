@@ -40,6 +40,7 @@ def check_integrity(file_path, log_path):
             tampered_detected = True
             last_entry['status'] = "Tampered"
             write_log(log_file_path, logs)
+            print("\033[93m\nStatus: Tampered\n\033[0m")
 
     return tampered_detected
 
