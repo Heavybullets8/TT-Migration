@@ -1,41 +1,56 @@
-import os
-import secrets
-import base64
 import hashlib
+import sys
+import os
+import time
 import json
-from datetime import datetime
 
-def create_marker(username, app_name, namespace, backup_path, chart_name, **kwargs):
-    separator = "::::::"  
-    timestamp = datetime.utcnow().isoformat() 
-    states = json.dumps(kwargs)  
-    chart_name = chart_name if chart_name else "EMPTY"
-    encoded_backup_path = base64.urlsafe_b64encode(backup_path.encode()).decode().rstrip('=')
-    secret_component = secrets.token_urlsafe(16)  
-    components = separator.join([timestamp, username, app_name, namespace, encoded_backup_path, chart_name, states])
-    combined_hash = hashlib.sha256(components.encode()).hexdigest() 
-    marker_content = f"{combined_hash}{separator}{components}{separator}{secret_component}" 
-    marker_filename = f".marker_{hashlib.sha256(marker_content.encode()).hexdigest()[:8]}"
-    marker_path = os.path.join(backup_path, marker_filename)
+def calculate_hash(file_path):
+    try:
+        with open(file_path, 'rb') as file:
+            file_data = file.read()
+        hash_object = hashlib.sha256(file_data)
+        return hash_object.hexdigest()
+    except FileNotFoundError:
+        return None
 
-    with open(marker_path, "w") as f:
-        f.write(marker_content)
+def read_log(log_file_path):
+    if os.path.exists(log_file_path):
+        with open(log_file_path, 'r') as file:
+            try:
+                return json.load(file)
+            except json.JSONDecodeError:
+                return []
+    else:
+        return []
+
+def write_log(log_file_path, data):
+    with open(log_file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+
+def check_and_update_log(file_path, log_path, variable_name, value):
+    log_file_path = os.path.join(log_path, ".variables.log")
+    logs = read_log(log_file_path)
+    current_hash = calculate_hash(file_path)
+    
+    if logs:
+        last_entry = logs[-1]
+        last_hash = last_entry['hash']
+        status = "Not Tampered" if last_hash == current_hash else "Tampered"
+    else:
+        status = "Not Tampered"  # No previous entries means it's the initial state
+
+    new_entry = {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+        "file": file_path,
+        "log_path": log_path,
+        "variable_name": variable_name,
+        "value": value,
+        "hash": current_hash,
+        "status": status
+    }
+    logs.append(new_entry)
+    write_log(log_file_path, logs)
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) < 10:
-        print("Usage: python create_marker.py <username> <app_name> <namespace> <backup_path> <chart_name> <force> <outdated> <deploying> <migrate_db> <migrate_pvs>")
-        sys.exit(1)
-
-    username = sys.argv[1]
-    app_name = sys.argv[2]
-    namespace = sys.argv[3]
-    backup_path = sys.argv[4]
-    chart_name = sys.argv[5]
-    force = sys.argv[6]
-    outdated = sys.argv[7]
-    deploying = sys.argv[8]
-    migrate_db = sys.argv[9]
-    migrate_pvs = sys.argv[10]
-    
-    create_marker(username, app_name, namespace, backup_path, chart_name, force=force, outdated=outdated, deploying=deploying, migrate_db=migrate_db, migrate_pvs=migrate_pvs)
+    _, action, file_path, log_path, variable_name, value = sys.argv
+    check_and_update_log(file_path, log_path, variable_name, value, action)

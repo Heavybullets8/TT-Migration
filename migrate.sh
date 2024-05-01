@@ -153,7 +153,6 @@ main() {
             update_or_append_variable "deploying" "${deploying}"
             update_or_append_variable "latest_version" "${latest_version}"
             update_or_append_variable "version" "${version}"
-            python3 create/create_marker.py "$USER" "$appname" "$namespace" "$backup_path" "$chart_name" "$force" "$outdated" "$deploying" "$migrate_db" "$migrate_pvs" || exit 1
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
         backup_cnpg_databases)
