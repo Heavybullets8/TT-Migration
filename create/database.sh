@@ -35,18 +35,15 @@ restore_database() {
         return 1
     fi
 
+    if [[ -z $db_name ]]; then
+        echo -e "${red}Failed to get database name for $app.${reset}"
+        return 1
+    fi
+
     # get database role
     if ! db_role=$(k3s kubectl get secrets -n "ix-${app}" -o json | jq -r '.items[] | select(.metadata.name | endswith("-cnpg-main-user")) | select(.data.username and .data.password) | .data.username // empty' | base64 --decode); then
         db_role=$db_name
     fi
-
-
-    if [[ -z $db_name ]]; then
-        echo -e "${yellow}Failed to get database name for $app.${reset}"
-        echo -e "${yellow}Attemting use of \"$db_role\"...${reset}"
-        db_name=$db_role
-    fi
-
 
     # Restore
     if [[ $chart_name == "immich" ]]; then
@@ -69,7 +66,6 @@ restore_database() {
     fi
 }
 
-
 dump_database() {
     app="$1"
     output_dir="$2"
@@ -88,15 +84,9 @@ dump_database() {
         return 1
     fi
 
-    # get database role
-    if ! db_role=$(k3s kubectl get secrets -n "ix-${app}" -o json | jq -r '.items[] | select(.metadata.name | endswith("-cnpg-main-user")) | select(.data.username and .data.password) | .data.username // empty' | base64 --decode); then
-        db_role=$db_name
-    fi
-
     if [[ -z $db_name ]]; then
-        echo -e "${yellow}Failed to get database name for $app.${reset}"
-        echo -e "${yellow}Attemting use of \"$db_role\"...${reset}"
-        db_name=$db_role
+        echo -e "${red}Failed to get database name for $app.${reset}"
+        return 1
     fi
 
     # Create the output directory if it doesn't exist
