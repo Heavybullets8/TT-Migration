@@ -83,7 +83,7 @@ while [[ "$#" -gt 0 ]]; do
         --force)
             force=true
             ;;
-        -l|--latest_version)
+        -l|--latest-version)
             latest_version=true
             ;;
         -h|--help)
