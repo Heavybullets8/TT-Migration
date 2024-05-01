@@ -4,6 +4,8 @@ update_or_append_variable() {
     local variable_name="$1"
     local value="$2"
     local file="/mnt/$migration_path/variables.txt"
+    local log_path="/mnt/$migration_path"
+
 
     # Check if the value contains spaces or special characters that require quoting
     if [[ "$value" =~ [[:space:]] ]]; then
@@ -15,12 +17,16 @@ update_or_append_variable() {
         return
     fi
 
+    python create/create_marker.py check_integrity "$file" "$log_path"
+
     if grep -q "^${variable_name}=" "$file" 2>/dev/null; then
         # Using a different delimiter ('|') to avoid issues with paths that contain '/'
         sed -i "s|^${variable_name}=.*|${variable_name}=${value}|" "$file"
     else
         echo "${variable_name}=${value}" >> "$file"
     fi
+
+    python create/create_marker.py log_update "$file" "$log_path" "$variable_name" "$value"
 }
 
 
