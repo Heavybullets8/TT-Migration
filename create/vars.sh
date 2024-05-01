@@ -14,11 +14,10 @@ update_or_append_variable() {
 
     if [ ! -f "$file" ]; then
         echo "${variable_name}=${value}" > "$file"
-        python create/create_marker.py "check_and_update" "$file" "$log_path" "$variable_name" "$value"
         return
     fi
 
-    python create/create_marker.py "check_and_update" "$file" "$log_path" "$variable_name" "$value"
+    python create/create_marker.py check_integrity "$file" "$log_path"
 
     if grep -q "^${variable_name}=" "$file" 2>/dev/null; then
         # Using a different delimiter ('|') to avoid issues with paths that contain '/'
@@ -27,7 +26,7 @@ update_or_append_variable() {
         echo "${variable_name}=${value}" >> "$file"
     fi
 
-    python create/create_marker.py "check_and_update" "$file" "$log_path" "$variable_name" "$value"
+    python create/create_marker.py log_update "$file" "$log_path" "$variable_name" "$value"
 }
 
 

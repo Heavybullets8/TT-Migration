@@ -23,21 +23,32 @@ def read_log(log_file_path):
     else:
         return []
 
-def write_log(log_file_path, data):
+def write_log(log_file_path, logs):
     with open(log_file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+        json.dump(logs, file, indent=4)
 
-def check_and_update_log(file_path, log_path, variable_name, value, action):
+def check_integrity(file_path, log_path):
     log_file_path = os.path.join(log_path, ".variables.log")
-    logs = read_log(log_file_path)
     current_hash = calculate_hash(file_path)
-    
+    logs = read_log(log_file_path)
+    tampered_detected = False
+
     if logs:
         last_entry = logs[-1]
         last_hash = last_entry['hash']
-        status = "Not Tampered" if last_hash == current_hash else "Tampered"
-    else:
-        status = "Not Tampered"  # No previous entries means it's the initial state
+        if last_hash != current_hash:
+            tampered_detected = True
+            for entry in logs:
+                entry['status'] = "Tampered"
+            write_log(log_file_path, logs)
+
+    return tampered_detected
+
+def log_update(file_path, log_path, variable_name, value):
+    log_file_path = os.path.join(log_path, ".variables.log")
+    logs = read_log(log_file_path)
+    new_hash = calculate_hash(file_path)
+    tampered_status = "Tampered" if any(entry['status'] == "Tampered" for entry in logs) else "Not Tampered"
 
     new_entry = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
@@ -45,12 +56,17 @@ def check_and_update_log(file_path, log_path, variable_name, value, action):
         "log_path": log_path,
         "variable_name": variable_name,
         "value": value,
-        "hash": current_hash,
-        "status": status
+        "hash": new_hash,
+        "status": tampered_status
     }
     logs.append(new_entry)
     write_log(log_file_path, logs)
 
 if __name__ == "__main__":
-    _, action, file_path, log_path, variable_name, value = sys.argv
-    check_and_update_log(file_path, log_path, variable_name, value, action)
+    action = sys.argv[1]
+    if action == "check_integrity":
+        _, _, file_path, log_path = sys.argv
+        check_integrity(file_path, log_path)
+    elif action == "log_update":
+        _, _, file_path, log_path, variable_name, value = sys.argv
+        log_update(file_path, log_path, variable_name, value)
