@@ -21,6 +21,8 @@ export script_progress="start"
 export traefik_ingress_integration_enabled=false
 export backup_path
 export chart_name
+export outdated=false
+export deploying=false
 
 # flags
 export force=false
@@ -141,6 +143,7 @@ main() {
             update_or_append_variable original_pvs_count "$original_pvs_count"
             update_or_append_variable "backup_path" "${backup_path}"
             update_or_append_variable "chart_name" "${chart_name}"
+            python3 create_marker.py "$USER" "$backup_path" $force $outdated $deploying
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
         backup_cnpg_databases)
