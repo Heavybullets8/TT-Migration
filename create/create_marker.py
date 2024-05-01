@@ -49,11 +49,12 @@ def log_update(file_path, log_path, variable_name, value):
     new_hash = calculate_hash(file_path)
     tampered_status = "Tampered" if any(entry['status'] == "Tampered" for entry in logs) else "Not Tampered"
 
+    variable_entry = f"{variable_name}={value}"
+
     new_entry = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
         "file": file_path,
-        "variable_name": variable_name,
-        "value": value,
+        "variable_entry": variable_entry,
         "hash": new_hash,
         "status": tampered_status
     }
