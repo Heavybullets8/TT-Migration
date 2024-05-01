@@ -196,9 +196,9 @@ create_application() {
                     catalog: $catalog, 
                     item: $chart_name, 
                     train: $catalog_train, 
-                    values: $values,
-                    version: (if $version | length > 0 then $version else empty end)
-                }')
+                    values: $values
+                } + (if $version | length > 0 then {version: $version} else {} end)')
+
                 
     while [[ $retry_count -lt $max_retries ]]; do
         job_id=$(midclt call chart.release.create "$command" | jq -r '.')
