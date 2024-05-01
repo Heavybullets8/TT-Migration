@@ -8,11 +8,14 @@ import json
 def create_marker(username, backup_path, **kwargs):
     timestamp = time.time()
     states = json.dumps(kwargs)
+    encoded_states = base64.b64encode(states.encode()).decode()
+
     secret_string = secrets.token_urlsafe(16)
     encoded_string = base64.b64encode(secret_string.encode())[::-1]
-
-    marker_content = f"{timestamp}:{username}:{encoded_string.decode()}:{states}"
-    marker_filename = f".marker_{hashlib.sha256(marker_content.encode()).hexdigest()[:8]}"
+    combined_content = f"{timestamp}:{username}:{encoded_string}:{encoded_states}"
+    hash_of_content = hashlib.sha256(combined_content.encode()).hexdigest() 
+    marker_content = f"{hash_of_content}:{combined_content}"
+    marker_filename = f".marker_{hash_of_content[:8]}"
     marker_path = os.path.join(backup_path, marker_filename)
 
     with open(marker_path, "w") as f:
