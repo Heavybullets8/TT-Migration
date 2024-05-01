@@ -184,14 +184,28 @@ create_application() {
     DATA=$(cat "${metadata_path}/${backup_name}")
 
     # Construct and execute the reinstallation command, capturing the job ID
-    command=$(jq -n \
+    if [[ "$latest_version" == false ]]; then
+        # install the current chart version
+        command=$(jq -n \
+                    --arg release_name "$appname" \
+                    --arg chart_name "$chart_name" \
+                    --arg catalog "$catalog" \
+                    --arg catalog_train "$catalog_train" \
+                    --argjson values "$DATA" \
+                    --arg version "$version" \
+                    '{release_name: $release_name, catalog: $catalog, item: $chart_name, train: $catalog_train, version: $version, values: $values}')
+    else
+        # do not pass the version, which will install the latest version
+        command=$(jq -n \
                     --arg release_name "$appname" \
                     --arg chart_name "$chart_name" \
                     --arg catalog "$catalog" \
                     --arg catalog_train "$catalog_train" \
                     --argjson values "$DATA" \
                     '{release_name: $release_name, catalog: $catalog, item: $chart_name, train: $catalog_train, values: $values}')
-    
+    fi
+
+                
     while [[ $retry_count -lt $max_retries ]]; do
         job_id=$(midclt call chart.release.create "$command" | jq -r '.')
 
