@@ -6,8 +6,8 @@ get_pvc_info() {
     local pvc_data workloads_data pvc_name volume mount_path pvc_parent_path
 
     # Ensure backup directory exists
-    mkdir -p "$backup_path"
-    touch "$pvc_backup_file"
+    mkdir -p "$backup_path" || return 1
+    touch "$pvc_backup_file" || return 1
 
     # Fetch all PVCs and workload data in JSON format
     if ! pvc_data=$(k3s kubectl get pvc -n "$namespace" -o json); then
@@ -20,7 +20,7 @@ get_pvc_info() {
         return 1
     fi
 
-    echo '[' > "$pvc_backup_file"
+    echo '[' > "$pvc_backup_file" || return 1
 
     local first_entry=true
     while IFS= read -r pvc; do
@@ -45,7 +45,7 @@ get_pvc_info() {
         if [ "$first_entry" = true ]; then
             first_entry=false
         else
-            echo ',' >> "$pvc_backup_file"
+            echo ',' >> "$pvc_backup_file" || return 1
         fi
 
         jq -n \
@@ -62,11 +62,11 @@ get_pvc_info() {
             matched: false,
             destroyed: false,
             ignored: false
-        }' >> "$pvc_backup_file"
+        }' >> "$pvc_backup_file" || return 1
 
     done < <(echo "$pvc_data" | jq -c '.items[]')
 
-    echo ']' >> "$pvc_backup_file"
+    echo ']' >> "$pvc_backup_file" || return 1
 }
 
 

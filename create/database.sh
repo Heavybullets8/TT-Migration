@@ -90,7 +90,7 @@ dump_database() {
     fi
 
     # Create the output directory if it doesn't exist
-    mkdir -p "${output_dir}"
+    mkdir -p "${output_dir}" || return 1
 
 
     # Backup
@@ -203,7 +203,7 @@ search_for_database_file() {
 
     # Rename the file to appname.sql
     if [[ "$database_path" != "${search_directory}/${appname}.sql" ]]; then
-        mv "$database_path" "${search_directory}/${appname}.sql"
+        mv "$database_path" "${search_directory}/${appname}.sql" || return 1
     fi
 
     return 0 

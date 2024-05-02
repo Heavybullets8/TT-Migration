@@ -122,14 +122,14 @@ create_config_backup() {
     fi
 
     # Ensure backup directory exists
-    mkdir -p "$backup_path"
+    mkdir -p "$backup_path" || return 1
 
     if [[ $traefik_ingress_integration_enabled == true ]]; then
-        echo "$ingress_backup" > "${backup_path}/ingress_backup.json"
+        echo "$ingress_backup" > "${backup_path}/ingress_backup.json" || return 1
     fi
 
     # Save data to backup path
-    echo "$DATA" > "${backup_path}/${backup_name}"
+    echo "$DATA" > "${backup_path}/${backup_name}" || return 1
     return 0
 }
 
@@ -162,8 +162,8 @@ create_backup_metadata() {
                           '{chart_name: $chart_name, catalog: $catalog, catalog_train: $catalog_train}')
     
 
-    mkdir -p "$backup_path"
-    echo "$metadata_json" > "${backup_path}/${metadata_name}"
+    mkdir -p "$backup_path" || return 1
+    echo "$metadata_json" > "${backup_path}/${metadata_name}" || return 1
     return 0
 }
 
