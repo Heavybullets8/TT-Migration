@@ -21,7 +21,7 @@ rename_original_pvcs() {
         local old_pvc_name="$pvc_parent_path/${volume_name}"
         local new_pvc_name="$migration_path/${pvc_name}"
 
-        if zfs rename "${old_pvc_name}" "${new_pvc_name}"; then
+        if /usr/sbin/zfs rename "${old_pvc_name}" "${new_pvc_name}"; then
             echo -e "${green}Renamed ${blue}${old_pvc_name}${reset} to ${blue}${new_pvc_name}${reset}"
             # Update the JSON file to set original_rename_complete to true for this PVC
             update_json_file "$pvc_backup_file" \

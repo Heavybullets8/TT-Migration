@@ -31,7 +31,7 @@ match_pvcs_with_mountpoints() {
 
 
             if [ "$new_mountpath" == "$original_mountpath" ]; then
-                if zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${new_volume}"; then
+                if /usr/sbin/zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${new_volume}"; then
                     echo -e "${green}Renamed ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
                     echo -e "${green}Matched by mount point:${green}"
                     echo -e "${blue}${original_pvc_name}${reset} -> ${blue}${new_pvc_name}${reset}"
@@ -75,7 +75,7 @@ match_remaining_single_pvc_pair() {
     local new_volume=$(echo "$new_pvc" | jq -r '.pvc_volume_name')
     local new_pvc_parent_path=$(echo "$new_pvc" | jq -r '.pvc_parent_path')
 
-    if zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${new_volume}"; then
+    if /usr/sbin/zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${new_volume}"; then
         echo -e "${green}Renamed ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${new_volume}${reset}"
         echo -e "${green}Single pair left:${green}"
         echo -e "${blue}${original_pvc_name}${reset} -> ${blue}${new_pvc_name}${reset}"
@@ -152,7 +152,7 @@ match_remaining_pvcs_by_name() {
 
         new_pvc_parent_path=$(jq -r --arg vol "$most_similar_volume" '.[] | select(.pvc_volume_name == $vol) | .pvc_parent_path' "$new_app_pvc_info")
 
-        if zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${most_similar_volume}"; then
+        if /usr/sbin/zfs rename "$migration_path/${original_pvc_name}" "$new_pvc_parent_path/${most_similar_volume}"; then
             echo -e "${green}Renamed ${blue}$migration_path/${original_pvc_name}${reset} to ${blue}$new_pvc_parent_path/${most_similar_volume}${reset}"
             echo -e "${green}Matched by name similarity: ${blue}${original_pvc_name}${reset} -> ${blue}${most_similar_pvc}${reset}"
             echo

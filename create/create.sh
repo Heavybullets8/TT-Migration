@@ -72,9 +72,6 @@ restore_traefik_ingress() {
     fi
 }
 
-
-
-
 create_config_backup() {
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
     

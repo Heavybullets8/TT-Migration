@@ -61,7 +61,7 @@ delete_original_app() {
         if [[ "$output" == *"dataset is busy"* ]]; then
             echo -e "\n${red}The dataset ${blue}'${dataset}'${red} is busy. This usually means resources are still in use.${reset}"
             echo -e "${red}Please check and ensure all resources using the dataset are terminated. You may need to manually destroy the dataset using the command:${reset}"
-            echo -e "${blue}zfs destroy -r \"${dataset}\"${reset}"
+            echo -e "${blue}/usr/sbin/zfs destroy -r \"${dataset}\"${reset}"
             echo -e "After confirming that the namespace and ALL related datasets (except migrated PVs, if any) are destroyed, you can retry the operation using the ${blue}--skip${reset} flag."
         else
             echo -e "\nPlease ensure all pods are terminated and no resources are in use before trying again."
@@ -69,10 +69,10 @@ delete_original_app() {
         fi
         echo -e "\n${bold}What to do if your dataset is reporting busy:${reset}"
         echo -e "Try the following in these EXACT steps, deviation of any kind can result in data loss:"
-        echo -e "1. Try to delete the dataset using the command ${blue}zfs destroy -r \"${dataset}\"${reset}"
+        echo -e "1. Try to delete the dataset using the command ${blue}/usr/sbin/zfs destroy -r \"${dataset}\"${reset}"
         echo -e "2. If Step 1 fails, note the name of the failed app(s) and continue migrating ALL remaining apps."
         echo -e "3. After all apps are migrated, unset the apps pool: TrueNAS SCALE GUI -> Applications -> Settings -> Unset Pool"
-        echo -e "4. Go through your list of failed apps and delete them one by one example: ${blue}zfs destroy -r \"${dataset}\"${reset}"
+        echo -e "4. Go through your list of failed apps and delete them one by one example: ${blue}/usr/sbin/zfs destroy -r \"${dataset}\"${reset}"
         echo -e "5. After all failed apps datasets are deleted, set the apps pool: TrueNAS SCALE GUI -> Applications -> Settings -> Set Pool"
         echo -e "6. Re-run the script with ${blue}--skip${reset} flag for all failed apps."
         echo -e "\nIt is very important to attempt all migrations until unsetting the applications pool, unsetting the applications pool, or restarting with applicaitons mid-migration can result in data loss."

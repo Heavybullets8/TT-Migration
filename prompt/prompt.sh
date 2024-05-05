@@ -14,12 +14,12 @@ prompt_app_name() {
             namespace="ix-${appname}"
 
             # Check if the app is already in the migration pool
-            if zfs list "${ix_apps_pool}/migration/${appname}" &> /dev/null; then
+            if /usr/sbin/zfs list "${ix_apps_pool}/migration/${appname}" &> /dev/null; then
                 echo -e "${red}Error: ${blue}${appname}${red} is already in the migration pool: ${ix_apps_pool}/migration/${appname}${reset}"
                 echo -e "\nIf the application has failed, and you want to complete from a previous step:"
                 echo -e "     use the ${blue}--skip${reset} flag and select ${blue}${appname}${reset}"
                 echo -e "\nIf its an old migration, you can remove the dataset with:"
-                echo -e "     ${blue}zfs destroy -r \"${ix_apps_pool}/migration/${appname}\"${reset}"
+                echo -e "     ${blue}/usr/sbin/zfs destroy -r \"${ix_apps_pool}/migration/${appname}\"${reset}"
                 echo -e "Please only do this if you are certain the application migration dataset listed is not from a recently failed migration.${reset}"
                 return 1
             fi
@@ -133,7 +133,7 @@ rename_app() {
 
 prompt_migration_path() {
     # Create a list of datasets within migration
-    app_list=$(zfs list -H -o name -r "$ix_apps_pool/migration" | grep -E "$ix_apps_pool/migration/.*" | awk -F/ '{print $3}' | sort | uniq)
+    app_list=$(/usr/sbin/zfs list -H -o name -r "$ix_apps_pool/migration" | grep -E "$ix_apps_pool/migration/.*" | awk -F/ '{print $3}' | sort | uniq)
 
     # Check if there are any datasets and exit if there are none
     if [ -z "${app_list}" ]; then
