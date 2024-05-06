@@ -26,7 +26,7 @@ destroy_new_apps_pvcs() {
         max_attempts=2
 
         while ! $success && [ $attempt_count -lt $max_attempts ]; do
-            if output=$(zfs destroy "${to_delete}" 2>&1); then
+            if output=$(/usr/sbin/zfs destroy "${to_delete}" 2>&1); then
                 echo -e "${green}Destroyed ${blue}${to_delete}${reset}"
                 update_json_file "$new_app_pvc_info" \
                                 ".volume_name == \"$volume_name\"" \
@@ -63,7 +63,7 @@ cleanup_datasets() {
 
     # Remove the app dataset
     echo -e "${bold}Cleaning up app dataset...${reset}"
-    if zfs destroy -r "${app_dataset}"; then
+    if /usr/sbin/zfs destroy -r "${app_dataset}"; then
         echo -e "${green}Removed app dataset: ${blue}${app_dataset}${reset}"
     else
         echo -e "${red}Error: Failed to remove app dataset: ${blue}${app_dataset}${reset}"
@@ -72,10 +72,10 @@ cleanup_datasets() {
     echo
 
     # Check if the base path has any remaining child datasets
-    if ! zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -q -v "^${base_path}$"; then
+    if ! /usr/sbin/zfs list -H -d 1 -o name -t filesystem -r "$base_path" 2>/dev/null | grep -q -v "^${base_path}$"; then
         # Remove the base path dataset if it's empty
         echo -e "Removing base path dataset as it has no child datasets..."
-        if zfs destroy "$base_path"; then
+        if /usr/sbin/zfs destroy "$base_path"; then
             echo -e "${green}Removed base path dataset: ${blue}${base_path}${reset}"
         else
             echo -e "${red}Error: Failed to remove base path dataset: ${blue}${base_path}${reset}"

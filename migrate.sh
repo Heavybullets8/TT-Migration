@@ -30,7 +30,7 @@ export latest_version=false
 export force=false
 export skip=false
 export no_update=false
-
+export prompt_rename_flag=false
 
 export script=$(readlink -f "$0")
 export script_path=$(dirname "$script")
@@ -88,6 +88,9 @@ while [[ "$#" -gt 0 ]]; do
         -l|--latest-version)
             latest_version=true
             ;;
+        -r|--rename)
+            prompt_rename_flag=true
+            ;;
         -h|--help)
             script_help
             exit 0
@@ -138,6 +141,7 @@ main() {
             update_or_append_variable "deploying" "${deploying}"
             update_or_append_variable "latest_version" "${latest_version}"
             update_or_append_variable "version" "${version}"
+            update_or_append_variable "prompt_rename_flag" "${prompt_rename_flag}"
             update_or_append_variable "script_progress" "backup_cnpg_databases"
             ;& 
         backup_cnpg_databases)
@@ -178,7 +182,9 @@ main() {
             update_or_append_variable "script_progress" "prompt_rename"
             ;&
         prompt_rename)
-            prompt_rename
+            if [[ "${prompt_rename_flag}" == true ]]; then
+                prompt_rename
+            fi
             update_or_append_variable "script_progress" "create_application"
             ;&
         create_application)

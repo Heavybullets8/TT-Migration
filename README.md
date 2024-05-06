@@ -20,6 +20,7 @@ bash migration.sh
 | `--no-update`     | `-n`       | Do not check for script updates.                             |
 | `--force`         |            | Force migration without checking for the presence of database pods. |
 | `--latest-version`| `-l`       | Migrate to the latest version of the software. Note: using this option means you will not be supported. |
+| `--rename`        | `-r`       | Prompt to rename the application.                                      |
 
 #### Important Notes
 

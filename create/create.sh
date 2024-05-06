@@ -4,9 +4,9 @@ create_migration_dataset() {
     local path=${ix_apps_pool}/migration
 
     # Check if the migration dataset exists, and create it if it doesn't
-    if ! zfs list "$path" >/dev/null 2>&1; then
+    if ! /usr/sbin/zfs list "$path" >/dev/null 2>&1; then
         echo -e "${bold}Creating migration dataset...${reset}"
-        if zfs create "$path"; then
+        if /usr/sbin/zfs create "$path"; then
             echo -e "${green}Dataset created: ${blue}$path${reset}"
             echo
         else
@@ -21,9 +21,9 @@ create_app_dataset() {
     local path="${ix_apps_pool}/migration/${appname}"
 
     # Check if the app dataset exists, and create it if it doesn't
-    if ! zfs list "$path" >/dev/null 2>&1; then
+    if ! /usr/sbin/zfs list "$path" >/dev/null 2>&1; then
         echo -e "${bold}Creating app dataset...${reset}"
-        if zfs create "$path"; then
+        if /usr/sbin/zfs create "$path"; then
             echo -e "${green}Dataset created: ${blue}$path${reset}"
             echo
         else
