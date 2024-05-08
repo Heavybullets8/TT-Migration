@@ -30,10 +30,12 @@ get_pvc_info() {
         pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}')
 
         # Validate required fields
-        if [ -z "$pvc_name" ] || [ -z "$volume" ] || [ -z "$mount_path" ] || [ -z "$pvc_parent_path" ]; then
-            echo -e "${red}Error: Required field is missing or empty. PVC: \"${pvc_name:-"EMPTY"}\", Volume: \"${volume:-"EMPTY"}\", Mount Path: \"${mount_path:-"EMPTY"}\", Parent Path: \"${parent_path:-"EMPTY"}\"${reset}"
-            rm -f "$pvc_backup_file"
-            return 1
+        if [[ ! "$pvc_name" =~ -cnpg- ]]; then
+            if [ -z "$pvc_name" ] || [ -z "$volume" ] || [ -z "$mount_path" ] || [ -z "$pvc_parent_path" ]; then
+                echo -e "${red}Error: Required field is missing or empty. PVC: \"${pvc_name:-"EMPTY"}\", Volume: \"${volume:-"EMPTY"}\", Mount Path: \"${mount_path:-"EMPTY"}\", Parent Path: \"${parent_path:-"EMPTY"}\"${reset}"
+                rm -f "$pvc_backup_file"
+                return 1
+            fi
         fi
 
         # Format entry as JSON object and append to file, handling commas for valid JSON
