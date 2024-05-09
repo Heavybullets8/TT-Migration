@@ -28,6 +28,18 @@ get_pvc_info() {
         volume=$(echo "$pvc" | jq -r '.spec.volumeName // empty')
         mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath // empty' | head -n 1)
         pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}')
+        local ignored=false
+
+        # Validate required fields
+        if ! echo "$pvc_name" | grep -qE -- '-cnpg-main-|-redis-0'; then
+            if [ -z "$pvc_name" ] || [ -z "$volume" ] || [ -z "$mount_path" ] || [ -z "$pvc_parent_path" ]; then
+                echo -e "${red}Error: Required field is missing or empty. PVC: \"${pvc_name:-"EMPTY"}\", Volume: \"${volume:-"EMPTY"}\", Mount Path: \"${mount_path:-"EMPTY"}\", Parent Path: \"${parent_path:-"EMPTY"}\"${reset}"
+                rm -f "$pvc_backup_file"
+                return 1
+            fi
+        else
+            ignored=true
+        fi
 
         # Format entry as JSON object and append to file, handling commas for valid JSON
         if [ "$first_entry" = true ]; then
@@ -41,6 +53,7 @@ get_pvc_info() {
         --arg volume "$volume" \
         --arg mount_path "$mount_path" \
         --arg pvc_parent_path "$pvc_parent_path" \
+        --arg ignored "$ignored" \
         '{ 
             pvc_name: $pvc_name, 
             pvc_volume_name: $volume, 
@@ -49,7 +62,7 @@ get_pvc_info() {
             original_rename_complete: false, 
             matched: false,
             destroyed: false,
-            ignored: false
+            ignored: $ignored
         }' >> "$pvc_backup_file" || return 1
 
     done < <(echo "$pvc_data" | jq -c '.items[]')
