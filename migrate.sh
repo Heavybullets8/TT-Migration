@@ -127,7 +127,10 @@ main() {
             check_for_db
             create_migration_dataset || exit 1
             create_app_dataset || exit 1
-            get_pvc_info "original" || exit 1
+            if ! get_pvc_info "original"; then
+                zfs destroy "${migration_path}"
+                exit 1
+            fi
             update_pvc_migration_status
             update_or_append_variable "appname" "${appname}"
             update_or_append_variable "namespace" "${namespace}"
