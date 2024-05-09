@@ -37,6 +37,7 @@ get_pvc_info() {
                 rm -f "$pvc_backup_file"
                 return 1
             fi
+        else
             ignored=true
         fi
 
