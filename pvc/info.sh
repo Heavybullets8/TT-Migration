@@ -24,21 +24,21 @@ get_pvc_info() {
 
     local first_entry=true
     while IFS= read -r pvc; do
-        pvc_name=$(echo "$pvc" | jq -r '.metadata.name // empty')
-        volume=$(echo "$pvc" | jq -r '.spec.volumeName // empty')
-        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath // empty' | head -n 1)
+        pvc_name=$(echo "$pvc" | jq -r '.metadata.name')
+        volume=$(echo "$pvc" | jq -r '.spec.volumeName')
+        mount_path=$(echo "$workloads_data" | jq --arg pvc_name "$pvc_name" -r '.items[].spec.template.spec | .volumes[] as $volume | select($volume.persistentVolumeClaim.claimName == $pvc_name) | .containers[].volumeMounts[] | select(.name == $volume.name) | .mountPath' | head -n 1)
         pvc_parent_path=$(k3s kubectl describe pv "$volume" | grep "poolname=" | awk -F '=' '{print $2}')
-        local ignored=false
 
-        # Validate required fields
-        if ! echo "$pvc_name" | grep -qE -- '-cnpg-main-|-redis-0'; then
-            if [ -z "$pvc_name" ] || [ -z "$volume" ] || [ -z "$mount_path" ] || [ -z "$pvc_parent_path" ]; then
-                echo -e "${red}Error: Required field is missing or empty. PVC: \"${pvc_name:-"EMPTY"}\", Volume: \"${volume:-"EMPTY"}\", Mount Path: \"${mount_path:-"EMPTY"}\", Parent Path: \"${parent_path:-"EMPTY"}\"${reset}"
-                rm -f "$pvc_backup_file"
-                return 1
-            fi
-        else
-            ignored=true
+        # Check for CNPG related annotations or labels
+        if echo "$pvc" | jq -e '.metadata.labels | to_entries[] | select(.key | startswith("cnpg.io/"))' >/dev/null; then
+            # This is a CNPG PVC, skip it
+            continue
+        fi
+
+        # Skip any PVCs that have names ending with "-redis-0"
+        if echo "$pvc" | jq -r '.metadata.name' | grep -q -- '-redis-0$'; then
+            # This is a Redis PVC, skip it
+            continue
         fi
 
         # Format entry as JSON object and append to file, handling commas for valid JSON
@@ -53,7 +53,6 @@ get_pvc_info() {
         --arg volume "$volume" \
         --arg mount_path "$mount_path" \
         --arg pvc_parent_path "$pvc_parent_path" \
-        --arg ignored "$ignored" \
         '{ 
             pvc_name: $pvc_name, 
             pvc_volume_name: $volume, 
@@ -62,7 +61,7 @@ get_pvc_info() {
             original_rename_complete: false, 
             matched: false,
             destroyed: false,
-            ignored: $ignored
+            ignored: false
         }' >> "$pvc_backup_file" || return 1
 
     done < <(echo "$pvc_data" | jq -c '.items[]')

@@ -36,10 +36,10 @@ delete_original_app() {
     local total_objects
     total_objects=$(k3s kubectl get all -n "$namespace" --no-headers)
 
-    # if [[ -n "$total_objects" ]]; then
-    #     echo -e "${bold}Deleting all resources gracefully...${reset}"
-    #     timeout 120s k3s kubectl delete all --all -n "$namespace" --grace-period=10 > /dev/null 2>&1 
-    # fi
+    if [[ -n "$total_objects" ]]; then
+        echo -e "${bold}Deleting all resources gracefully...${reset}"
+        timeout 120s k3s kubectl delete all --all -n "$namespace" --grace-period=10 > /dev/null 2>&1 
+    fi
 
     total_objects=$(k3s kubectl get all -n "$namespace" --no-headers)
 
@@ -49,8 +49,8 @@ delete_original_app() {
     fi
 
 
-    # echo -e "${bold}Handling finalizers...${reset}"
-    # k3s kubectl get zv -o name -n openebs | xargs -I {} k3s kubectl patch {} -p '{"metadata":{"finalizers":[]}}' --type=merge -n openebs
+    echo -e "${bold}Handling finalizers...${reset}"
+    k3s kubectl get zv -o name -n openebs | xargs -I {} k3s kubectl patch {} -p '{"metadata":{"finalizers":[]}}' --type=merge -n openebs
 
     echo -e "${bold}Calling ix API to delete the app...${reset}"
     if ! output=$(cli -c "app chart_release delete release_name=\"${appname}\"" 2>&1); then
