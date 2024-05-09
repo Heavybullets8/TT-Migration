@@ -158,19 +158,6 @@ prompt_migration_path() {
             migration_path="$ix_apps_pool/migration/${apps_array[$((choice-1))]}"
             echo "You have chosen ${migration_path}"
 
-            # Define the backup path based on migration path
-            local backup_path="/mnt/${migration_path}/backup"
-            
-            # Check for critical migration files
-            if [[ ! -f "${backup_path}/pvcs_original.json" ]]; then
-                echo -e "${red}Error: It looks like this migration is from an earlier version of the script.${reset}"
-                echo -e "To continue with this specific migration, please switch to the legacy branch:"
-                echo -e "${blue}git fetch --all${reset}"
-                echo -e "${blue}git checkout legacy${reset}"
-                echo -e "Dont forget to switch back to main after youre done with your older migrations:"
-                echo -e "${blue}git checkout main${reset}"
-                return 1
-            fi
             break
         else
             echo "Invalid choice. Please enter a valid number."
