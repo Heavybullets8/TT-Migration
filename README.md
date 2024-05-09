@@ -18,7 +18,7 @@ bash migration.sh
 |-------------------|------------|--------------------------------------------------------------|
 | `--skip`          | `-s`       | Continue with a previously started migration.                |
 | `--no-update`     | `-n`       | Do not check for script updates.                             |
-| `--force`         |            | Force migration without checking for the presence of database pods. |
+| `--force`         |            | Force migration without performing health checks, using this voids support and most of the time results in an error later on in the script, do not use this unless instructed to.  |
 | `--latest-version`| `-l`       | Migrate to the latest version of the software. Note: using this option means you will not be supported. |
 | `--rename`        | `-r`       | Prompt to rename the application.                                      |
 
