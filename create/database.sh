@@ -59,10 +59,10 @@ restore_database() {
         # Show the first 10 lines of the dump file to confirm its content
         head "$dump_file" 
         echo
-        
+
         echo "Starting PostgreSQL import..."
         # Execute psql and log output with high verbosity
-        if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- psql -e -a < "$dump_file"; then
+        if k3s kubectl exec -n "ix-$app" -i -c "postgres" "${cnpg_pod}" -- psql -e -a < "$dump_file"; then
             echo -e "${green}Success\n${reset}"
             echo "PostgreSQL import completed successfully."
             return 0
