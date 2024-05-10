@@ -41,7 +41,7 @@ prompt_app_name() {
 
 prompt_rename() {
     while true; do
-        read -n1 -s -rp "Do you want to rename the app? [y/n] " key
+        read -n1 -s -rp "Do you want to rename the app? [y/N] " key
         if [[ $key == "y" ]]; then
             echo
             rename_app
@@ -59,12 +59,12 @@ prompt_rename() {
 
 prompt_continue_for_db() {
     while true; do
-        read -n1 -s -rp "Would you like the script to attempt the restore? [y/n] " key
-        if [[ $key == "y" ]]; then
+        read -n1 -s -rp "Would you like the script to attempt the restore? [Y/n] " key
+        if [[ $key == "y" || $key == "Y" || $key == "" ]]; then
             echo
             echo -e "${green}Attempting a restore...${reset}\n"
             break
-        elif [[ $key == "n" || $key == "N" || $key == "" ]]; then
+        elif [[ $key == "n" || $key == "N" ]]; then
             echo
             return 1
         else
@@ -76,7 +76,7 @@ prompt_continue_for_db() {
 
 prompt_continue() {
     while true; do
-        read -n1 -s -rp "Would you like to continue? [y/n] " key
+        read -n1 -s -rp "Would you like to continue? [y/N] " key
         if [[ $key == "y" ]]; then
             echo
             break
