@@ -97,6 +97,9 @@ dump_database() {
     if [[ $chart_name == "immich" ]]; then
         if k3s kubectl exec -n "ix-$app" -c "postgres" "$cnpg_pod" -- pg_dumpall --clean --if-exists > "$output_file"; then
             sed -i "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" "$output_file"
+            # Comment out DROP and CREATE commands for the postgres user
+            sed -i '/DROP ROLE IF EXISTS postgres;/ s/^/-- /' "$output_file"
+            sed -i '/CREATE ROLE postgres;/ s/^/-- /' "$output_file"
             return 0
         else
             rm -f "$output_file" &> /dev/null
