@@ -48,7 +48,7 @@ restore_database() {
     # Restore
     if [[ $chart_name == "immich" ]]; then
         # Execute psql and log output with high verbosity
-        if k3s kubectl exec -n "ix-$app" -i -c "postgres" "${cnpg_pod}" -- psql -1 < "$dump_file"; then
+        if k3s kubectl exec -n "ix-$app" -i -c "postgres" "${cnpg_pod}" -- psql --echo-errors --quiet --single-transaction < "$dump_file"; then
             echo -e "${green}Success\n${reset}"
             return 0
         else
