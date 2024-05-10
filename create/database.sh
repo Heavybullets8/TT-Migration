@@ -49,21 +49,25 @@ restore_database() {
     if [[ $chart_name == "immich" ]]; then
         echo "Preparing to process the PostgreSQL dump file..."
         echo "Dump file to be processed: $dump_file"
-        echo "First few lines of the dump file:"
-        head "$dump_file"  # Show the first 10 lines of the dump file to confirm its content
-
+        echo "First few lines of the dump file before filter:"
+        head "$dump_file" 
+        echo
         # Replace the search path setting in the SQL dump
         sed -i "s/SELECT pg_catalog.set_config('search_path', '', false);/SELECT pg_catalog.set_config('search_path', 'public, pg_catalog', true);/g" "$dump_file"
         
+        echo "First few lines of the dump file after filter:"
+        # Show the first 10 lines of the dump file to confirm its content
+        head "$dump_file" 
+        echo
+        
         echo "Starting PostgreSQL import..."
-        # Execute psql and log output
-        if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- psql -v < "$dump_file" | tee -a psql_output.log; then
+        # Execute psql and log output with high verbosity
+        if k3s kubectl exec -n "ix-$app" -c "postgres" "${cnpg_pod}" -- psql -e -a < "$dump_file"; then
             echo -e "${green}Success\n${reset}"
             echo "PostgreSQL import completed successfully."
             return 0
         else
             echo -e "${red}Failed to execute psql command\n${reset}"
-            echo "Check the 'psql_output.log' file for more details."
             return 1
         fi
     else 
