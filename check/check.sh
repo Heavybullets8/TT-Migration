@@ -140,24 +140,36 @@ check_health() {
     fi
 
     if echo "$update_info" | grep -q ",true$"; then
-        # Get the list of versions
-        local versions
-        if ! versions=$(midclt call catalog.get_item_details "\"$chart_name\"" "{\"catalog\": \"$catalog\", \"train\": \"$catalog_train\"}" | jq -r '.versions | keys[]'); then
-            echo -e "${red}Failed to get app versions from the catalog.${reset}"
+        
+        catalog_location=$(midclt call "catalog.query" | jq -r ".[] | select(.label == \"$catalog\") | .location")
+        catalog_location=$catalog_location/$catalog_train/$chart_name
+
+        if [[ -z "$version" ]]; then
+            echo -e "${red}Failed to get the version.${reset}"
             return 1
         fi
 
-        # Check if the provided version exists in the list
-        if ! printf '%s\n' "$versions" | grep -q "^$version$" && [[ "${latest_version}" != true ]]; then
+        release_location=/mnt/$ix_apps_pool/ix-applications/releases/$app_name/charts/$version
+
+        # Checking if the version exists in the release location
+        if [[ -d "$release_location" ]]; then
+            # Check if the version exists in the catalog
+            if [[ ! -d "$catalog_location/$version" ]]; then
+                # Copying the version directory from release to catalog, this will allow the chart to be installed from the catalog
+                # Since the ix create function looks inside the catalog dir for the version that is being installed, then copies it to the release location
+                cp -r "$release_location" "$catalog_location/$version"
+                echo -e "Version ${blue}$version${reset} of the chart ${blue}$chart_name${reset} was not found in the catalog and has been copied from the release location."
+            fi
+        else
+            # The version does not exist in the release location
             echo -e "${red}The version: ${blue}$version${red} of the chart: ${blue}$chart_name${red} is not available in the catalog: ${blue}$catalog${reset}."
             echo -e "${red}You need to update your application to a new version prior to attempting the migration.${reset}"
             echo -e "${red}The script by default reinstalls the chart to the same version, if you would like to install the latest version, please use the ${blue}--latest-version,-l${red} flag.${reset}"
             echo -e "Note: Enabling the ${blue}--latest-version,-l${reset} flag will install the latest version of the chart from the catalog."
-            echo -e "However, this will VOID any support for this migration since its impossible to know if your current configuration is compatible with the new version."
+            echo -e "However, this will VOID any support for this migration since it's impossible to know if your current configuration is compatible with the new version."
             return 1
         fi
     fi
-
 
     #############################################
     ############## Check app status #############
