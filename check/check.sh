@@ -153,7 +153,7 @@ check_health() {
         catalog_location=$(midclt call "catalog.query" | jq -r ".[] | select(.label == \"$catalog\" or .id == \"$catalog\") | .location")
         catalog_location=$catalog_location/$catalog_train/$chart_name
 
-        release_location=/mnt/$ix_apps_pool/ix-applications/releases/$app_name/charts/$version
+        release_location=/mnt/$ix_apps_pool/ix-applications/releases/$appname/charts/$version
 
         # Checking if the version exists in the release location
         if [[ -d "$release_location" ]]; then
