@@ -150,7 +150,7 @@ check_health() {
             return 1
         fi
 
-        catalog_location=$(midclt call "catalog.query" | jq -r ".[] | select(.label == \"$catalog\") | .location")
+        catalog_location=$(midclt call "catalog.query" | jq -r ".[] | select(.label == \"$catalog\" or .id == \"$catalog\") | .location")
         catalog_location=$catalog_location/$catalog_train/$chart_name
 
         release_location=/mnt/$ix_apps_pool/ix-applications/releases/$app_name/charts/$version
