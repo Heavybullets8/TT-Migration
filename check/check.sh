@@ -161,7 +161,7 @@ check_health() {
             if [[ ! -d "$catalog_location/$version" ]]; then
                 # Copying the version directory from release to catalog, this will allow the chart to be installed from the catalog
                 # Since the ix create function looks inside the catalog dir for the version that is being installed, then copies it to the release location
-                cp -r "$release_location" "$catalog_location/$version"
+                cp -r "$release_location" "$catalog_location"
                 echo -e "Version ${blue}$version${reset} of the chart ${blue}$chart_name${reset} was not found in the catalog and has been copied from the release location."
             fi
         else
