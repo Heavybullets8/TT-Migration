@@ -139,15 +139,19 @@ check_health() {
         return 1
     fi
 
+    #############################################
+    ####### Ensure App Exists in Catalog ########
+    #############################################
+
     if echo "$update_info" | grep -q ",true$"; then
-        
-        catalog_location=$(midclt call "catalog.query" | jq -r ".[] | select(.label == \"$catalog\") | .location")
-        catalog_location=$catalog_location/$catalog_train/$chart_name
 
         if [[ -z "$version" ]]; then
             echo -e "${red}Failed to get the version.${reset}"
             return 1
         fi
+
+        catalog_location=$(midclt call "catalog.query" | jq -r ".[] | select(.label == \"$catalog\") | .location")
+        catalog_location=$catalog_location/$catalog_train/$chart_name
 
         release_location=/mnt/$ix_apps_pool/ix-applications/releases/$app_name/charts/$version
 
