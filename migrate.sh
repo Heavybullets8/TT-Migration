@@ -25,6 +25,8 @@ export version=""
 export outdated=false
 export deploying=false
 export latest_version=false
+catalog_location=""
+release_location=""
 
 # flags
 export force=false
@@ -159,6 +161,10 @@ main() {
             update_or_append_variable "chart_name" "${chart_name}"
             update_or_append_variable "force" "${force}"
             update_or_append_variable "outdated" "${outdated}"
+            if [[ "${outdated}" == true ]]; then
+                update_or_append_variable "release_location" "${release_location}"
+                update_or_append_variable "catalog_location" "${catalog_location}"
+            fi
             update_or_append_variable "deploying" "${deploying}"
             update_or_append_variable "latest_version" "${latest_version}"
             update_or_append_variable "version" "${version}"
@@ -197,6 +203,9 @@ main() {
             update_or_append_variable "script_progress" "delete_original_app"
             ;&
         delete_original_app)
+            if [[ "$outdated" == true ]]; then
+                create_catalog_backup
+            fi
             if check_if_app_exists "${appname}" >/dev/null 2>&1; then
                 delete_original_app || exit 1
             fi
@@ -209,6 +218,9 @@ main() {
             update_or_append_variable "script_progress" "create_application"
             ;&
         create_application)
+            if [[ "$outdated" == true ]]; then
+                restore_catalog_backup
+            fi
             if ! check_if_app_exists "${appname}" >/dev/null 2>&1; then
                 create_application || exit 1
             fi

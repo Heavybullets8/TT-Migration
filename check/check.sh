@@ -149,7 +149,7 @@ check_health() {
             echo -e "${red}Failed to get the version.${reset}"
             return 1
         fi
-
+        outdated=true
         catalog_location=$(midclt call "catalog.query" | jq -r ".[] | select(.label == \"$catalog\" or .id == \"$catalog\") | .location")
         catalog_location=$catalog_location/$catalog_train/$chart_name
 
