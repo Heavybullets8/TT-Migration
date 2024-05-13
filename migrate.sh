@@ -115,7 +115,9 @@ main() {
 
     if [[ "${skip}" == true ]]; then
         prompt_migration_path || exit 1
-        # import_variables
+        [[ "$latest_version" == true ]] && update_or_append_variable "latest_version" "${latest_version}"
+        [[ "$prompt_rename_flag" == true ]] && update_or_append_variable "prompt_rename_flag" "${prompt_rename_flag}"
+        [[ "$force" == true ]] && update_or_append_variable "force" "${force}"
         source "/mnt/$migration_path/variables.txt" 
     
         if [[ -f "${backup_path}/pvcs_original.json" ]]; then
