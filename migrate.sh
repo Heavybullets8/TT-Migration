@@ -220,9 +220,9 @@ main() {
             update_or_append_variable "script_progress" "create_application"
             ;&
         create_application)
-            if [[ "$outdated" == true ]]; then
-                restore_catalog_backup
-            fi
+            # if [[ "$outdated" == true ]]; then
+            restore_catalog_backup
+            # fi
             if ! check_if_app_exists "${appname}" >/dev/null 2>&1; then
                 create_application || exit 1
             fi
