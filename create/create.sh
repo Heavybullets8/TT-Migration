@@ -72,22 +72,6 @@ restore_traefik_ingress() {
     fi
 }
 
-create_catalog_backup() {
-    mkdir -p "$backup_path/$version"
-    
-    cp -r "$release_location" "$backup_path/$version"
-    
-    return 0
-}
-
-restore_catalog_backup() {
-    mkdir -p "$catalog_location"
-    
-    cp -r "$backup_path/$version" "$catalog_location"
-    
-    return 0
-}
-
 create_config_backup() {
     local backup_name="config-backup.json"  # Use .json to emphasize the data format
     

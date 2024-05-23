@@ -25,8 +25,6 @@ export version=""
 export outdated=false
 export deploying=false
 export latest_version=false
-catalog_location=""
-release_location=""
 
 # flags
 export force=false
@@ -205,10 +203,6 @@ main() {
             update_or_append_variable "script_progress" "delete_original_app"
             ;&
         delete_original_app)
-            # TODO: Fix this after the catalog is fixed
-            # if [[ "$outdated" == true ]]; then
-            create_catalog_backup
-            # fi
             if check_if_app_exists "${appname}" >/dev/null 2>&1; then
                 delete_original_app || exit 1
             fi
@@ -221,10 +215,6 @@ main() {
             update_or_append_variable "script_progress" "create_application"
             ;&
         create_application)
-            # TODO: Fix this after the catalog is fixed
-            # if [[ "$outdated" == true ]]; then
-            restore_catalog_backup
-            # fi
             if ! check_if_app_exists "${appname}" >/dev/null 2>&1; then
                 create_application || exit 1
             fi
